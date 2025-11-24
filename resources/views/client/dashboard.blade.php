@@ -1,51 +1,31 @@
 @extends('layouts.sneat-dashboard')
 
-@section('title', 'Admin Dashboard')
+@section('title', 'Client Dashboard')
 
 @section('sidebar')
 <!-- Dashboard -->
 <li class="menu-item active">
-    <a href="{{ route('admin.dashboard') }}" class="menu-link">
+    <a href="{{ route('client.dashboard') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-home-circle"></i>
         <div data-i18n="Analytics">Dashboard</div>
     </a>
-</li>
-
-<!-- Clients -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-user"></i>
-        <div data-i18n="Layouts">Clients</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item">
-            <a href="{{ route('admin.clients.index') }}" class="menu-link">
-                <div data-i18n="Without menu">All Clients</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.clients.create') }}" class="menu-link">
-                <div data-i18n="Without navbar">Add Client</div>
-            </a>
-        </li>
-    </ul>
 </li>
 
 <!-- Services -->
 <li class="menu-item">
     <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-package"></i>
-        <div data-i18n="Account Settings">Services</div>
+        <div data-i18n="Layouts">My Services</div>
     </a>
     <ul class="menu-sub">
         <li class="menu-item">
-            <a href="{{ route('admin.services.index') }}" class="menu-link">
-                <div data-i18n="Account">All Services</div>
+            <a href="#" class="menu-link">
+                <div data-i18n="Without menu">Active Services</div>
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ route('admin.services.create') }}" class="menu-link">
-                <div data-i18n="Notifications">Add Service</div>
+            <a href="#" class="menu-link">
+                <div data-i18n="Without navbar">Service History</div>
             </a>
         </li>
     </ul>
@@ -55,27 +35,27 @@
 <li class="menu-item">
     <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-receipt"></i>
-        <div data-i18n="Misc">Invoices</div>
+        <div data-i18n="Account Settings">Invoices</div>
     </a>
     <ul class="menu-sub">
         <li class="menu-item">
-            <a href="{{ route('admin.invoices.index') }}" class="menu-link">
-                <div data-i18n="Error">All Invoices</div>
+            <a href="#" class="menu-link">
+                <div data-i18n="Account">All Invoices</div>
             </a>
         </li>
         <li class="menu-item">
-            <a href="{{ route('admin.invoices.create') }}" class="menu-link">
-                <div data-i18n="Under Maintenance">Create Invoice</div>
+            <a href="#" class="menu-link">
+                <div data-i18n="Notifications">Unpaid Invoices</div>
             </a>
         </li>
     </ul>
 </li>
 
-<!-- Reports -->
+<!-- Support -->
 <li class="menu-item">
     <a href="#" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-bar-chart"></i>
-        <div data-i18n="Support">Reports</div>
+        <i class="menu-icon tf-icons bx bx-support"></i>
+        <div data-i18n="Support">Support</div>
     </a>
 </li>
 @endsection
@@ -87,12 +67,12 @@
             <div class="d-flex align-items-end row">
                 <div class="col-sm-7">
                     <div class="card-body">
-                        <h5 class="card-title text-primary">Admin Dashboard 🎯</h5>
+                        <h5 class="card-title text-primary">Welcome {{ $user->name }}! 🎉</h5>
                         <p class="mb-4">
-                            You have <span class="fw-bold">{{ $stats['active_services'] }}</span> active services and 
-                            <span class="fw-bold">{{ $stats['invoice_unpaid'] }}</span> unpaid invoices to manage.
+                            You have <span class="fw-bold">{{ $stats['active_services'] }}</span> active services. 
+                            Check your recent activity and manage your services.
                         </p>
-                        <a href="{{ route('admin.services.index') }}" class="btn btn-sm btn-outline-primary">Manage Services</a>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Services</a>
                     </div>
                 </div>
                 <div class="col-sm-5 text-center text-sm-left">
@@ -113,9 +93,9 @@
                                 <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/chart-success.png') }}" alt="chart success" class="rounded" />
                             </div>
                         </div>
-                        <span class="fw-semibold d-block mb-1">Active Services</span>
-                        <h3 class="card-title mb-2">{{ $stats['active_services'] ?? 0 }}</h3>
-                        <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Running</small>
+                        <span class="fw-semibold d-block mb-1">Services</span>
+                        <h3 class="card-title mb-2">{{ $stats['total_services'] }}</h3>
+                        <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{ $stats['active_services'] }} Active</small>
                     </div>
                 </div>
             </div>
@@ -127,9 +107,9 @@
                                 <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/wallet-info.png') }}" alt="Credit Card" class="rounded" />
                             </div>
                         </div>
-                        <span>Unpaid Invoices</span>
-                        <h3 class="card-title text-nowrap mb-1">{{ $stats['invoice_unpaid'] ?? 0 }}</h3>
-                        <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> Pending</small>
+                        <span>Invoices</span>
+                        <h3 class="card-title text-nowrap mb-1">{{ $stats['total_invoices'] }}</h3>
+                        <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> {{ $stats['unpaid_invoices'] }} Unpaid</small>
                     </div>
                 </div>
             </div>
@@ -150,9 +130,10 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex flex-column align-items-center gap-1">
-                        <h2 class="mb-2">{{ $stats['invoice_unpaid'] ?? 0 }}</h2>
+                        <h2 class="mb-2">{{ $stats['unpaid_invoices'] }}</h2>
                         <span>Unpaid</span>
                     </div>
+                    <div id="orderStatisticsChart"></div>
                 </div>
                 <ul class="p-0 m-0">
                     @forelse($invoices as $invoice)
@@ -182,16 +163,16 @@
         </div>
     </div>
     
-    <!-- All Services -->
+    <!-- Active Services -->
     <div class="col-md-6 col-lg-8 order-1 mb-4">
         <div class="card">
-            <h5 class="card-header m-0 me-2 pb-3">All Services Management</h5>
+            <h5 class="card-header m-0 me-2 pb-3">Active Services</h5>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-borderless">
                         <thead>
                             <tr>
-                                <th>Client & Service</th>
+                                <th>Service</th>
                                 <th>Price</th>
                                 <th>Due Date</th>
                                 <th>Status</th>
@@ -208,7 +189,7 @@
                                         </div>
                                         <div>
                                             <h6 class="mb-0">{{ $service->product }}</h6>
-                                            <small class="text-muted">{{ $service->client->name ?? 'N/A' }} - {{ $service->domain }}</small>
+                                            <small class="text-muted">{{ $service->domain }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -227,8 +208,8 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('admin.services.edit', $service->id) }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
-                                            <a class="dropdown-item" href="#"><i class="bx bx-receipt me-1"></i> Create Invoice</a>
+                                            <a class="dropdown-item" href="#"><i class="bx bx-edit-alt me-1"></i> Manage</a>
+                                            <a class="dropdown-item" href="#"><i class="bx bx-receipt me-1"></i> View Invoice</a>
                                         </div>
                                     </div>
                                 </td>
@@ -238,8 +219,8 @@
                                 <td colspan="5" class="text-center">
                                     <div class="py-4">
                                         <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No services" width="150">
-                                        <p class="mt-3 text-muted">No services found</p>
-                                        <a href="{{ route('admin.services.create') }}" class="btn btn-primary">Add Service</a>
+                                        <p class="mt-3 text-muted">No active services found</p>
+                                        <a href="#" class="btn btn-primary">Browse Services</a>
                                     </div>
                                 </td>
                             </tr>
@@ -257,32 +238,32 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title m-0">Admin Quick Actions</h5>
+                <h5 class="card-title m-0">Quick Actions</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.clients.create') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-user-plus fs-1 mb-2"></i>
-                            <span>Add New Client</span>
+                        <a href="#" class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 flex-column">
+                            <i class="bx bx-plus fs-1 mb-2"></i>
+                            <span>Order New Service</span>
                         </a>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.services.create') }}" class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-package fs-1 mb-2"></i>
-                            <span>Add Service</span>
+                        <a href="#" class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 flex-column">
+                            <i class="bx bx-credit-card fs-1 mb-2"></i>
+                            <span>Pay Invoices</span>
                         </a>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.invoices.create') }}" class="btn btn-outline-info d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-receipt fs-1 mb-2"></i>
-                            <span>Create Invoice</span>
+                        <a href="#" class="btn btn-outline-info d-flex align-items-center justify-content-center h-100 flex-column">
+                            <i class="bx bx-support fs-1 mb-2"></i>
+                            <span>Get Support</span>
                         </a>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
                         <a href="#" class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-bar-chart fs-1 mb-2"></i>
-                            <span>View Reports</span>
+                            <i class="bx bx-file fs-1 mb-2"></i>
+                            <span>View Documentation</span>
                         </a>
                     </div>
                 </div>
