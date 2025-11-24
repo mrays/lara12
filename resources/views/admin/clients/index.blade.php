@@ -692,13 +692,29 @@ function deleteService(serviceId) {
 // Delete client function
 function deleteClient(clientId, clientName) {
     if (confirm(`Are you sure you want to delete client "${clientName}"? This action cannot be undone.`)) {
+        // Create form with proper CSRF token
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/clients/${clientId}`;
-        form.innerHTML = `
-            @csrf
-            @method('DELETE')
-        `;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken.getAttribute('content');
+            form.appendChild(csrfInput);
+        }
+        
+        // Add DELETE method
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        form.appendChild(methodInput);
+        
+        // Submit form
         document.body.appendChild(form);
         form.submit();
     }
