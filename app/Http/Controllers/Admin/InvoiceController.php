@@ -61,8 +61,30 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load('client');
-        return view('admin.invoices.show', compact('invoice'));
+        // Load invoice with client data using direct query for consistency
+        $invoiceData = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email',
+                     'services.product as service_name')
+            ->where('invoices.id', $invoice->id)
+            ->first();
+
+        // Create client object with safe properties
+        $client = (object) [
+            'id' => $invoiceData->client_id,
+            'name' => $invoiceData->client_name,
+            'email' => $invoiceData->client_email,
+            'phone' => null, // Column doesn't exist in users table
+            'address' => null, // Column doesn't exist in users table
+        ];
+
+        // Create service object if exists
+        $service = $invoiceData->service_name ? (object) [
+            'product' => $invoiceData->service_name,
+        ] : null;
+
+        return view('admin.invoices.show', compact('invoice', 'client', 'service'));
     }
 
     public function edit(Invoice $invoice)

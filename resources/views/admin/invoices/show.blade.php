@@ -92,14 +92,11 @@
                             <h6 class="text-primary mb-3">
                                 <i class="tf-icons bx bx-user me-2"></i>Bill To:
                             </h6>
-                            @php
-                                $client = \DB::table('users')->where('id', $invoice->client_id)->first();
-                            @endphp
                             @if($client)
                                 <div class="mb-2">
-                                    <strong>{{ $client->name }}</strong>
+                                    <strong>{{ $client->name ?? 'N/A' }}</strong>
                                 </div>
-                                <div class="mb-1">{{ $client->email }}</div>
+                                <div class="mb-1">{{ $client->email ?? 'N/A' }}</div>
                                 @if($client->phone)
                                     <div class="mb-1">{{ $client->phone }}</div>
                                 @endif

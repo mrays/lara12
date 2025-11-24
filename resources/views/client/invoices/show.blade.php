@@ -72,12 +72,12 @@
                         <h6 class="text-muted">Bill To:</h6>
                         <address>
                             <strong>{{ $invoice->client->name ?? 'N/A' }}</strong><br>
-                            @if($invoice->client->address)
-                                {!! nl2br(e($invoice->client->address)) !!}<br>
-                            @endif
                             {{ $invoice->client->email ?? 'N/A' }}<br>
                             @if($invoice->client->phone)
-                                {{ $invoice->client->phone }}
+                                {{ $invoice->client->phone }}<br>
+                            @endif
+                            @if($invoice->client->address)
+                                {!! nl2br(e($invoice->client->address)) !!}
                             @endif
                         </address>
                     </div>

@@ -234,8 +234,7 @@ class InvoiceController extends Controller
         $invoiceData = \DB::table('invoices')
             ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
             ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
-            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email', 
-                     'users.phone as client_phone', 'users.address as client_address',
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email',
                      'services.product as service_name', 'services.domain as service_domain')
             ->where('invoices.id', $invoiceId)
             ->first();
@@ -269,8 +268,8 @@ class InvoiceController extends Controller
             'client' => (object) [
                 'name' => $invoiceData->client_name,
                 'email' => $invoiceData->client_email,
-                'phone' => $invoiceData->client_phone,
-                'address' => $invoiceData->client_address,
+                'phone' => null, // Column doesn't exist in users table
+                'address' => null, // Column doesn't exist in users table
             ],
             // Service info as object for compatibility
             'service' => $invoiceData->service_name ? (object) [
@@ -300,7 +299,7 @@ class InvoiceController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        \DB::table('invoices')
+        $updated = \DB::table('invoices')
             ->where('id', $invoiceId)
             ->update([
                 'title' => $request->title,
@@ -314,8 +313,13 @@ class InvoiceController extends Controller
                 'updated_at' => now()
             ]);
 
-        return redirect()->route('admin.invoices.index')
-            ->with('success', 'Invoice updated successfully');
+        if ($updated) {
+            return redirect()->route('admin.invoices.index')
+                ->with('success', "Invoice updated successfully. Status changed to: {$request->status}");
+        } else {
+            return redirect()->route('admin.invoices.index')
+                ->with('error', 'Failed to update invoice. Please try again.');
+        }
     }
 
     /**
@@ -327,7 +331,7 @@ class InvoiceController extends Controller
             'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas'
         ]);
 
-        \DB::table('invoices')
+        $updated = \DB::table('invoices')
             ->where('id', $invoiceId)
             ->update([
                 'status' => $request->status,
@@ -335,8 +339,13 @@ class InvoiceController extends Controller
                 'updated_at' => now()
             ]);
 
-        return redirect()->route('admin.invoices.index')
-            ->with('success', 'Invoice status updated successfully');
+        if ($updated) {
+            return redirect()->route('admin.invoices.index')
+                ->with('success', "Invoice status updated to: {$request->status}");
+        } else {
+            return redirect()->route('admin.invoices.index')
+                ->with('error', 'Failed to update invoice status. Please try again.');
+        }
     }
 
     /**
@@ -380,5 +389,67 @@ class InvoiceController extends Controller
             'Cancelled' => 'badge bg-secondary',
             default => 'badge bg-secondary'
         };
+    }
+
+    /**
+     * Download invoice as PDF
+     */
+    public function downloadPDF($invoice)
+    {
+        // Get invoice data using the same method as clientShow
+        $invoiceData = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email',
+                     'services.product as service_name', 'services.domain as service_domain')
+            ->where('invoices.id', $invoice)
+            ->first();
+
+        if (!$invoiceData) {
+            abort(404, 'Invoice not found');
+        }
+
+        // Ensure the invoice belongs to the authenticated client (if accessed by client)
+        if (auth()->user()->role === 'client' && $invoiceData->client_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to invoice.');
+        }
+
+        // Convert to object with computed properties (same as clientShow)
+        $invoice = (object) [
+            'id' => $invoiceData->id,
+            'client_id' => $invoiceData->client_id,
+            'service_id' => $invoiceData->service_id,
+            'number' => $invoiceData->number,
+            'title' => $invoiceData->title,
+            'description' => $invoiceData->description,
+            'subtotal' => $invoiceData->subtotal,
+            'total_amount' => $invoiceData->total_amount,
+            'status' => $invoiceData->status,
+            'issue_date' => $invoiceData->issue_date ? \Carbon\Carbon::parse($invoiceData->issue_date) : null,
+            'due_date' => $invoiceData->due_date ? \Carbon\Carbon::parse($invoiceData->due_date) : null,
+            'paid_date' => $invoiceData->paid_date ? \Carbon\Carbon::parse($invoiceData->paid_date) : null,
+            'created_at' => $invoiceData->created_at ? \Carbon\Carbon::parse($invoiceData->created_at) : null,
+            'updated_at' => $invoiceData->updated_at ? \Carbon\Carbon::parse($invoiceData->updated_at) : null,
+            // Client info as object for compatibility
+            'client' => (object) [
+                'name' => $invoiceData->client_name,
+                'email' => $invoiceData->client_email,
+                'phone' => null,
+                'address' => null,
+            ],
+            // Service info as object for compatibility
+            'service' => $invoiceData->service_name ? (object) [
+                'product' => $invoiceData->service_name,
+                'domain' => $invoiceData->service_domain,
+            ] : null,
+            // Computed properties
+            'status_color' => $this->getStatusColor($invoiceData->status),
+            'formatted_total' => 'Rp ' . number_format($invoiceData->total_amount, 0, ',', '.'),
+            'formatted_subtotal' => 'Rp ' . number_format($invoiceData->subtotal ?? $invoiceData->total_amount, 0, ',', '.'),
+        ];
+
+        // For now, return a simple PDF view or redirect to show page
+        // You can implement actual PDF generation later using libraries like DomPDF or wkhtmltopdf
+        return view('client.invoices.pdf', compact('invoice'));
     }
 }

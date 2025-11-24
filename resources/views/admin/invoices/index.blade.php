@@ -81,8 +81,14 @@
                                             @case('Paid')
                                                 <span class="badge bg-success">Paid</span>
                                                 @break
+                                            @case('Lunas')
+                                                <span class="badge bg-success">Lunas</span>
+                                                @break
                                             @case('Unpaid')
                                                 <span class="badge bg-warning">Unpaid</span>
+                                                @break
+                                            @case('Sent')
+                                                <span class="badge bg-info">Sent</span>
                                                 @break
                                             @case('Overdue')
                                                 <span class="badge bg-danger">Overdue</span>
@@ -90,17 +96,8 @@
                                             @case('Cancelled')
                                                 <span class="badge bg-secondary">Cancelled</span>
                                                 @break
-                                            @case('Sedang Dicek')
-                                                <span class="badge bg-info">Sedang Dicek</span>
-                                                @break
-                                            @case('Lunas')
-                                                <span class="badge bg-success">Lunas</span>
-                                                @break
-                                            @case('Belum Lunas')
-                                                <span class="badge bg-warning">Belum Lunas</span>
-                                                @break
                                             @default
-                                                <span class="badge bg-warning">Unpaid</span>
+                                                <span class="badge bg-warning">{{ $invoice->status }}</span>
                                         @endswitch
                                     </td>
                                     <td>
@@ -124,17 +121,17 @@
                                                 </button>
                                                 <div class="dropdown-menu">
                                                     <h6 class="dropdown-header">Update Status</h6>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Unpaid')">
+                                                        <i class="bx bx-time me-1 text-warning"></i> Mark as Unpaid
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sent')">
+                                                        <i class="bx bx-send me-1 text-info"></i> Mark as Sent
+                                                    </button>
                                                     <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
                                                         <i class="bx bx-check me-1 text-success"></i> Mark as Paid
                                                     </button>
                                                     <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Lunas')">
                                                         <i class="bx bx-check me-1 text-success"></i> Mark as Lunas
-                                                    </button>
-                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sedang Dicek')">
-                                                        <i class="bx bx-time me-1 text-info"></i> Sedang Dicek
-                                                    </button>
-                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Belum Lunas')">
-                                                        <i class="bx bx-x me-1 text-warning"></i> Belum Lunas
                                                     </button>
                                                     <div class="dropdown-divider"></div>
                                                     <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Overdue')">
