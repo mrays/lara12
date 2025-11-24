@@ -17,7 +17,6 @@ class ClientController extends Controller
         
         // Use User model instead of Client model for consistency
         $clients = User::where('role', 'client')
-            ->with(['services'])
             ->when($q, fn($b) => $b->where('name','like',"%$q%")->orWhere('email','like',"%$q%"))
             ->orderBy('created_at','desc')
             ->paginate(15)
@@ -60,8 +59,11 @@ class ClientController extends Controller
 
     public function show(User $client)
     {
-        $client->load(['services', 'invoices']);
-        return view('admin.clients.show', compact('client'));
+        // Get services and invoices using direct queries
+        $services = \DB::table('services')->where('client_id', $client->id)->get();
+        $invoices = \DB::table('invoices')->where('client_id', $client->id)->get();
+        
+        return view('admin.clients.show', compact('client', 'services', 'invoices'));
     }
 
     public function edit(User $client)
@@ -84,8 +86,11 @@ class ClientController extends Controller
 
     public function destroy(User $client)
     {
-        // Check if client has services or invoices
-        if ($client->services()->count() > 0 || $client->invoices()->count() > 0) {
+        // Check if client has services or invoices using direct queries
+        $servicesCount = \DB::table('services')->where('client_id', $client->id)->count();
+        $invoicesCount = \DB::table('invoices')->where('client_id', $client->id)->count();
+        
+        if ($servicesCount > 0 || $invoicesCount > 0) {
             return redirect()->route('admin.clients.index')
                 ->with('error', 'Cannot delete client with existing services or invoices');
         }

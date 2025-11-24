@@ -206,11 +206,13 @@
                         <select class="form-select" style="width: 150px;" id="filterServiceStatus">
                             <option value="">All Status</option>
                             <option value="Active">Active</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Cancelled">Cancelled</option>
                             <option value="Suspended">Suspended</option>
-                            <option value="Creating">Creating</option>
                             <option value="Terminated">Terminated</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
+                            <option value="Disuspen">Disuspen</option>
+                            <option value="Sedang Dibuat">Sedang Dibuat</option>
+                            <option value="Ditutup">Ditutup</option>
                         </select>
                     </div>
                 </div>
@@ -264,20 +266,26 @@
                                             @case('Active')
                                                 <span class="badge bg-success">Active</span>
                                                 @break
-                                            @case('Pending')
-                                                <span class="badge bg-warning">Pending</span>
-                                                @break
-                                            @case('Cancelled')
-                                                <span class="badge bg-danger">Cancelled</span>
-                                                @break
                                             @case('Suspended')
                                                 <span class="badge bg-secondary">Suspended</span>
                                                 @break
-                                            @case('Creating')
-                                                <span class="badge bg-info">Creating</span>
-                                                @break
                                             @case('Terminated')
                                                 <span class="badge bg-dark">Terminated</span>
+                                                @break
+                                            @case('Pending')
+                                                <span class="badge bg-warning">Pending</span>
+                                                @break
+                                            @case('Dibatalkan')
+                                                <span class="badge bg-danger">Dibatalkan</span>
+                                                @break
+                                            @case('Disuspen')
+                                                <span class="badge bg-secondary">Disuspen</span>
+                                                @break
+                                            @case('Sedang Dibuat')
+                                                <span class="badge bg-info">Sedang Dibuat</span>
+                                                @break
+                                            @case('Ditutup')
+                                                <span class="badge bg-dark">Ditutup</span>
                                                 @break
                                             @default
                                                 <span class="badge bg-warning">Pending</span>
@@ -295,18 +303,24 @@
                                                 <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Pending')">
                                                     <i class="bx bx-time me-1 text-warning"></i> Set Pending
                                                 </button>
-                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Creating')">
-                                                    <i class="bx bx-cog me-1 text-info"></i> Creating
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Sedang Dibuat')">
+                                                    <i class="bx bx-cog me-1 text-info"></i> Sedang Dibuat
                                                 </button>
                                                 <div class="dropdown-divider"></div>
                                                 <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Suspended')">
                                                     <i class="bx bx-pause me-1 text-secondary"></i> Suspend
                                                 </button>
-                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Cancelled')">
-                                                    <i class="bx bx-x me-1 text-danger"></i> Cancel
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Disuspen')">
+                                                    <i class="bx bx-pause me-1 text-secondary"></i> Disuspen
                                                 </button>
                                                 <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Terminated')">
                                                     <i class="bx bx-block me-1 text-dark"></i> Terminate
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Dibatalkan')">
+                                                    <i class="bx bx-x me-1 text-danger"></i> Dibatalkan
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Ditutup')">
+                                                    <i class="bx bx-block me-1 text-dark"></i> Ditutup
                                                 </button>
                                             </div>
                                         </div>

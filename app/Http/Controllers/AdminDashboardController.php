@@ -68,7 +68,7 @@ class AdminDashboardController extends Controller
     public function updateServiceStatus(Request $request, $serviceId)
     {
         $request->validate([
-            'status' => 'required|in:Active,Pending,Cancelled,Suspended,Creating,Terminated'
+            'status' => 'required|in:Active,Suspended,Terminated,Pending,Dibatalkan,Disuspen,Sedang Dibuat,Ditutup'
         ]);
 
         \DB::table('services')

@@ -92,7 +92,7 @@
                         </div>
                     </div>
                     <span class="fw-semibold d-block mb-1">Total Services</span>
-                    <h3 class="card-title mb-2">{{ $clients->sum(function($client) { return $client->services->count(); }) }}</h3>
+                    <h3 class="card-title mb-2">{{ \DB::table('services')->count() }}</h3>
                     <small class="text-warning fw-semibold">
                         <i class="bx bx-package"></i> All Services
                     </small>
@@ -168,9 +168,9 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-2">{{ $client->services->count() }}</span>
+                                            <span class="badge bg-primary me-2">{{ \DB::table('services')->where('client_id', $client->id)->count() }}</span>
                                             <small class="text-muted">
-                                                {{ $client->services->where('status', 'Active')->count() }} active
+                                                {{ \DB::table('services')->where('client_id', $client->id)->where('status', 'Active')->count() }} active
                                             </small>
                                         </div>
                                     </td>
