@@ -258,7 +258,7 @@
                                     <a class="dropdown-item" href="{{ route('client.invoices.show', $invoice->id) }}">
                                         <i class="bx bx-show me-1"></i> View Details
                                     </a>
-                                    @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
+                                    @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']) && !in_array($invoice->status, ['Paid', 'Lunas', 'Cancelled']))
                                         <a class="dropdown-item text-success" href="#" onclick="payInvoice({{ $invoice->id }})">
                                             <i class="bx bx-credit-card me-1"></i> Pay Now
                                         </a>

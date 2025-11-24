@@ -57,20 +57,20 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process payment request (Fixed based on working PHP native code)
+     * Process payment request (Based on working reference implementation)
      */
     public function process(Request $request, Invoice $invoice)
     {
         try {
-            // Validate request EXACTLY like PHP native
+            // Validate request based on working implementation
             $request->validate([
-                'payment_method' => 'required|string|in:SP,NQ,OV,DA,LK,M2,I1,B1,BT,A1,AG',
+                'payment_method' => 'required|string|in:M2,B1,BR,I1,DA,SP',
                 'customer_name' => 'required|string|max:255',
                 'customer_email' => 'required|email|max:255',
                 'customer_phone' => 'required|string|min:10|max:20'
             ], [
                 'payment_method.required' => 'Please select a payment method',
-                'payment_method.in' => 'Invalid payment method selected',
+                'payment_method.in' => 'Invalid payment method selected. Only Mandiri VA, BCA VA, BRI VA, BNI VA, DANA, and ShopeePay are allowed.',
                 'customer_name.required' => 'Customer name is required',
                 'customer_email.required' => 'Customer email is required',
                 'customer_email.email' => 'Please enter a valid email address',
@@ -84,7 +84,7 @@ class PaymentController extends Controller
             }
 
             // Check if invoice can be paid
-            if (!in_array($invoice->status, ['Draft', 'Sent', 'Overdue'])) {
+            if (!in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue'])) {
                 return redirect()->back()->with('error', 'This invoice cannot be paid');
             }
 

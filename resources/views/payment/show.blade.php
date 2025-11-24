@@ -49,7 +49,7 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <td><strong>Subtotal:</strong></td>
-                                    <td class="text-end">{{ $invoice->getFormattedAmount() }}</td>
+                                    <td class="text-end">Rp {{ number_format($invoice->subtotal ?? $invoice->total_amount, 0, ',', '.') }}</td>
                                 </tr>
                                 @if($invoice->tax_amount > 0)
                                 <tr>
@@ -65,7 +65,7 @@
                                 @endif
                                 <tr class="border-top">
                                     <td><strong>Total Amount:</strong></td>
-                                    <td class="text-end"><strong class="text-primary fs-4">{{ $invoice->getFormattedAmount() }}</strong></td>
+                                    <td class="text-end"><strong class="text-primary fs-4">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            @if($invoice->canBePaid())
+            @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
                 <!-- Payment Methods Card -->
                 <div class="card">
                     <div class="card-header">
@@ -82,11 +82,11 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        @if($invoice->hasPendingPayment())
+                        @if($invoice->merchant_order_id)
                             <div class="alert alert-info">
                                 <i class="bx bx-info-circle me-2"></i>
                                 You have a pending payment for this invoice. 
-                                <a href="{{ $invoice->getPaymentUrl() }}" class="btn btn-sm btn-primary ms-2" target="_blank">
+                                <a href="#" class="btn btn-sm btn-primary ms-2" target="_blank">
                                     Continue Payment
                                 </a>
                                 <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="checkPaymentStatus()">
@@ -172,7 +172,7 @@
                                     <i class="bx bx-credit-card me-2"></i>Choose Payment Method <span class="text-danger">*</span>
                                 </h6>
                                 <div class="row">
-                                    @foreach($paymentMethods as $code => $name)
+                                    @foreach($paymentMethods as $code => $method)
                                         <div class="col-md-4 col-sm-6 mb-3">
                                             <div class="card payment-method-card" style="cursor: pointer;" onclick="selectPaymentMethod('{{ $code }}')">
                                                 <div class="card-body text-center">
@@ -181,20 +181,17 @@
                                                             @case('SP')
                                                                 <i class="bx bx-mobile" style="font-size: 2rem; color: #ee4d2d;"></i>
                                                                 @break
-                                                            @case('NQ')
-                                                                <i class="bx bx-qr" style="font-size: 2rem; color: #1976d2;"></i>
-                                                                @break
-                                                            @case('OV')
-                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #4c6ef5;"></i>
-                                                                @break
                                                             @case('DA')
                                                                 <i class="bx bx-wallet" style="font-size: 2rem; color: #009cff;"></i>
                                                                 @break
-                                                            @case('LK')
-                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #e74c3c;"></i>
-                                                                @break
                                                             @case('M2')
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #004CAD;"></i>
+                                                                @break
+                                                            @case('B1')
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066cc;"></i>
+                                                                @break
+                                                            @case('BR')
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #003d82;"></i>
                                                                 @break
                                                             @case('I1')
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066CC;"></i>
@@ -206,8 +203,8 @@
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d;"></i>
                                                         @endswitch
                                                     </div>
-                                                    <h6 class="mb-0">{{ $name }}</h6>
-                                                    <small class="text-muted">Instant Payment</small>
+                                                    <h6 class="mb-0">{{ $method['name'] }}</h6>
+                                                    <small class="text-muted">{{ $method['type'] == 'ewallet' ? 'E-Wallet' : 'Virtual Account' }}</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -219,7 +216,7 @@
                             
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg" id="payButton" disabled>
-                                    <i class="bx bx-credit-card me-2"></i>Pay {{ $invoice->getFormattedAmount() }}
+                                    <i class="bx bx-credit-card me-2"></i>Pay Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}
                                 </button>
                                 <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-lg ms-2">
                                     <i class="bx bx-arrow-back me-2"></i>Back

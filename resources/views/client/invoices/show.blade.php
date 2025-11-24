@@ -56,7 +56,7 @@
                     <div class="text-end">
                         <span class="badge bg-label-{{ $invoice->status_color }} fs-6 mb-2">{{ $invoice->status }}</span>
                         <br>
-                        @if($invoice->status !== 'Paid')
+                        @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
                             <button class="btn btn-success btn-sm" onclick="payInvoice({{ $invoice->id }})">
                                 <i class="bx bx-credit-card me-1"></i> Pay Now
                             </button>
@@ -213,7 +213,7 @@
                             </tr>
                         </table>
                         
-                        @if($invoice->status !== 'Paid')
+                        @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
                             <div class="d-grid gap-2 mt-3">
                                 <button class="btn btn-success" onclick="payInvoice({{ $invoice->id }})">
                                     <i class="bx bx-credit-card me-1"></i> Pay {{ $invoice->formatted_total }}

@@ -29,12 +29,13 @@ class DuitkuService
     }
 
     /**
-     * Create payment request to Duitku (Fixed based on working PHP native code)
+     * Create payment request to Duitku (Based on working reference implementation)
      */
     public function createPayment(Invoice $invoice, $paymentMethod = 'SP', $customerData = null)
     {
         try {
-            $merchantOrderId = $this->generateMerchantOrderId($invoice);
+            // Generate unique order ID like reference implementation
+            $merchantOrderId = 'PROD-' . date('YmdHis') . '-' . substr(md5($invoice->id . time()), 0, 6);
             $amount = (int) $invoice->total_amount;
             
             // Use customer data if provided, otherwise use client data
@@ -42,7 +43,10 @@ class DuitkuService
             $customerEmail = $customerData['email'] ?? $invoice->client->email;
             $customerPhone = $customerData['phone'] ?? $invoice->client->phone ?? '081234567890';
             
-            // Prepare payment data EXACTLY like working PHP native code
+            // Generate signature like reference implementation
+            $signature = md5($this->merchantCode . $merchantOrderId . $amount . $this->apiKey);
+            
+            // Prepare payment data EXACTLY like working reference implementation
             $paymentData = [
                 'merchantCode' => $this->merchantCode,
                 'paymentAmount' => $amount,
@@ -54,18 +58,16 @@ class DuitkuService
                 'customerPhone' => $customerPhone,
                 'returnUrl' => $this->returnUrl,
                 'callbackUrl' => $this->callbackUrl,
-                'signature' => '', // Will be set below
-                'expiryPeriod' => 120, // 2 hours like PHP native
+                'signature' => $signature,
+                'expiryPeriod' => 120, // 2 hours like reference implementation
                 'additionalParam' => json_encode([
                     'invoice_id' => $invoice->id,
                     'client_id' => $invoice->client_id,
+                    'domain' => config('app.url'),
+                    'mode' => config('services.duitku.env', 'sandbox'),
                     'timestamp' => date('Y-m-d H:i:s')
                 ])
             ];
-
-            // Generate signature EXACTLY like PHP native
-            $signature = $this->generateSignature($paymentData);
-            $paymentData['signature'] = $signature;
 
             Log::info('Duitku Payment Request (Fixed Format)', [
                 'merchantCode' => $paymentData['merchantCode'],
@@ -304,22 +306,53 @@ class DuitkuService
 
 
     /**
-     * Get available payment methods
+     * Get available payment methods (Based on working reference implementation)
      */
     public function getPaymentMethods()
     {
         return [
-            'SP' => 'Shopee Pay',
-            'NQ' => 'QRIS',
-            'OV' => 'OVO',
-            'DA' => 'DANA',
-            'LK' => 'LinkAja',
-            'M2' => 'Mandiri VA',
-            'I1' => 'BCA VA',
-            'B1' => 'CIMB Niaga VA',
-            'BT' => 'Permata Bank VA',
-            'A1' => 'ATM Bersama',
-            'AG' => 'Bank Transfer',
+            'M2' => [
+                'name' => 'Mandiri Virtual Account',
+                'type' => 'bank_transfer',
+                'icon' => 'mandiri.png',
+                'min_amount' => 10000,
+                'max_amount' => 50000000
+            ],
+            'B1' => [
+                'name' => 'BCA Virtual Account',
+                'type' => 'bank_transfer',
+                'icon' => 'bca.png',
+                'min_amount' => 10000,
+                'max_amount' => 50000000
+            ],
+            'BR' => [
+                'name' => 'BRI Virtual Account',
+                'type' => 'bank_transfer',
+                'icon' => 'bri.png',
+                'min_amount' => 10000,
+                'max_amount' => 50000000
+            ],
+            'I1' => [
+                'name' => 'BNI Virtual Account',
+                'type' => 'bank_transfer',
+                'icon' => 'bni.png',
+                'min_amount' => 10000,
+                'max_amount' => 50000000
+            ],
+            'DA' => [
+                'name' => 'DANA E-Wallet',
+                'type' => 'ewallet',
+                'icon' => 'dana.png',
+                'min_amount' => 10000,
+                'max_amount' => 10000000
+            ],
+            'SP' => [
+                'name' => 'ShopeePay E-Wallet',
+                'type' => 'ewallet',
+                'icon' => 'shopee.png',
+                'min_amount' => 10000,
+                'max_amount' => 10000000
+            ]
         ];
     }
 }
