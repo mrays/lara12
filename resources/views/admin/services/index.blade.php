@@ -19,17 +19,17 @@
             <td>{{ $s->product }}</td>
             <td>{{ $s->domain ?? '-' }}</td>
             <td>{{ $s->client_name ?? '-' }}</td>
-            <td>{{ optional($s->due_date)->format('Y-m-d') }}</td>
+            <td>{{ $s->due_date ? date('Y-m-d', strtotime($s->due_date)) : '-' }}</td>
             <td><span class="badge {{ $s->status=='Active'?'bg-success':'bg-secondary' }}">{{ $s->status }}</span></td>
             <td>
               <div class="d-flex gap-1">
                 <a class="btn btn-sm btn-outline-info" href="{{ route('admin.services.manage-details', $s->id) }}" title="Manage Client View">
                   <i class="tf-icons bx bx-cog"></i>
                 </a>
-                <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.services.edit',$s) }}" title="Edit Service">
+                <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.services.edit', $s->id) }}" title="Edit Service">
                   <i class="tf-icons bx bx-edit"></i>
                 </a>
-                <form action="{{ route('admin.services.destroy',$s) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
+                <form action="{{ route('admin.services.destroy', $s->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
                   @csrf @method('DELETE')
                   <button class="btn btn-sm btn-outline-danger" title="Delete Service">
                     <i class="tf-icons bx bx-trash"></i>

@@ -58,7 +58,6 @@ class InvoiceController extends Controller
             'client_id' => $validated['client_id'],
             'number' => $validated['invoice_no'],
             'due_date' => $validated['due_date'],
-            'amount' => $validated['amount'],
             'total_amount' => $validated['amount'],
             'status' => $validated['status'],
             'description' => $validated['description'],
@@ -239,7 +238,6 @@ class InvoiceController extends Controller
                 'due_date' => $request->due_date,
                 'number' => $request->invoice_no,
                 'total_amount' => $request->amount,
-                'amount' => $request->amount, // Update both fields for compatibility
                 'status' => $request->status,
                 'paid_date' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
