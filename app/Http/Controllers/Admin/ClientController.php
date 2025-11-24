@@ -100,6 +100,52 @@ class ClientController extends Controller
     }
 
     /**
+     * Toggle client status
+     */
+    public function toggleStatus(Request $request, $clientId)
+    {
+        $request->validate([
+            'status' => 'required|in:Active,Inactive'
+        ]);
+
+        \DB::table('users')
+            ->where('id', $clientId)
+            ->update([
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('admin.clients.index')
+            ->with('success', 'Client status updated successfully');
+    }
+
+    /**
+     * Manage client services
+     */
+    public function manageServices(Request $request, $clientId)
+    {
+        $request->validate([
+            'service_type' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'status' => 'required|in:Active,Pending,Suspended,Terminated',
+            'description' => 'nullable|string'
+        ]);
+
+        \DB::table('services')->insert([
+            'client_id' => $clientId,
+            'name' => $request->service_type,
+            'price' => $request->price,
+            'status' => $request->status,
+            'description' => $request->description,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return redirect()->route('admin.clients.index')
+            ->with('success', 'Service added successfully');
+    }
+
+    /**
      * Reset client password
      */
     public function resetPassword(Request $request, User $client)

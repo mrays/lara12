@@ -190,24 +190,44 @@
                                         <small class="text-muted">{{ $client->created_at->format('M d, Y') }}</small>
                                     </td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                        <div class="d-flex gap-1">
+                                            <!-- View Button -->
+                                            <a href="{{ route('admin.clients.show', $client) }}" class="btn btn-sm btn-outline-info" title="View Client">
+                                                <i class="bx bx-show"></i>
+                                            </a>
+                                            
+                                            <!-- Edit Client Info Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="editClientInfo({{ $client->id }}, '{{ $client->name }}', '{{ $client->email }}', '{{ $client->phone ?? '' }}', '{{ $client->status ?? 'Active' }}')" 
+                                                    title="Edit Client Info">
+                                                <i class="bx bx-edit"></i>
                                             </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="{{ route('admin.clients.show', $client) }}">
-                                                    <i class="bx bx-show me-1"></i> View Details
-                                                </a>
-                                                <a class="dropdown-item" href="{{ route('admin.clients.edit', $client) }}">
-                                                    <i class="bx bx-edit me-1"></i> Edit Client
-                                                </a>
-                                                <button class="dropdown-item" onclick="resetPassword({{ $client->id }}, '{{ $client->name }}')">
-                                                    <i class="bx bx-key me-1"></i> Reset Password
+                                            
+                                            <!-- Manage Services Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-success" 
+                                                    onclick="manageServices({{ $client->id }}, '{{ $client->name }}')" 
+                                                    title="Manage Services">
+                                                <i class="bx bx-package"></i>
+                                            </button>
+                                            
+                                            <!-- More Actions Dropdown -->
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="More Actions">
+                                                    <i class="bx bx-dots-horizontal"></i>
                                                 </button>
-                                                <div class="dropdown-divider"></div>
-                                                <button class="dropdown-item text-danger" onclick="deleteClient({{ $client->id }}, '{{ $client->name }}')">
-                                                    <i class="bx bx-trash me-1"></i> Delete Client
-                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <h6 class="dropdown-header">Account Actions</h6>
+                                                    <button class="dropdown-item" onclick="resetPassword({{ $client->id }}, '{{ $client->name }}')">
+                                                        <i class="bx bx-key me-1"></i> Reset Password
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="toggleStatus({{ $client->id }}, '{{ $client->status ?? 'Active' }}')">
+                                                        <i class="bx bx-toggle-left me-1"></i> Toggle Status
+                                                    </button>
+                                                    <div class="dropdown-divider"></div>
+                                                    <button class="dropdown-item text-danger" onclick="deleteClient({{ $client->id }}, '{{ $client->name }}')">
+                                                        <i class="bx bx-trash me-1"></i> Delete Client
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -363,6 +383,136 @@
     </div>
 </div>
 
+<!-- Edit Client Info Modal -->
+<div class="modal fade" id="editClientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bx bx-edit me-2"></i>Edit Client Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editClientForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_name" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="edit_email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_phone" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="edit_phone" name="phone" placeholder="+62xxx">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_status" class="form-label">Status</label>
+                            <select class="form-select" id="edit_status" name="status">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-save me-1"></i>Update Client
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Manage Services Modal -->
+<div class="modal fade" id="manageServicesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bx bx-package me-2"></i>Manage Services for <span id="manageServicesClientName"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="manageServicesForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="service_type" class="form-label">Service Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="service_type" name="service_type" required>
+                                <option value="">-- Choose Service --</option>
+                                <option value="Website">Website</option>
+                                <option value="Mobile App">Mobile App</option>
+                                <option value="SEO">SEO</option>
+                                <option value="Hosting">Hosting</option>
+                                <option value="Domain">Domain</option>
+                                <option value="Maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="service_price" class="form-label">Price <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" id="service_price" name="price" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="service_status" class="form-label">Status</label>
+                            <select class="form-select" id="service_status" name="status">
+                                <option value="Active">Active</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Suspended">Suspended</option>
+                                <option value="Terminated">Terminated</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="service_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="service_description" name="description" rows="3" placeholder="Service description..."></textarea>
+                    </div>
+                    
+                    <!-- Existing Services List -->
+                    <div class="mt-4">
+                        <h6>Current Services</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="currentServicesList">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Loading services...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bx bx-plus me-1"></i>Add Service
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 // Toggle password visibility
 function togglePasswordVisibility(inputId) {
@@ -383,6 +533,52 @@ function resetPassword(clientId, clientName) {
     document.getElementById('resetClientName').textContent = clientName;
     document.getElementById('resetPasswordForm').action = `/admin/clients/${clientId}/reset-password`;
     new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
+}
+
+// Edit client info function
+function editClientInfo(clientId, name, email, phone, status) {
+    document.getElementById('editClientForm').action = `/admin/clients/${clientId}`;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_phone').value = phone;
+    document.getElementById('edit_status').value = status;
+    
+    new bootstrap.Modal(document.getElementById('editClientModal')).show();
+}
+
+// Manage services function
+function manageServices(clientId, clientName) {
+    document.getElementById('manageServicesClientName').textContent = clientName;
+    document.getElementById('manageServicesForm').action = `/admin/clients/${clientId}/services`;
+    
+    // Load existing services for this client
+    loadClientServices(clientId);
+    
+    new bootstrap.Modal(document.getElementById('manageServicesModal')).show();
+}
+
+// Toggle status function
+function toggleStatus(clientId, currentStatus) {
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    if (confirm(`Change client status to ${newStatus}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/clients/${clientId}/toggle-status`;
+        form.innerHTML = `
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="status" value="${newStatus}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Load client services
+function loadClientServices(clientId) {
+    // This would typically be an AJAX call to get services
+    // For now, we'll just show the form
+    console.log('Loading services for client:', clientId);
 }
 
 // Delete client function

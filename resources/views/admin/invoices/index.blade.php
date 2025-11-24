@@ -104,34 +104,54 @@
                                         @endswitch
                                     </td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                        <div class="d-flex gap-1">
+                                            <!-- View Button -->
+                                            <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-info" title="View Invoice">
+                                                <i class="bx bx-show"></i>
+                                            </a>
+                                            
+                                            <!-- Edit Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->due_date }}', '{{ $invoice->invoice_no ?? 'INV-' . $invoice->id }}', '{{ $invoice->total_amount ?? $invoice->amount ?? 0 }}', '{{ $invoice->status }}')" 
+                                                    title="Edit Invoice">
+                                                <i class="bx bx-edit"></i>
                                             </button>
-                                            <div class="dropdown-menu">
-                                                <button class="dropdown-item" onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->due_date }}', '{{ $invoice->invoice_no ?? 'INV-' . $invoice->id }}', '{{ $invoice->total_amount ?? $invoice->amount ?? 0 }}', '{{ $invoice->status }}')">
-                                                    <i class="bx bx-edit me-1"></i> Edit Invoice
+                                            
+                                            <!-- Status Dropdown -->
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Change Status">
+                                                    <i class="bx bx-cog"></i>
                                                 </button>
-                                                <div class="dropdown-divider"></div>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
-                                                    <i class="bx bx-check me-1 text-success"></i> Mark as Paid
-                                                </button>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Lunas')">
-                                                    <i class="bx bx-check me-1 text-success"></i> Mark as Lunas
-                                                </button>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sedang Dicek')">
-                                                    <i class="bx bx-time me-1 text-info"></i> Sedang Dicek
-                                                </button>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Belum Lunas')">
-                                                    <i class="bx bx-x me-1 text-warning"></i> Belum Lunas
-                                                </button>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Overdue')">
-                                                    <i class="bx bx-clock me-1 text-danger"></i> Mark as Overdue
-                                                </button>
-                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Cancelled')">
-                                                    <i class="bx bx-block me-1 text-secondary"></i> Cancel Invoice
-                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <h6 class="dropdown-header">Update Status</h6>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
+                                                        <i class="bx bx-check me-1 text-success"></i> Mark as Paid
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Lunas')">
+                                                        <i class="bx bx-check me-1 text-success"></i> Mark as Lunas
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sedang Dicek')">
+                                                        <i class="bx bx-time me-1 text-info"></i> Sedang Dicek
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Belum Lunas')">
+                                                        <i class="bx bx-x me-1 text-warning"></i> Belum Lunas
+                                                    </button>
+                                                    <div class="dropdown-divider"></div>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Overdue')">
+                                                        <i class="bx bx-clock me-1 text-danger"></i> Mark as Overdue
+                                                    </button>
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Cancelled')">
+                                                        <i class="bx bx-block me-1 text-secondary"></i> Cancel Invoice
+                                                    </button>
+                                                </div>
                                             </div>
+                                            
+                                            <!-- Delete Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteInvoice({{ $invoice->id }})" 
+                                                    title="Delete Invoice">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -238,6 +258,21 @@ function updateInvoiceStatus(invoiceId, status) {
             @csrf
             @method('PUT')
             <input type="hidden" name="status" value="${status}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Delete invoice function
+function deleteInvoice(invoiceId) {
+    if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/invoices/${invoiceId}`;
+        form.innerHTML = `
+            @csrf
+            @method('DELETE')
         `;
         document.body.appendChild(form);
         form.submit();

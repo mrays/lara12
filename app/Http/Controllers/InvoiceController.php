@@ -269,4 +269,15 @@ class InvoiceController extends Controller
         return redirect()->route('admin.invoices.index')
             ->with('success', 'Invoice status updated successfully');
     }
+
+    /**
+     * Delete invoice
+     */
+    public function destroy($invoiceId)
+    {
+        \DB::table('invoices')->where('id', $invoiceId)->delete();
+
+        return redirect()->route('admin.invoices.index')
+            ->with('success', 'Invoice deleted successfully');
+    }
 }
