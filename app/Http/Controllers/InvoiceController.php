@@ -62,7 +62,6 @@ class InvoiceController extends Controller
             'total_amount' => $validated['amount'],
             'status' => $validated['status'],
             'description' => $validated['description'],
-            'paid_at' => in_array($validated['status'], ['Paid', 'Lunas']) ? now() : null,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -241,7 +240,6 @@ class InvoiceController extends Controller
                 'total_amount' => $request->amount,
                 'amount' => $request->amount, // Update both fields for compatibility
                 'status' => $request->status,
-                'paid_at' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
 
@@ -262,7 +260,6 @@ class InvoiceController extends Controller
             ->where('id', $invoiceId)
             ->update([
                 'status' => $request->status,
-                'paid_at' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
 
