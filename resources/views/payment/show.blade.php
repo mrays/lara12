@@ -95,36 +95,74 @@
                             </div>
                         @endif
 
+                        @if($errors->any())
+                            <div class="alert alert-danger">
+                                <h6><i class="bx bx-error me-2"></i>Please fix the following errors:</h6>
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger">
+                                <i class="bx bx-error me-2"></i>{{ session('error') }}
+                            </div>
+                        @endif
+
                         <form action="{{ route('payment.process', $invoice) }}" method="POST" id="paymentForm">
                             @csrf
                             
-                            <!-- Customer Information -->
+                            <!-- Customer Information (REQUIRED like PHP native) -->
                             <div class="mb-4">
                                 <h6 class="text-muted mb-3">
-                                    <i class="bx bx-user me-2"></i>Customer Information (Optional)
+                                    <i class="bx bx-user me-2"></i>Customer Information <span class="text-danger">*</span>
                                 </h6>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="customer_name" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" id="customer_name" name="customer_name" 
-                                               value="{{ $invoice->client->name }}" placeholder="Enter full name">
+                                        <label for="customer_name" class="form-label">
+                                            Full Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control @error('customer_name') is-invalid @enderror" 
+                                               id="customer_name" name="customer_name" required
+                                               value="{{ old('customer_name', $invoice->client->name) }}" 
+                                               placeholder="Enter your full name">
+                                        @error('customer_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="customer_email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="customer_email" name="customer_email" 
-                                               value="{{ $invoice->client->email }}" placeholder="Enter email address">
+                                        <label for="customer_email" class="form-label">
+                                            Email Address <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" class="form-control @error('customer_email') is-invalid @enderror" 
+                                               id="customer_email" name="customer_email" required
+                                               value="{{ old('customer_email', $invoice->client->email) }}" 
+                                               placeholder="your@email.com">
+                                        @error('customer_email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="customer_phone" class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" id="customer_phone" name="customer_phone" 
-                                               value="{{ $invoice->client->phone }}" placeholder="08xxxxxxxxxx">
+                                        <label for="customer_phone" class="form-label">
+                                            Phone Number <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="tel" class="form-control @error('customer_phone') is-invalid @enderror" 
+                                               id="customer_phone" name="customer_phone" required
+                                               value="{{ old('customer_phone', $invoice->client->phone) }}" 
+                                               placeholder="08xxxxxxxxxx" pattern="[0-9+]{10,15}">
+                                        @error('customer_phone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <small class="text-muted">
                                     <i class="bx bx-info-circle me-1"></i>
-                                    You can update customer information for this payment or use the default client data.
+                                    All customer information is required for payment processing.
                                 </small>
                             </div>
 
@@ -242,6 +280,45 @@
 </style>
 
 <script>
+// Form validation like PHP native
+function validateForm() {
+    const customerName = document.getElementById('customer_name').value.trim();
+    const customerEmail = document.getElementById('customer_email').value.trim();
+    const customerPhone = document.getElementById('customer_phone').value.trim();
+    const paymentMethod = document.getElementById('selectedPaymentMethod').value;
+    
+    if (!customerName) {
+        alert('Please enter your full name');
+        document.getElementById('customer_name').focus();
+        return false;
+    }
+    
+    if (!customerEmail) {
+        alert('Please enter your email address');
+        document.getElementById('customer_email').focus();
+        return false;
+    }
+    
+    if (!customerEmail.includes('@') || !customerEmail.includes('.')) {
+        alert('Please enter a valid email address');
+        document.getElementById('customer_email').focus();
+        return false;
+    }
+    
+    if (!customerPhone || customerPhone.length < 10) {
+        alert('Please enter a valid phone number (minimum 10 digits)');
+        document.getElementById('customer_phone').focus();
+        return false;
+    }
+    
+    if (!paymentMethod) {
+        alert('Please select a payment method');
+        return false;
+    }
+    
+    return true;
+}
+
 function selectPaymentMethod(method) {
     // Remove previous selection
     document.querySelectorAll('.payment-method-card').forEach(card => {
@@ -254,9 +331,63 @@ function selectPaymentMethod(method) {
     // Set hidden input value
     document.getElementById('selectedPaymentMethod').value = method;
     
-    // Enable pay button
-    document.getElementById('payButton').disabled = false;
+    // Enable pay button if form is valid
+    updatePayButton();
 }
+
+function updatePayButton() {
+    const customerName = document.getElementById('customer_name').value.trim();
+    const customerEmail = document.getElementById('customer_email').value.trim();
+    const customerPhone = document.getElementById('customer_phone').value.trim();
+    const paymentMethod = document.getElementById('selectedPaymentMethod').value;
+    
+    const isValid = customerName && customerEmail && customerPhone && paymentMethod;
+    document.getElementById('payButton').disabled = !isValid;
+}
+
+// Phone number formatting
+document.getElementById('customer_phone').addEventListener('input', function() {
+    let value = this.value.replace(/[^0-9+]/g, '');
+    this.value = value;
+    updatePayButton();
+});
+
+// Real-time validation
+document.getElementById('customer_name').addEventListener('input', updatePayButton);
+document.getElementById('customer_email').addEventListener('input', updatePayButton);
+document.getElementById('customer_phone').addEventListener('input', updatePayButton);
+
+// Form submission with confirmation like PHP native
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+        return false;
+    }
+    
+    const customerName = document.getElementById('customer_name').value.trim();
+    const amount = '{{ $invoice->getFormattedAmount() }}';
+    const paymentMethod = document.getElementById('selectedPaymentMethod').value;
+    
+    const confirmMessage = `Confirm Payment\n\n` +
+        `Name: ${customerName}\n` +
+        `Amount: ${amount}\n` +
+        `Payment Method: ${paymentMethod}\n\n` +
+        `This will process your payment securely.\n` +
+        `Continue?`;
+    
+    if (!confirm(confirmMessage)) {
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('payButton');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i>Processing Payment...';
+    
+    // Submit form
+    this.submit();
+});
 
 function checkPaymentStatus() {
     fetch('{{ route("payment.status", $invoice) }}')

@@ -38,17 +38,25 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process payment request
+     * Process payment request (Fixed based on working PHP native code)
      */
     public function process(Request $request, Invoice $invoice)
     {
         try {
-            // Validate request
+            // Validate request EXACTLY like PHP native
             $request->validate([
-                'payment_method' => 'required|string',
-                'customer_name' => 'nullable|string|max:255',
-                'customer_email' => 'nullable|email|max:255',
-                'customer_phone' => 'nullable|string|max:20'
+                'payment_method' => 'required|string|in:SP,NQ,OV,DA,LK,M2,I1,B1,BT,A1,AG',
+                'customer_name' => 'required|string|max:255',
+                'customer_email' => 'required|email|max:255',
+                'customer_phone' => 'required|string|min:10|max:20'
+            ], [
+                'payment_method.required' => 'Please select a payment method',
+                'payment_method.in' => 'Invalid payment method selected',
+                'customer_name.required' => 'Customer name is required',
+                'customer_email.required' => 'Customer email is required',
+                'customer_email.email' => 'Please enter a valid email address',
+                'customer_phone.required' => 'Customer phone number is required',
+                'customer_phone.min' => 'Phone number must be at least 10 digits'
             ]);
 
             // Check if user can access this invoice
@@ -63,15 +71,29 @@ class PaymentController extends Controller
 
             $paymentMethod = $request->payment_method;
             
-            // Prepare customer data if provided
-            $customerData = null;
-            if ($request->filled('customer_name') || $request->filled('customer_email') || $request->filled('customer_phone')) {
-                $customerData = [
-                    'name' => $request->customer_name ?: $invoice->client->name,
-                    'email' => $request->customer_email ?: $invoice->client->email,
-                    'phone' => $request->customer_phone ?: $invoice->client->phone
-                ];
+            // Prepare customer data (REQUIRED like PHP native)
+            $customerData = [
+                'name' => trim($request->customer_name),
+                'email' => trim($request->customer_email),
+                'phone' => trim($request->customer_phone)
+            ];
+
+            // Additional validation like PHP native
+            if (!filter_var($customerData['email'], FILTER_VALIDATE_EMAIL)) {
+                return redirect()->back()->with('error', 'Invalid email format');
             }
+
+            if ($invoice->total_amount < 10000) {
+                return redirect()->back()->with('error', 'Minimum payment amount is Rp 10,000');
+            }
+
+            Log::info('Processing Payment Request', [
+                'invoice_id' => $invoice->id,
+                'amount' => $invoice->total_amount,
+                'payment_method' => $paymentMethod,
+                'customer_name' => $customerData['name'],
+                'customer_email' => $customerData['email']
+            ]);
 
             // Create payment with Duitku
             $result = $this->duitkuService->createPayment($invoice, $paymentMethod, $customerData);

@@ -29,7 +29,7 @@ class DuitkuService
     }
 
     /**
-     * Create payment request to Duitku
+     * Create payment request to Duitku (Fixed based on working PHP native code)
      */
     public function createPayment(Invoice $invoice, $paymentMethod = 'SP', $customerData = null)
     {
@@ -42,40 +42,46 @@ class DuitkuService
             $customerEmail = $customerData['email'] ?? $invoice->client->email;
             $customerPhone = $customerData['phone'] ?? $invoice->client->phone ?? '081234567890';
             
-            // Prepare payment data sesuai format Duitku yang benar
+            // Prepare payment data EXACTLY like working PHP native code
             $paymentData = [
                 'merchantCode' => $this->merchantCode,
                 'paymentAmount' => $amount,
                 'paymentMethod' => $paymentMethod,
                 'merchantOrderId' => $merchantOrderId,
                 'productDetails' => $invoice->title,
-                'additionalParam' => '',
-                'merchantUserInfo' => $customerEmail,
-                'customerVaName' => $customerName,
-                'email' => $customerEmail,
-                'phoneNumber' => $customerPhone,
-                'callbackUrl' => $this->callbackUrl,
+                'customerName' => $customerName,
+                'customerEmail' => $customerEmail,
+                'customerPhone' => $customerPhone,
                 'returnUrl' => $this->returnUrl,
-                'expiryPeriod' => 1440 // 24 hours in minutes
+                'callbackUrl' => $this->callbackUrl,
+                'signature' => '', // Will be set below
+                'expiryPeriod' => 120, // 2 hours like PHP native
+                'additionalParam' => json_encode([
+                    'invoice_id' => $invoice->id,
+                    'client_id' => $invoice->client_id,
+                    'timestamp' => date('Y-m-d H:i:s')
+                ])
             ];
 
-            // Generate signature sesuai dokumentasi Duitku
+            // Generate signature EXACTLY like PHP native
             $signature = $this->generateSignature($paymentData);
             $paymentData['signature'] = $signature;
 
-            Log::info('Duitku Payment Request', [
+            Log::info('Duitku Payment Request (Fixed Format)', [
                 'merchantCode' => $paymentData['merchantCode'],
                 'merchantOrderId' => $merchantOrderId,
                 'amount' => $amount,
                 'paymentMethod' => $paymentMethod,
+                'customerName' => $customerName,
+                'customerEmail' => $customerEmail,
                 'signature' => $signature
             ]);
 
-            // Send request to Duitku dengan endpoint yang benar
+            // Send request to Duitku EXACTLY like PHP native
             $response = Http::timeout(30)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
+                    'User-Agent' => 'Exputra-Payment-Gateway/1.0'
                 ])
                 ->post($this->baseUrl . 'v2/inquiry', $paymentData);
 
