@@ -28,7 +28,7 @@ class PaymentController extends Controller
         }
 
         // Check if invoice can be paid
-        if (!in_array($invoice->status, ['Draft', 'Sent', 'Overdue'])) {
+        if (!in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue'])) {
             return redirect()->back()->with('error', 'This invoice cannot be paid');
         }
 

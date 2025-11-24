@@ -92,7 +92,7 @@
                             <h6 class="text-primary mb-3">
                                 <i class="tf-icons bx bx-user me-2"></i>Bill To:
                             </h6>
-                            @if($client)
+                            @if(isset($client) && $client)
                                 <div class="mb-2">
                                     <strong>{{ $client->name ?? 'N/A' }}</strong>
                                 </div>

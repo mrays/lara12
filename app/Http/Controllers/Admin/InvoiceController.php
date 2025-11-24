@@ -70,11 +70,15 @@ class InvoiceController extends Controller
             ->where('invoices.id', $invoice->id)
             ->first();
 
+        if (!$invoiceData) {
+            abort(404, 'Invoice not found');
+        }
+
         // Create client object with safe properties
         $client = (object) [
             'id' => $invoiceData->client_id,
-            'name' => $invoiceData->client_name,
-            'email' => $invoiceData->client_email,
+            'name' => $invoiceData->client_name ?? 'N/A',
+            'email' => $invoiceData->client_email ?? 'N/A',
             'phone' => null, // Column doesn't exist in users table
             'address' => null, // Column doesn't exist in users table
         ];

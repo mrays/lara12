@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/invoices', [App\Http\Controllers\InvoiceController::class, 'clientInvoices'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [App\Http\Controllers\InvoiceController::class, 'clientShow'])->name('invoices.show');
         Route::get('/invoices/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPDF'])->name('invoices.pdf');
+        Route::get('/invoices/{invoice}/pay', [App\Http\Controllers\PaymentController::class, 'show'])->name('invoices.pay');
         
         // Client service management routes
         Route::get('/services', [App\Http\Controllers\ServiceManagementController::class, 'index'])->name('services.index');

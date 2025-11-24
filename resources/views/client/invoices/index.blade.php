@@ -304,8 +304,14 @@
 @push('scripts')
 <script>
 function payInvoice(invoiceId) {
-    // This would integrate with your payment gateway
-    alert('Payment integration would be implemented here for invoice ID: ' + invoiceId);
+    // Redirect to payment page or show payment modal
+    if (confirm('Proceed to payment for this invoice?')) {
+        // Option 1: Redirect to payment gateway
+        window.location.href = `/client/invoices/${invoiceId}/pay`;
+        
+        // Option 2: Open payment in new window
+        // window.open(`/client/invoices/${invoiceId}/pay`, '_blank');
+    }
 }
 
 function downloadInvoice(invoiceId) {

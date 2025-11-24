@@ -252,16 +252,9 @@
                         <button class="btn btn-outline-secondary" onclick="downloadPDF()">
                             <i class="bx bx-download me-1"></i> Download PDF
                         </button>
-                        @if($invoice->canBePaid())
-                            <a href="{{ route('payment.show', $invoice) }}" class="btn btn-success">
+                        @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
+                            <button class="btn btn-success" onclick="payInvoice({{ $invoice->id }})">
                                 <i class="bx bx-credit-card me-1"></i> Pay Now
-                            </a>
-                        @elseif($invoice->hasPendingPayment())
-                            <a href="{{ $invoice->getPaymentUrl() }}" class="btn btn-warning" target="_blank">
-                                <i class="bx bx-time me-1"></i> Continue Payment
-                            </a>
-                            <button class="btn btn-outline-primary ms-1" onclick="checkPaymentStatus({{ $invoice->id }})">
-                                <i class="bx bx-refresh me-1"></i> Check Status
                             </button>
                         @endif
                     </div>
@@ -274,6 +267,13 @@
 
 @push('scripts')
 <script>
+function payInvoice(invoiceId) {
+    // Redirect to payment page
+    if (confirm('Proceed to payment for this invoice?')) {
+        window.location.href = `/client/invoices/${invoiceId}/pay`;
+    }
+}
+
 function checkPaymentStatus(invoiceId) {
     Swal.fire({
         title: 'Checking Payment Status',
