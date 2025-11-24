@@ -13,12 +13,20 @@ class ClientDashboardController extends Controller
         $user = auth()->user();
         
         // Get client's services and invoices with relationships
-        $services = Service::where('client_id', $user->id)->orderBy('due_date', 'asc')->get();
         $invoices = Invoice::where('client_id', $user->id)
-                          ->with(['service'])
                           ->orderBy('created_at', 'desc')
                           ->limit(5)
                           ->get();
+
+        // Get active services with invoices
+        $services = Service::where('client_id', $user->id)
+            ->where('status', 'Active')
+            ->with(['invoices' => function($query) {
+                $query->orderBy('created_at', 'desc')->limit(1);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
         
         $stats = [
             'active_services' => $services->where('status', 'Active')->count(),

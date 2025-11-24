@@ -64,24 +64,11 @@
                                                     <use fill="#696cff" xlink:href="#path-3"></use>
                                                     <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-3"></use>
                                                 </g>
-                                                <g id="Path-4" mask="url(#mask-2)">
-                                                    <use fill="#696cff" xlink:href="#path-4"></use>
-                                                    <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-4"></use>
-                                                </g>
-                                            </g>
-                                            <g id="Triangle" transform="translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) ">
-                                                <use fill="#696cff" xlink:href="#path-5"></use>
-                                                <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </g>
-                            </svg>
                         </span>
-                        <span class="app-brand-text demo menu-text fw-bolder ms-2">{{ config('app.name', 'Laravel') }}</span>
+                        <span class="app-brand-text demo menu-text fw-bolder ms-2">Exputra</span>
                     </a>
 
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-toggle-icon d-xl-block align-top">
                         <i class="bx bx-chevron-left bx-sm align-middle"></i>
                     </a>
                 </div>
@@ -89,7 +76,116 @@
                 <div class="menu-inner-shadow"></div>
 
                 <ul class="menu-inner py-1">
-                    @yield('sidebar')
+                    <!-- Dashboard -->
+                    <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('dashboard') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Dashboard</div>
+                        </a>
+                    </li>
+
+                    <!-- My Services -->
+                    <li class="menu-item {{ request()->routeIs('client.services.*') ? 'active open' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-package"></i>
+                            <div data-i18n="Services">My Services</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item {{ request()->routeIs('client.services.index') ? 'active' : '' }}">
+                                <a href="{{ route('client.services.index') }}" class="menu-link">
+                                    <div data-i18n="View Services">View Services</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Active Services (Quick Access) -->
+                    <li class="menu-item {{ request()->routeIs('client.services.active') ? 'active' : '' }}">
+                        <a href="{{ route('client.services.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-check-circle"></i>
+                            <div data-i18n="Active Services">Active Services</div>
+                        </a>
+                    </li>
+
+                    <!-- Service History -->
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" onclick="comingSoon()">
+                            <i class="menu-icon tf-icons bx bx-history"></i>
+                            <div data-i18n="Service History">Service History</div>
+                        </a>
+                    </li>
+
+                    <!-- Invoices -->
+                    <li class="menu-item {{ request()->routeIs('client.invoices.*') ? 'active open' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-receipt"></i>
+                            <div data-i18n="Invoices">Invoices</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item {{ request()->routeIs('client.invoices.index') ? 'active' : '' }}">
+                                <a href="{{ route('client.invoices.index') }}" class="menu-link">
+                                    <div data-i18n="All Invoices">All Invoices</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Support -->
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" onclick="contactSupport()">
+                            <i class="menu-icon tf-icons bx bx-support"></i>
+                            <div data-i18n="Support">Support</div>
+                        </a>
+                    </li>
+
+                    <!-- Divider -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">LAYANAN</span>
+                    </li>
+
+                    <!-- Website -->
+                    <li class="menu-item">
+                        <a href="{{ route('client.services.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-globe"></i>
+                            <div data-i18n="Website">Website</div>
+                            <div class="badge badge-center rounded-pill bg-success ms-auto">{{ Auth::user()->services()->where('status', 'Active')->count() }}</div>
+                        </a>
+                    </li>
+
+                    <!-- Coming Soon -->
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" onclick="comingSoon()">
+                            <i class="menu-icon tf-icons bx bx-dots-horizontal"></i>
+                            <div data-i18n="Coming Soon">Coming Soon</div>
+                            <div class="badge badge-center rounded-pill bg-secondary ms-auto">0</div>
+                        </a>
+                    </li>
+
+                    <!-- Divider -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">BILLING</span>
+                    </li>
+
+                    <!-- Invoices (Quick Access) -->
+                    <li class="menu-item {{ request()->routeIs('client.invoices.index') ? 'active' : '' }}">
+                        <a href="{{ route('client.invoices.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-receipt"></i>
+                            <div data-i18n="Invoices">Invoices</div>
+                        </a>
+                    </li>
+
+                    <!-- Divider -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">SUPPORT</span>
+                    </li>
+
+                    <!-- WhatsApp Support -->
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" onclick="contactSupport()">
+                            <i class="menu-icon tf-icons bx bx-message-dots"></i>
+                            <div data-i18n="WhatsApp Kami">WhatsApp Kami</div>
+                        </a>
+                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -211,6 +307,28 @@
     <script src="{{ asset('vendor/sneat/assets/js/main.js') }}"></script>
 
     @stack('scripts')
+
+    <!-- Custom Scripts -->
+    <script>
+        // Coming Soon function
+        function comingSoon() {
+            alert('This feature is coming soon!');
+        }
+
+        // Contact Support function
+        function contactSupport() {
+            const message = encodeURIComponent('Hello, I need support with my services.');
+            window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 </body>
 
 </html>

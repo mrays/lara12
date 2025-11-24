@@ -227,9 +227,24 @@
                                         <div class="avatar avatar-sm me-3">
                                             <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/cc-primary.png') }}" alt="Service" class="rounded" />
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ $service->product }}</h6>
-                                            <small class="text-muted">{{ $service->domain }}</small>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ $service->name }}</h6>
+                                                <small class="text-muted">{{ $service->product }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-{{ $service->status === 'Active' ? 'success' : 'warning' }}">
+                                                    {{ strtoupper($service->status) }}
+                                                </span>
+                                                <div class="mt-1">
+                                                    <small class="text-muted">{{ $service->due_date ? $service->due_date->format('M d, Y') : 'No due date' }}</small>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <a href="{{ route('client.services.manage', $service) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-cog me-1"></i>Manage
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -248,8 +263,10 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="#"><i class="bx bx-edit-alt me-1"></i> Manage</a>
-                                            <a class="dropdown-item" href="#"><i class="bx bx-receipt me-1"></i> View Invoice</a>
+                                            <a class="dropdown-item" href="{{ route('client.services.manage', $service) }}"><i class="bx bx-edit-alt me-1"></i> Manage</a>
+                                            @if($service->invoices->count() > 0)
+                                                <a class="dropdown-item" href="{{ route('client.invoices.show', $service->invoices->first()) }}"><i class="bx bx-receipt me-1"></i> View Invoice</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
