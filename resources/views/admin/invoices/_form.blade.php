@@ -65,8 +65,7 @@
     <div class="col-md-6 mb-3">
         <label class="form-label">Status</label>
         <select name="status" class="form-select">
-            <option value="Draft" {{ (old('status', $invoice->status ?? 'Draft')=='Draft') ? 'selected':'' }}>Draft</option>
-            <option value="Sent" {{ (old('status', $invoice->status ?? '')=='Sent') ? 'selected':'' }}>Sent</option>
+            <option value="Unpaid" {{ (old('status', $invoice->status ?? 'Unpaid')=='Unpaid') ? 'selected':'' }}>Unpaid</option>
             <option value="Paid" {{ (old('status', $invoice->status ?? '')=='Paid') ? 'selected':'' }}>Paid</option>
             <option value="Overdue" {{ (old('status', $invoice->status ?? '')=='Overdue') ? 'selected':'' }}>Overdue</option>
             <option value="Cancelled" {{ (old('status', $invoice->status ?? '')=='Cancelled') ? 'selected':'' }}>Cancelled</option>
