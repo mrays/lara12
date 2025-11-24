@@ -228,14 +228,61 @@ class InvoiceController extends Controller
         return view('client.invoices.index', compact('invoices', 'stats'));
     }
 
-    public function clientShow(Invoice $invoice)
+    public function clientShow($invoiceId)
     {
+        // Get invoice with client and service data using direct query
+        $invoiceData = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email', 
+                     'users.phone as client_phone', 'users.address as client_address',
+                     'services.product as service_name', 'services.domain as service_domain')
+            ->where('invoices.id', $invoiceId)
+            ->first();
+
+        if (!$invoiceData) {
+            abort(404, 'Invoice not found');
+        }
+
         // Ensure the invoice belongs to the authenticated client
-        if ($invoice->client_id !== auth()->id()) {
+        if ($invoiceData->client_id !== auth()->id()) {
             abort(403, 'Unauthorized access to invoice.');
         }
 
-        $invoice->load(['client', 'service', 'items']);
+        // Convert to object and add computed properties
+        $invoice = (object) [
+            'id' => $invoiceData->id,
+            'client_id' => $invoiceData->client_id,
+            'service_id' => $invoiceData->service_id,
+            'number' => $invoiceData->number,
+            'title' => $invoiceData->title,
+            'description' => $invoiceData->description,
+            'subtotal' => $invoiceData->subtotal,
+            'total_amount' => $invoiceData->total_amount,
+            'status' => $invoiceData->status,
+            'issue_date' => $invoiceData->issue_date ? \Carbon\Carbon::parse($invoiceData->issue_date) : null,
+            'due_date' => $invoiceData->due_date ? \Carbon\Carbon::parse($invoiceData->due_date) : null,
+            'paid_date' => $invoiceData->paid_date ? \Carbon\Carbon::parse($invoiceData->paid_date) : null,
+            'created_at' => $invoiceData->created_at ? \Carbon\Carbon::parse($invoiceData->created_at) : null,
+            'updated_at' => $invoiceData->updated_at ? \Carbon\Carbon::parse($invoiceData->updated_at) : null,
+            // Client info as object for compatibility
+            'client' => (object) [
+                'name' => $invoiceData->client_name,
+                'email' => $invoiceData->client_email,
+                'phone' => $invoiceData->client_phone,
+                'address' => $invoiceData->client_address,
+            ],
+            // Service info as object for compatibility
+            'service' => $invoiceData->service_name ? (object) [
+                'product' => $invoiceData->service_name,
+                'domain' => $invoiceData->service_domain,
+            ] : null,
+            // Computed properties
+            'status_color' => $this->getStatusColor($invoiceData->status),
+            'formatted_total' => 'Rp ' . number_format($invoiceData->total_amount, 0, ',', '.'),
+            'formatted_subtotal' => 'Rp ' . number_format($invoiceData->subtotal ?? $invoiceData->total_amount, 0, ',', '.'),
+        ];
+
         return view('client.invoices.show', compact('invoice'));
     }
 

@@ -95,7 +95,7 @@
                     </div>
                 </div>
                 <span>Unpaid Amount</span>
-                <h3 class="card-title text-nowrap mb-1">${{ number_format($stats['unpaid_amount'], 2) }}</h3>
+                <h3 class="card-title text-nowrap mb-1">Rp {{ number_format($stats['unpaid_amount'], 0, ',', '.') }}</h3>
                 <small class="text-danger fw-semibold">
                     <i class="bx bx-down-arrow-alt"></i> 
                     {{ $stats['unpaid'] }} invoices

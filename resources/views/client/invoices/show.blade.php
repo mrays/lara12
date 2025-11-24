@@ -71,14 +71,11 @@
                     <div class="col-md-6">
                         <h6 class="text-muted">Bill To:</h6>
                         <address>
-                            <strong>{{ $invoice->client->name }}</strong><br>
-                            @if($invoice->client->company)
-                                {{ $invoice->client->company }}<br>
-                            @endif
+                            <strong>{{ $invoice->client->name ?? 'N/A' }}</strong><br>
                             @if($invoice->client->address)
                                 {!! nl2br(e($invoice->client->address)) !!}<br>
                             @endif
-                            {{ $invoice->client->email }}<br>
+                            {{ $invoice->client->email ?? 'N/A' }}<br>
                             @if($invoice->client->phone)
                                 {{ $invoice->client->phone }}
                             @endif
@@ -89,13 +86,13 @@
                         <table class="table table-borderless table-sm">
                             <tr>
                                 <td class="text-end"><strong>Issue Date:</strong></td>
-                                <td>{{ $invoice->issue_date->format('M d, Y') }}</td>
+                                <td>{{ $invoice->issue_date ? $invoice->issue_date->format('M d, Y') : 'N/A' }}</td>
                             </tr>
                             <tr>
                                 <td class="text-end"><strong>Due Date:</strong></td>
-                                <td class="{{ $invoice->is_overdue ? 'text-danger' : '' }}">
-                                    {{ $invoice->due_date->format('M d, Y') }}
-                                    @if($invoice->is_overdue && $invoice->status !== 'Paid')
+                                <td class="{{ $invoice->status == 'Overdue' ? 'text-danger' : '' }}">
+                                    {{ $invoice->due_date ? $invoice->due_date->format('M d, Y') : 'N/A' }}
+                                    @if($invoice->status == 'Overdue')
                                         <span class="badge bg-danger ms-1">Overdue</span>
                                     @endif
                                 </td>
@@ -135,18 +132,29 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($invoice->items as $item)
-                            <tr>
-                                <td>
-                                    <div>
-                                        <h6 class="mb-0">{{ $item->description }}</h6>
-                                    </div>
-                                </td>
-                                <td class="text-center">{{ $item->quantity }}</td>
-                                <td class="text-end">${{ number_format($item->unit_price, 2) }}</td>
-                                <td class="text-end">${{ number_format($item->total_price, 2) }}</td>
-                            </tr>
-                            @endforeach
+                            @if(isset($invoice->items) && count($invoice->items) > 0)
+                                @foreach($invoice->items as $item)
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">{{ $item->description }}</h6>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ $item->quantity }}</td>
+                                    <td class="text-end">Rp {{ number_format($item->unit_price, 0, ',', '.') }}</td>
+                                    <td class="text-end">Rp {{ number_format($item->total_price, 0, ',', '.') }}</td>
+                                </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <div class="py-3">
+                                            <h6 class="mb-0">{{ $invoice->title ?? 'Service Invoice' }}</h6>
+                                            <small>{{ $invoice->description ?? 'Invoice for services rendered' }}</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -185,38 +193,34 @@
                         <table class="table table-borderless">
                             <tr>
                                 <td>Subtotal:</td>
-                                <td class="text-end">${{ number_format($invoice->subtotal, 2) }}</td>
+                                <td class="text-end">{{ $invoice->formatted_subtotal }}</td>
                             </tr>
-                            @if($invoice->discount_amount > 0)
+                            @if(($invoice->discount_amount ?? 0) > 0)
                             <tr>
                                 <td>Discount:</td>
-                                <td class="text-end text-success">-${{ number_format($invoice->discount_amount, 2) }}</td>
+                                <td class="text-end text-success">-Rp {{ number_format($invoice->discount_amount, 0, ',', '.') }}</td>
                             </tr>
                             @endif
-                            @if($invoice->tax_rate > 0)
+                            @if(($invoice->tax_rate ?? 0) > 0)
                             <tr>
                                 <td>Tax ({{ $invoice->tax_rate }}%):</td>
-                                <td class="text-end">${{ number_format($invoice->tax_amount, 2) }}</td>
+                                <td class="text-end">Rp {{ number_format($invoice->tax_amount, 0, ',', '.') }}</td>
                             </tr>
                             @endif
                             <tr class="table-active">
                                 <td><strong>Total Amount:</strong></td>
-                                <td class="text-end"><strong>${{ number_format($invoice->total_amount, 2) }}</strong></td>
+                                <td class="text-end"><strong>{{ $invoice->formatted_total }}</strong></td>
                             </tr>
                         </table>
                         
                         @if($invoice->status !== 'Paid')
                             <div class="d-grid gap-2 mt-3">
                                 <button class="btn btn-success" onclick="payInvoice({{ $invoice->id }})">
-                                    <i class="bx bx-credit-card me-1"></i> Pay ${{ number_format($invoice->total_amount, 2) }}
+                                    <i class="bx bx-credit-card me-1"></i> Pay {{ $invoice->formatted_total }}
                                 </button>
-                                @if($invoice->is_overdue)
+                                @if($invoice->status == 'Overdue')
                                     <small class="text-danger text-center">
                                         <i class="bx bx-error-circle"></i> This invoice is overdue
-                                    </small>
-                                @elseif($invoice->days_until_due !== null && $invoice->days_until_due <= 7)
-                                    <small class="text-warning text-center">
-                                        <i class="bx bx-time"></i> Due in {{ $invoice->days_until_due }} days
                                     </small>
                                 @endif
                             </div>
