@@ -1,19 +1,19 @@
 -- SQL Query untuk memperbaiki tabel invoices
--- Jalankan query ini di database MySQL/MariaDB Anda
+-- Berdasarkan struktur tabel yang ada, kolom paid_date sudah tersedia
 
 -- 1. Cek struktur tabel invoices saat ini
 DESCRIBE `invoices`;
 
--- 2. Tambahkan kolom paid_at jika diperlukan (optional)
--- Uncomment baris di bawah jika ingin menambahkan kolom paid_at
--- ALTER TABLE `invoices` ADD COLUMN `paid_at` TIMESTAMP NULL AFTER `status`;
+-- 2. Kolom paid_date sudah ada di tabel (tidak perlu ditambahkan)
+-- Kolom paid_date terlihat di baris 15 pada struktur tabel
 
--- 3. Update existing paid invoices dengan paid_at (jika kolom ditambahkan)
--- Uncomment baris di bawah jika kolom paid_at sudah ditambahkan
--- UPDATE `invoices` SET `paid_at` = `updated_at` WHERE `status` IN ('Paid', 'Lunas') AND `paid_at` IS NULL;
+-- 3. Update existing paid invoices dengan paid_date
+UPDATE `invoices` SET `paid_date` = `updated_at` 
+WHERE `status` IN ('Paid', 'Lunas') AND `paid_date` IS NULL;
 
--- 4. Verifikasi struktur tabel
-DESCRIBE `invoices`;
+-- 4. Verifikasi perubahan
+SELECT id, invoice_no, status, paid_date, created_at, updated_at FROM `invoices` LIMIT 5;
 
--- 5. Cek data sample
-SELECT id, invoice_no, status, created_at, updated_at FROM `invoices` LIMIT 5;
+-- 5. Cek invoices yang sudah dibayar
+SELECT id, invoice_no, status, paid_date FROM `invoices` 
+WHERE `status` IN ('Paid', 'Lunas') LIMIT 5;
