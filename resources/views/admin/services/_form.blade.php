@@ -50,7 +50,17 @@
 </div>
 <div class="mb-3">
   <label class="form-label">Billing Cycle</label>
-  <input name="billing_cycle" class="form-control" value="{{ old('billing_cycle', $service->billing_cycle ?? '') }}">
+  <select name="billing_cycle" class="form-select">
+    <option value="">-- choose billing cycle --</option>
+    <option value="1 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1 Bulan') ? 'selected':'' }}>1 Bulan</option>
+    <option value="2 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2 Bulan') ? 'selected':'' }}>2 Bulan</option>
+    <option value="3 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3 Bulan') ? 'selected':'' }}>3 Bulan</option>
+    <option value="6 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '6 Bulan') ? 'selected':'' }}>6 Bulan</option>
+    <option value="1 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1 Tahun') ? 'selected':'' }}>1 Tahun</option>
+    <option value="2 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2 Tahun') ? 'selected':'' }}>2 Tahun</option>
+    <option value="3 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3 Tahun') ? 'selected':'' }}>3 Tahun</option>
+    <option value="4 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '4 Tahun') ? 'selected':'' }}>4 Tahun</option>
+  </select>
 </div>
 <div class="mb-3">
   <label class="form-label">Registration Date</label>
@@ -68,8 +78,13 @@
   <label class="form-label">Status</label>
   <select name="status" class="form-select">
     <option value="Active" {{ (old('status', $service->status ?? '')=='Active') ? 'selected':'' }}>Active</option>
+    <option value="Pending" {{ (old('status', $service->status ?? '')=='Pending') ? 'selected':'' }}>Pending</option>
     <option value="Suspended" {{ (old('status', $service->status ?? '')=='Suspended') ? 'selected':'' }}>Suspended</option>
-    <option value="Cancelled" {{ (old('status', $service->status ?? '')=='Cancelled') ? 'selected':'' }}>Cancelled</option>
+    <option value="Terminated" {{ (old('status', $service->status ?? '')=='Terminated') ? 'selected':'' }}>Terminated</option>
+    <option value="Dibatalkan" {{ (old('status', $service->status ?? '')=='Dibatalkan') ? 'selected':'' }}>Dibatalkan</option>
+    <option value="Disuspen" {{ (old('status', $service->status ?? '')=='Disuspen') ? 'selected':'' }}>Disuspen</option>
+    <option value="Sedang Dibuat" {{ (old('status', $service->status ?? '')=='Sedang Dibuat') ? 'selected':'' }}>Sedang Dibuat</option>
+    <option value="Ditutup" {{ (old('status', $service->status ?? '')=='Ditutup') ? 'selected':'' }}>Ditutup</option>
   </select>
 </div>
 

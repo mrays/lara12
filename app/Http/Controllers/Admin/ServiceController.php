@@ -27,14 +27,18 @@ class ServiceController extends Controller
 
     public function create()
     {
-        $clients = Client::orderBy('name')->get();
+        // Get clients from users table where role is client
+        $clients = \DB::table('users')
+            ->where('role', 'client')
+            ->orderBy('name')
+            ->get();
         return view('admin.services.create', compact('clients'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client_id'=>'required|exists:clients,id',
+            'client_id'=>'required|exists:users,id',
             'product'=>'required|string|max:191',
             'domain'=>'nullable|string|max:191',
             'price'=>'required|numeric',
@@ -42,7 +46,7 @@ class ServiceController extends Controller
             'registration_date'=>'nullable|date',
             'due_date'=>'nullable|date',
             'ip'=>'nullable|ip',
-            'status'=>'required|in:Active,Suspended,Cancelled',
+            'status'=>'required|in:Active,Pending,Suspended,Terminated,Dibatalkan,Disuspen,Sedang Dibuat,Ditutup',
         ]);
         Service::create($data);
         return redirect()->route('admin.services.index')->with('success','Service created');
@@ -56,14 +60,18 @@ class ServiceController extends Controller
 
     public function edit(Service $service)
     {
-        $clients = Client::orderBy('name')->get();
+        // Get clients from users table where role is client
+        $clients = \DB::table('users')
+            ->where('role', 'client')
+            ->orderBy('name')
+            ->get();
         return view('admin.services.edit', compact('service','clients'));
     }
 
     public function update(Request $request, Service $service)
     {
         $data = $request->validate([
-            'client_id'=>'required|exists:clients,id',
+            'client_id'=>'required|exists:users,id',
             'product'=>'required|string|max:191',
             'domain'=>'nullable|string|max:191',
             'price'=>'required|numeric',
@@ -71,7 +79,7 @@ class ServiceController extends Controller
             'registration_date'=>'nullable|date',
             'due_date'=>'nullable|date',
             'ip'=>'nullable|ip',
-            'status'=>'required|in:Active,Suspended,Cancelled',
+            'status'=>'required|in:Active,Pending,Suspended,Terminated,Dibatalkan,Disuspen,Sedang Dibuat,Ditutup',
         ]);
         $service->update($data);
         return redirect()->route('admin.services.index')->with('success','Service updated');
