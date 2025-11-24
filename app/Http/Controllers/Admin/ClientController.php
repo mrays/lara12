@@ -146,6 +146,35 @@ class ClientController extends Controller
     }
 
     /**
+     * Get client services (AJAX)
+     */
+    public function getServices($clientId)
+    {
+        $services = \DB::table('services')
+            ->where('client_id', $clientId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'services' => $services
+        ]);
+    }
+
+    /**
+     * Delete service (AJAX)
+     */
+    public function deleteService($serviceId)
+    {
+        \DB::table('services')->where('id', $serviceId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service deleted successfully'
+        ]);
+    }
+
+    /**
      * Reset client password
      */
     public function resetPassword(Request $request, User $client)

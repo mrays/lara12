@@ -18,15 +18,24 @@
             <td>{{ $s->id }}</td>
             <td>{{ $s->product }}</td>
             <td>{{ $s->domain ?? '-' }}</td>
-            <td>{{ $s->client->name ?? '-' }}</td>
+            <td>{{ $s->client_name ?? '-' }}</td>
             <td>{{ optional($s->due_date)->format('Y-m-d') }}</td>
             <td><span class="badge {{ $s->status=='Active'?'bg-success':'bg-secondary' }}">{{ $s->status }}</span></td>
             <td>
-              <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.services.edit',$s) }}">Edit</a>
-              <form action="{{ route('admin.services.destroy',$s) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
-                @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
+              <div class="d-flex gap-1">
+                <a class="btn btn-sm btn-outline-info" href="{{ route('admin.services.manage-details', $s->id) }}" title="Manage Client View">
+                  <i class="tf-icons bx bx-cog"></i>
+                </a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.services.edit',$s) }}" title="Edit Service">
+                  <i class="tf-icons bx bx-edit"></i>
+                </a>
+                <form action="{{ route('admin.services.destroy',$s) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
+                  @csrf @method('DELETE')
+                  <button class="btn btn-sm btn-outline-danger" title="Delete Service">
+                    <i class="tf-icons bx bx-trash"></i>
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           @endforeach

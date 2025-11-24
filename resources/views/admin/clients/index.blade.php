@@ -576,19 +576,117 @@ function toggleStatus(clientId, currentStatus) {
 
 // Load client services
 function loadClientServices(clientId) {
-    // Clear the loading message and show actual services
     const tbody = document.getElementById('currentServicesList');
     
-    // For now, show a message that services will be loaded
-    // In a real implementation, this would be an AJAX call
+    // Show loading state
     tbody.innerHTML = `
         <tr>
             <td colspan="4" class="text-center text-muted py-3">
-                <i class="tf-icons bx bx-info-circle me-1"></i>
-                Services will be loaded here. Click "Add Service" to create new services.
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Loading services...
             </td>
         </tr>
     `;
+    
+    // Fetch services via AJAX
+    fetch(`/admin/clients/${clientId}/services`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.services && data.services.length > 0) {
+                let servicesHtml = '';
+                data.services.forEach(service => {
+                    const statusBadge = getStatusBadge(service.status);
+                    servicesHtml += `
+                        <tr>
+                            <td>${service.name}</td>
+                            <td>Rp ${formatNumber(service.price)}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editService(${service.id})">
+                                    <i class="tf-icons bx bx-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteService(${service.id})">
+                                    <i class="tf-icons bx bx-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = servicesHtml;
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">
+                            <i class="tf-icons bx bx-info-circle me-1"></i>
+                            No services found. Click "Add Service" to create new services.
+                        </td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading services:', error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger py-3">
+                        <i class="tf-icons bx bx-error me-1"></i>
+                        Error loading services. Please try again.
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+// Helper function to get status badge
+function getStatusBadge(status) {
+    switch(status) {
+        case 'Active':
+            return '<span class="badge bg-success">Active</span>';
+        case 'Pending':
+            return '<span class="badge bg-warning">Pending</span>';
+        case 'Suspended':
+            return '<span class="badge bg-secondary">Suspended</span>';
+        case 'Terminated':
+            return '<span class="badge bg-dark">Terminated</span>';
+        default:
+            return '<span class="badge bg-warning">Pending</span>';
+    }
+}
+
+// Helper function to format numbers
+function formatNumber(num) {
+    return new Intl.NumberFormat('id-ID').format(num);
+}
+
+// Edit service function
+function editService(serviceId) {
+    // Implement edit service functionality
+    console.log('Edit service:', serviceId);
+}
+
+// Delete service function
+function deleteService(serviceId) {
+    if (confirm('Are you sure you want to delete this service?')) {
+        fetch(`/admin/services/${serviceId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload services
+                const clientId = document.getElementById('manageServicesForm').action.split('/').slice(-2, -1)[0];
+                loadClientServices(clientId);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting service:', error);
+            alert('Error deleting service. Please try again.');
+        });
+    }
 }
 
 // Delete client function

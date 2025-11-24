@@ -11,9 +11,17 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
-        $services = Service::with('client')
-            ->when($q, fn($b) => $b->where('product','like',"%$q%")->orWhere('domain','like',"%$q%"))
-            ->orderBy('due_date','asc')->paginate(15)->withQueryString();
+        // Use direct DB query for compatibility
+        $services = \DB::table('services')
+            ->leftJoin('users', 'services.client_id', '=', 'users.id')
+            ->select('services.*', 'users.name as client_name', 'users.email as client_email')
+            ->when($q, function($query) use ($q) {
+                return $query->where('services.name', 'like', "%$q%")
+                           ->orWhere('services.domain', 'like', "%$q%");
+            })
+            ->orderBy('services.created_at', 'desc')
+            ->paginate(15);
+            
         return view('admin.services.index', compact('services'));
     }
 
@@ -67,6 +75,78 @@ class ServiceController extends Controller
         ]);
         $service->update($data);
         return redirect()->route('admin.services.index')->with('success','Service updated');
+    }
+
+    /**
+     * Manage service details for client view
+     */
+    public function manageDetails($serviceId)
+    {
+        $service = \DB::table('services')
+            ->leftJoin('users', 'services.client_id', '=', 'users.id')
+            ->select('services.*', 'users.name as client_name', 'users.email as client_email')
+            ->where('services.id', $serviceId)
+            ->first();
+
+        if (!$service) {
+            return redirect()->route('admin.services.index')
+                ->with('error', 'Service not found');
+        }
+
+        return view('admin.services.manage-details', compact('service'));
+    }
+
+    /**
+     * Update service details for client view
+     */
+    public function updateDetails(Request $request, $serviceId)
+    {
+        $validated = $request->validate([
+            // Service Information
+            'service_name' => 'required|string|max:255',
+            'product' => 'required|string|max:255',
+            'domain' => 'nullable|string|max:255',
+            'status' => 'required|in:Active,Pending,Suspended,Terminated,Dibatalkan,Disuspen,Sedang Dibuat,Ditutup',
+            'next_due' => 'nullable|date',
+            
+            // Billing Information
+            'billing_cycle' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'setup_fee' => 'nullable|numeric|min:0',
+            
+            // Overview Information (Login Details)
+            'username' => 'nullable|string|max:255',
+            'password' => 'nullable|string|max:255',
+            'server' => 'nullable|string|max:255',
+            'login_url' => 'nullable|url',
+            
+            // Additional Details
+            'description' => 'nullable|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        \DB::table('services')
+            ->where('id', $serviceId)
+            ->update([
+                'name' => $validated['service_name'],
+                'product' => $validated['product'],
+                'domain' => $validated['domain'],
+                'status' => $validated['status'],
+                'due_date' => $validated['next_due'],
+                'billing_cycle' => $validated['billing_cycle'],
+                'price' => $validated['price'],
+                'setup_fee' => $validated['setup_fee'] ?? 0,
+                'username' => $validated['username'],
+                'password' => $validated['password'],
+                'server' => $validated['server'],
+                'login_url' => $validated['login_url'],
+                'description' => $validated['description'],
+                'notes' => $validated['notes'],
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('admin.services.manage-details', $serviceId)
+            ->with('success', 'Service details updated successfully');
     }
 
     public function destroy(Service $service)

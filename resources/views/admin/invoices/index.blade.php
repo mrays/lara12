@@ -269,7 +269,7 @@ function deleteInvoice(invoiceId) {
     if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/admin/invoices/${invoiceId}`;
+        form.action = `/admin/invoices/${invoiceId}/delete`;
         form.innerHTML = `
             @csrf
             @method('DELETE')

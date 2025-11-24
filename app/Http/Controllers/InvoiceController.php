@@ -271,9 +271,9 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Delete invoice
+     * Delete invoice (admin quick delete)
      */
-    public function destroy($invoiceId)
+    public function deleteInvoice($invoiceId)
     {
         \DB::table('invoices')->where('id', $invoiceId)->delete();
 

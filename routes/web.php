@@ -81,12 +81,24 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.invoices.quick-update');
         Route::put('invoices/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])
             ->name('admin.invoices.status-update');
+        Route::delete('invoices/{invoice}/delete', [App\Http\Controllers\InvoiceController::class, 'deleteInvoice'])
+            ->name('admin.invoices.delete');
             
         // Client management routes
         Route::put('clients/{client}/toggle-status', [App\Http\Controllers\Admin\ClientController::class, 'toggleStatus'])
             ->name('admin.clients.toggle-status');
         Route::post('clients/{client}/services', [App\Http\Controllers\Admin\ClientController::class, 'manageServices'])
             ->name('admin.clients.manage-services');
+        Route::get('clients/{client}/services', [App\Http\Controllers\Admin\ClientController::class, 'getServices'])
+            ->name('admin.clients.get-services');
+        Route::delete('services/{service}', [App\Http\Controllers\Admin\ClientController::class, 'deleteService'])
+            ->name('admin.services.delete');
+            
+        // Service details management routes
+        Route::get('services/{service}/manage-details', [App\Http\Controllers\Admin\ServiceController::class, 'manageDetails'])
+            ->name('admin.services.manage-details');
+        Route::put('services/{service}/update-details', [App\Http\Controllers\Admin\ServiceController::class, 'updateDetails'])
+            ->name('admin.services.update-details');
     ///akhir darigrp admin
     });
     // Payment routes

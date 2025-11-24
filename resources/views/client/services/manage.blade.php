@@ -345,7 +345,9 @@ function copyPassword() {
 }
 
 function loginDashboard() {
-    @if($service->domain)
+    @if($service->login_url)
+        window.open('{{ $service->login_url }}', '_blank');
+    @elseif($service->domain)
         window.open('https://{{ $service->domain }}/admin', '_blank');
     @else
         alert('No dashboard URL available for this service');
