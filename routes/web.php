@@ -125,7 +125,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
     
     // Service upgrade routes
-    Route::post('/services/{service}/upgrade', [App\Http\Controllers\ServiceManagementController::class, 'requestUpgrade'])->name('services.upgrade');
+    Route::post('/services/{service}/upgrade-request', [App\Http\Controllers\ServiceUpgradeController::class, 'submitRequest'])->name('services.upgrade.request');
+    Route::get('/upgrade-requests', [App\Http\Controllers\ServiceUpgradeController::class, 'clientRequests'])->name('client.upgrade-requests.index');
+    Route::get('/upgrade-requests/{request}', [App\Http\Controllers\ServiceUpgradeController::class, 'clientShow'])->name('client.upgrade-requests.show');
+    Route::post('/upgrade-requests/{upgradeRequest}/cancel', [App\Http\Controllers\ServiceUpgradeController::class, 'cancel'])->name('client.upgrade-requests.cancel');
 });
 
 // Public payment routes (no auth required for callbacks)
@@ -137,6 +140,17 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->n
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/gmail-test', function () { return view('gmail-test'); })->name('gmail.test')->middleware('auth');
 Route::post('/test-gmail-api', [GoogleAuthController::class, 'sendTestEmail'])->name('test.gmail.api')->middleware('auth');
+
+// Admin routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Service upgrade requests management
+    Route::get('/upgrade-requests', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'index'])->name('upgrade-requests.index');
+    Route::get('/upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'show'])->name('upgrade-requests.show');
+    Route::post('/upgrade-requests/{upgradeRequest}/approve', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'approve'])->name('upgrade-requests.approve');
+    Route::post('/upgrade-requests/{upgradeRequest}/reject', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'reject'])->name('upgrade-requests.reject');
+    Route::post('/upgrade-requests/{upgradeRequest}/processing', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'markAsProcessing'])->name('upgrade-requests.processing');
+    Route::post('/upgrade-requests/bulk-action', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'bulkAction'])->name('upgrade-requests.bulk-action');
+});
 
 // Test routes (remove in production)
 Route::get('/test/payment/config', [App\Http\Controllers\TestPaymentController::class, 'testConfig']);

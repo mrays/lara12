@@ -224,7 +224,13 @@
                                         <div class="col-md-8">
                                             <h6 class="mb-2">Current Plan</h6>
                                             <h5 class="mb-1">Your Current Plan is {{ $service->product ?? 'Basic' }}</h5>
-                                            <p class="text-muted mb-3">A simple start for everyone</p>
+                                            <p class="text-muted mb-3">
+                                                @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
+                                                    Annual subscription with better value
+                                                @else
+                                                    Monthly subscription plan
+                                                @endif
+                                            </p>
                                             
                                             <div class="mb-3">
                                                 <small class="text-muted">Active until {{ $service->due_date ? $service->due_date->format('M d, Y') : 'Dec 09, 2021' }}</small><br>
@@ -232,11 +238,26 @@
                                             </div>
                                             
                                             <div class="mb-3">
-                                                <span class="badge bg-label-primary me-2">{{ $service->price ? 'Rp ' . number_format($service->price, 0, ',', '.') : '$199' }} Per Month</span>
+                                                <span class="badge bg-label-primary me-2">
+                                                    {{ $service->price ? 'Rp ' . number_format($service->price, 0, ',', '.') : 'Rp 199.000' }} 
+                                                    @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
+                                                        Per Year
+                                                    @elseif($service->billing_cycle === 'monthly')
+                                                        Per Month
+                                                    @else
+                                                        Per {{ ucfirst($service->billing_cycle ?? 'Month') }}
+                                                    @endif
+                                                </span>
                                                 <span class="badge bg-label-info">Popular</span>
                                             </div>
                                             
-                                            <p class="text-muted mb-3">Standard plan for small to medium businesses</p>
+                                            <p class="text-muted mb-3">
+                                                @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
+                                                    Annual plan with cost savings for long-term commitment
+                                                @else
+                                                    Flexible monthly plan for small to medium businesses
+                                                @endif
+                                            </p>
                                             
                                             <div class="d-flex gap-2">
                                                 <button class="btn btn-primary" onclick="upgradePlan()">
@@ -259,11 +280,16 @@
                                                     
                                                     <div class="mb-3">
                                                         <h6 class="mb-1">Days</h6>
+                                                        @php
+                                                            $daysRemaining = $service->due_date ? $service->due_date->diffInDays(now()) : 0;
+                                                            $totalDays = ($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually') ? 365 : 30;
+                                                            $progressPercentage = $totalDays > 0 ? min(100, max(0, ($daysRemaining / $totalDays) * 100)) : 0;
+                                                        @endphp
                                                         <div class="progress mb-2" style="height: 8px;">
-                                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 40%"></div>
+                                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $progressPercentage }}%"></div>
                                                         </div>
-                                                        <small class="text-muted">{{ $service->due_date ? $service->due_date->diffInDays(now()) : '12' }} of 30 Days</small><br>
-                                                        <small class="text-muted">{{ $service->due_date ? $service->due_date->diffInDays(now()) : '18' }} days remaining until your plan requires update</small>
+                                                        <small class="text-muted">{{ $daysRemaining }} of {{ $totalDays }} Days</small><br>
+                                                        <small class="text-muted">{{ $daysRemaining }} days remaining until your plan requires update</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -491,6 +517,113 @@
     </div>
 </div>
 
+<!-- Upgrade Request Modal -->
+<div class="modal fade" id="upgradeRequestModal" tabindex="-1" aria-labelledby="upgradeRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="upgradeRequestModalLabel">
+                    <i class="bx bx-up-arrow-alt me-2"></i>Request Service Upgrade
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="upgradeRequestForm">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bx bx-info-circle me-2"></i>
+                        <strong>Upgrade Request Process:</strong> Your request will be reviewed by our admin team. You will be notified once it's approved and an invoice will be generated.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="current_plan" class="form-label">Current Plan</label>
+                                <input type="text" class="form-control" id="current_plan" name="current_plan" 
+                                       value="{{ $service->product }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="current_price" class="form-label">Current Price</label>
+                                <input type="text" class="form-control" id="current_price" name="current_price" 
+                                       value="Rp {{ number_format($service->price, 0, ',', '.') }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="requested_plan" class="form-label">Requested Plan</label>
+                                <input type="text" class="form-control" id="requested_plan" name="requested_plan" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="requested_price" class="form-label">New Price</label>
+                                <input type="text" class="form-control" id="requested_price" name="requested_price" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="billing_cycle" class="form-label">Billing Cycle</label>
+                        <input type="text" class="form-control" id="billing_cycle" name="billing_cycle" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="upgrade_reason" class="form-label">Reason for Upgrade <span class="text-danger">*</span></label>
+                        <select class="form-select" id="upgrade_reason" name="upgrade_reason" required>
+                            <option value="">Select reason...</option>
+                            <option value="need_more_resources">Need More Resources</option>
+                            <option value="additional_features">Need Additional Features</option>
+                            <option value="business_growth">Business Growth</option>
+                            <option value="performance_improvement">Performance Improvement</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="additional_notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" 
+                                  placeholder="Please provide any additional information about your upgrade request..."></textarea>
+                    </div>
+
+                    <!-- Price Comparison -->
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Price Comparison</h6>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted">Current</small>
+                                    <div class="fw-bold">Rp {{ number_format($service->price, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="col-4">
+                                    <i class="bx bx-right-arrow-alt text-primary"></i>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">New</small>
+                                    <div class="fw-bold text-primary" id="new_price_display">-</div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Price difference: </small>
+                                <span class="fw-bold" id="price_difference">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitUpgradeBtn" onclick="submitUpgradeRequest()">
+                        <i class="bx bx-paper-plane me-2"></i>Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function togglePasswordVisibility() {
     const passwordField = document.getElementById('password-field');
@@ -609,47 +742,82 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function selectPlan(packageId, packageName, price) {
-    if (confirm(`Are you sure you want to upgrade to ${packageName}?`)) {
-        showToast('Processing upgrade request...', 'info');
-        
-        // Get billing cycle
-        const billingToggle = document.getElementById('billingToggle');
-        const billingCycle = billingToggle.checked ? 'annually' : 'monthly';
-        
-        // Send AJAX request
-        fetch(`/services/{{ $service->id }}/upgrade`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                package_id: packageId,
-                billing_cycle: billingCycle
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Upgrade request submitted successfully!', 'success');
-                
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('upgradePlanModal'));
-                modal.hide();
-                
-                // Show confirmation
-                setTimeout(() => {
-                    alert(`${data.message}\nYou will receive an invoice shortly.`);
-                }, 1000);
-            } else {
-                showToast(data.error || 'Failed to process upgrade request', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('An error occurred while processing your request', 'danger');
-        });
-    }
+    // Close pricing modal and open upgrade request modal
+    const pricingModal = bootstrap.Modal.getInstance(document.getElementById('upgradePlanModal'));
+    pricingModal.hide();
+    
+    // Fill upgrade request form
+    document.getElementById('requested_plan').value = packageName;
+    document.getElementById('requested_price').value = price;
+    
+    // Get billing cycle
+    const billingToggle = document.getElementById('billingToggle');
+    const billingCycle = billingToggle.checked ? 'annually' : 'monthly';
+    document.getElementById('billing_cycle').value = billingCycle;
+    
+    // Update price comparison
+    const currentPrice = {{ $service->price }};
+    const newPrice = billingToggle.checked ? (price * 12 * 0.9) : price;
+    const priceDifference = newPrice - currentPrice;
+    
+    document.getElementById('new_price_display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(newPrice);
+    
+    const diffElement = document.getElementById('price_difference');
+    const sign = priceDifference >= 0 ? '+' : '';
+    diffElement.textContent = sign + 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.abs(priceDifference));
+    diffElement.className = 'fw-bold ' + (priceDifference >= 0 ? 'text-success' : 'text-danger');
+    
+    // Show upgrade request modal
+    const upgradeRequestModal = new bootstrap.Modal(document.getElementById('upgradeRequestModal'));
+    upgradeRequestModal.show();
+}
+
+function submitUpgradeRequest() {
+    const form = document.getElementById('upgradeRequestForm');
+    const formData = new FormData(form);
+    
+    // Show loading
+    const submitBtn = document.getElementById('submitUpgradeBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+    submitBtn.disabled = true;
+    
+    fetch(`/client/services/{{ $service->id }}/upgrade-request`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Upgrade request submitted successfully!', 'success');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('upgradeRequestModal'));
+            modal.hide();
+            
+            // Reset form
+            form.reset();
+            
+            // Show success message
+            setTimeout(() => {
+                alert('Your upgrade request has been submitted and is pending admin approval. You will be notified once it\'s processed.');
+            }, 1000);
+        } else {
+            showToast(data.message || 'Failed to submit upgrade request', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred while submitting your request', 'danger');
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
 }
 </script>
 @endsection

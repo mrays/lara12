@@ -86,5 +86,19 @@
                 <div data-i18n="Invoices">Invoices</div>
             </a>
         </li>
+
+        <!-- Upgrade Requests -->
+        <li class="menu-item {{ request()->routeIs('admin.upgrade-requests.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.upgrade-requests.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-up-arrow-alt"></i>
+                <div data-i18n="Upgrade Requests">Upgrade Requests</div>
+                @php
+                    $pendingCount = \App\Models\ServiceUpgradeRequest::where('status', 'pending')->count();
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="badge badge-center rounded-pill bg-danger ms-auto">{{ $pendingCount }}</span>
+                @endif
+            </a>
+        </li>
     </ul>
 </aside>
