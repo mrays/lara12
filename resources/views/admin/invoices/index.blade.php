@@ -219,7 +219,7 @@
 <script>
 // Edit invoice function
 function editInvoice(invoiceId, dueDate, invoiceNo, amount, status) {
-    document.getElementById('editInvoiceForm').action = `/admin/invoices/${invoiceId}`;
+    document.getElementById('editInvoiceForm').action = `/admin/invoices/${invoiceId}/quick-update`;
     document.getElementById('edit_due_date').value = dueDate ? dueDate.split(' ')[0] : '';
     document.getElementById('edit_invoice_no').value = invoiceNo;
     document.getElementById('edit_amount').value = amount;
@@ -233,7 +233,7 @@ function updateInvoiceStatus(invoiceId, status) {
     if (confirm(`Are you sure you want to mark this invoice as ${status}?`)) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/admin/invoices/${invoiceId}/update-status`;
+        form.action = `/admin/invoices/${invoiceId}/status`;
         form.innerHTML = `
             @csrf
             @method('PUT')

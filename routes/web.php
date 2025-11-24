@@ -77,8 +77,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.services.update-status');
             
         // Invoice edit routes
-        Route::put('invoices/{invoice}', [App\Http\Controllers\InvoiceController::class, 'update'])
-            ->name('admin.invoices.update');
+        Route::put('invoices/{invoice}/quick-update', [App\Http\Controllers\InvoiceController::class, 'updateInvoice'])
+            ->name('admin.invoices.quick-update');
         Route::put('invoices/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])
             ->name('admin.invoices.status-update');
     ///akhir darigrp admin

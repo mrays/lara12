@@ -251,9 +251,9 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Update invoice details
+     * Update invoice details (admin quick edit)
      */
-    public function update(Request $request, $invoiceId)
+    public function updateInvoice(Request $request, $invoiceId)
     {
         $request->validate([
             'due_date' => 'required|date',
