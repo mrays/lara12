@@ -74,10 +74,47 @@
 
             <!-- Email Address -->
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                 <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" 
-                       placeholder="Enter your email" value="{{ old('email') }}" required autocomplete="username" />
+                       placeholder="contoh@email.com" value="{{ old('email') }}" required autocomplete="username" />
                 @error('email')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+            <!-- WhatsApp -->
+            <div class="mb-3">
+                <label for="whatsapp" class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control @error('whatsapp') is-invalid @enderror" id="whatsapp" name="whatsapp" 
+                       placeholder="08xxxxxxxxxx" value="{{ old('whatsapp') }}" required />
+                @error('whatsapp')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
+                <div class="form-text">Format: 08xxxxxxxxxx (tanpa +62)</div>
+            </div>
+
+            <!-- Alamat Rumah -->
+            <div class="mb-3">
+                <label for="address" class="form-label">Alamat Rumah</label>
+                <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="2"
+                          placeholder="Alamat lengkap (opsional)">{{ old('address') }}</textarea>
+                @error('address')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+            <!-- Nama Usaha -->
+            <div class="mb-3">
+                <label for="business_name" class="form-label">Nama Usaha</label>
+                <input type="text" class="form-control @error('business_name') is-invalid @enderror" id="business_name" name="business_name" 
+                       placeholder="Nama perusahaan/usaha (opsional)" value="{{ old('business_name') }}" />
+                @error('business_name')
                     <div class="invalid-feedback">
                         {{ $message }}
                     </div>

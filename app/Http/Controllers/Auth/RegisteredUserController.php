@@ -32,14 +32,29 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'whatsapp' => ['required', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'business_name' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'terms' => ['required', 'accepted'],
+        ], [
+            'name.required' => 'Nama wajib diisi',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'whatsapp.required' => 'Nomor WhatsApp wajib diisi',
+            'whatsapp.max' => 'Nomor WhatsApp maksimal 20 karakter',
+            'terms.required' => 'Anda harus menyetujui syarat dan ketentuan',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'whatsapp' => $request->whatsapp,
+            'address' => $request->address,
+            'business_name' => $request->business_name,
             'password' => Hash::make($request->password),
+            'role' => 'client', // Set default role as client
         ]);
 
         event(new Registered($user));

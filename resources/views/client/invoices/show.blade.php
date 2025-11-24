@@ -164,7 +164,7 @@
         <!-- Invoice Summary -->
         <div class="row">
             <div class="col-md-8">
-                @if($invoice->description || $invoice->notes)
+                @if($invoice->description || ($invoice->notes ?? null))
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">Additional Information</h5>
@@ -175,7 +175,7 @@
                             <p>{{ $invoice->description }}</p>
                         @endif
                         
-                        @if($invoice->notes)
+                        @if($invoice->notes ?? null)
                             <h6>Notes:</h6>
                             <p>{{ $invoice->notes }}</p>
                         @endif

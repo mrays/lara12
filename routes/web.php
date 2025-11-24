@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ClientDashboardController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\GoogleAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,11 +122,18 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 // Public payment routes (no auth required for callbacks)
 Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'return'])->name('payment.return');
+
+// Google OAuth2 routes
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.auth');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/gmail-test', function () { return view('gmail-test'); })->name('gmail.test')->middleware('auth');
+Route::post('/test-gmail-api', [GoogleAuthController::class, 'sendTestEmail'])->name('test.gmail.api')->middleware('auth');
 
 // Test routes (remove in production)
 Route::get('/test/payment/config', [App\Http\Controllers\TestPaymentController::class, 'testConfig']);

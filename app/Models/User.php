@@ -17,6 +17,9 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'whatsapp',
+        'address',
+        'business_name',
         'status',
     ];
 
