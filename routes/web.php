@@ -57,10 +57,13 @@ Route::middleware(['auth'])->group(function () {
         // semua route admin lain taruh di sini
         Route::resource('clients', App\Http\Controllers\Admin\ClientController::class)
             ->names('admin.clients');
+        
+        // Client password reset route
+        Route::put('clients/{client}/reset-password', [App\Http\Controllers\Admin\ClientController::class, 'resetPassword'])
+            ->name('admin.clients.reset-password');
+            
         Route::resource('services', App\Http\Controllers\Admin\ServiceController::class)
-    ->names('admin.services');
-    Route::resource('client', App\Http\Controllers\Admin\ClientController::class)
-    ->names('admin.client');
+            ->names('admin.services');
         // Invoice management
         Route::resource('invoices', App\Http\Controllers\InvoiceController::class)
             ->names('admin.invoices');
