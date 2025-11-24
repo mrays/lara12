@@ -193,39 +193,39 @@
                                         <div class="d-flex gap-1">
                                             <!-- View Button -->
                                             <a href="{{ route('admin.clients.show', $client) }}" class="btn btn-sm btn-outline-info" title="View Client">
-                                                <i class="bx bx-show"></i>
+                                                <i class="tf-icons bx bx-show"></i>
                                             </a>
                                             
                                             <!-- Edit Client Info Button -->
                                             <button type="button" class="btn btn-sm btn-outline-primary" 
                                                     onclick="editClientInfo({{ $client->id }}, '{{ $client->name }}', '{{ $client->email }}', '{{ $client->phone ?? '' }}', '{{ $client->status ?? 'Active' }}')" 
                                                     title="Edit Client Info">
-                                                <i class="bx bx-edit"></i>
+                                                <i class="tf-icons bx bx-edit"></i>
                                             </button>
                                             
                                             <!-- Manage Services Button -->
                                             <button type="button" class="btn btn-sm btn-outline-success" 
                                                     onclick="manageServices({{ $client->id }}, '{{ $client->name }}')" 
                                                     title="Manage Services">
-                                                <i class="bx bx-package"></i>
+                                                <i class="tf-icons bx bx-package"></i>
                                             </button>
                                             
                                             <!-- More Actions Dropdown -->
                                             <div class="dropdown">
                                                 <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="More Actions">
-                                                    <i class="bx bx-dots-horizontal"></i>
+                                                    <i class="tf-icons bx bx-dots-horizontal"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
                                                     <h6 class="dropdown-header">Account Actions</h6>
                                                     <button class="dropdown-item" onclick="resetPassword({{ $client->id }}, '{{ $client->name }}')">
-                                                        <i class="bx bx-key me-1"></i> Reset Password
+                                                        <i class="tf-icons bx bx-key me-1"></i> Reset Password
                                                     </button>
                                                     <button class="dropdown-item" onclick="toggleStatus({{ $client->id }}, '{{ $client->status ?? 'Active' }}')">
-                                                        <i class="bx bx-toggle-left me-1"></i> Toggle Status
+                                                        <i class="tf-icons bx bx-toggle-left me-1"></i> Toggle Status
                                                     </button>
                                                     <div class="dropdown-divider"></div>
                                                     <button class="dropdown-item text-danger" onclick="deleteClient({{ $client->id }}, '{{ $client->name }}')">
-                                                        <i class="bx bx-trash me-1"></i> Delete Client
+                                                        <i class="tf-icons bx bx-trash me-1"></i> Delete Client
                                                     </button>
                                                 </div>
                                             </div>
@@ -389,7 +389,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bx bx-edit me-2"></i>Edit Client Information
+                    <i class="tf-icons bx bx-edit me-2"></i>Edit Client Information
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -424,7 +424,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-save me-1"></i>Update Client
+                        <i class="tf-icons bx bx-save me-1"></i>Update Client
                     </button>
                 </div>
             </form>
@@ -438,7 +438,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bx bx-package me-2"></i>Manage Services for <span id="manageServicesClientName"></span>
+                    <i class="tf-icons bx bx-package me-2"></i>Manage Services for <span id="manageServicesClientName"></span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -505,7 +505,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-success">
-                        <i class="bx bx-plus me-1"></i>Add Service
+                        <i class="tf-icons bx bx-plus me-1"></i>Add Service
                     </button>
                 </div>
             </form>
@@ -576,9 +576,19 @@ function toggleStatus(clientId, currentStatus) {
 
 // Load client services
 function loadClientServices(clientId) {
-    // This would typically be an AJAX call to get services
-    // For now, we'll just show the form
-    console.log('Loading services for client:', clientId);
+    // Clear the loading message and show actual services
+    const tbody = document.getElementById('currentServicesList');
+    
+    // For now, show a message that services will be loaded
+    // In a real implementation, this would be an AJAX call
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="4" class="text-center text-muted py-3">
+                <i class="tf-icons bx bx-info-circle me-1"></i>
+                Services will be loaded here. Click "Add Service" to create new services.
+            </td>
+        </tr>
+    `;
 }
 
 // Delete client function
