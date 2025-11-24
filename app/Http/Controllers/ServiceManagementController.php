@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\ServicePackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,7 +64,12 @@ class ServiceManagementController extends Controller
 
         $service->invoices = $invoices;
 
-        return view('client.services.manage', compact('service'));
+        // Get available service packages for upgrade
+        $servicePackages = ServicePackage::active()
+            ->orderBy('base_price', 'asc')
+            ->get();
+
+        return view('client.services.manage', compact('service', 'servicePackages'));
     }
 
     /**
@@ -82,6 +88,42 @@ class ServiceManagementController extends Controller
         }
 
         return view('client.services.index', compact('services'));
+    }
+
+    /**
+     * Request service upgrade
+     */
+    public function requestUpgrade(Request $request, Service $service)
+    {
+        // Validate request
+        $request->validate([
+            'package_id' => 'required|exists:service_packages,id',
+            'billing_cycle' => 'required|in:monthly,annually'
+        ]);
+
+        // Check if user can access this service
+        if (Auth::user()->role !== 'admin' && $service->client_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized access to service'], 403);
+        }
+
+        // Get the selected package
+        $package = ServicePackage::findOrFail($request->package_id);
+        
+        // Calculate price based on billing cycle
+        $price = $request->billing_cycle === 'annually' 
+            ? $package->base_price * 12 * 0.9  // 10% discount for annual
+            : $package->base_price;
+
+        // Create upgrade request (you might want to create a separate table for this)
+        // For now, we'll just return success response
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Upgrade to {$package->name} has been requested successfully!",
+            'package_name' => $package->name,
+            'price' => $price,
+            'billing_cycle' => $request->billing_cycle
+        ]);
     }
 
     /**

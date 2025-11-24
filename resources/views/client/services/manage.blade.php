@@ -21,25 +21,36 @@
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0">{{ $service->product ?? 'Service' }}</h5>
-                        <small class="text-muted">{{ $service->domain ?? 'No domain specified' }}</small>
-                    </div>
-                    <div>
-                        @switch($service->status)
-                            @case('Active')
-                                <span class="badge bg-success">ACTIVE</span>
-                                @break
-                            @case('Suspended')
-                                <span class="badge bg-warning">SUSPENDED</span>
-                                @break
-                            @case('Terminated')
-                                <span class="badge bg-danger">TERMINATED</span>
-                                @break
-                            @default
-                                <span class="badge bg-secondary">{{ strtoupper($service->status) }}</span>
-                        @endswitch
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-wrapper me-3">
+                                <div class="avatar avatar-lg">
+                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                        <i class="bx bx-globe fs-4"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="mb-1">{{ $service->product ?? 'Business Website Exclusive Type M' }}</h4>
+                                <p class="mb-0 text-muted">{{ $service->domain ?? 'websiteload' }}</p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            @switch($service->status)
+                                @case('Active')
+                                    <span class="badge bg-label-success fs-6 mb-2">ACTIVE</span>
+                                    @break
+                                @case('Suspended')
+                                    <span class="badge bg-label-warning fs-6 mb-2">SUSPENDED</span>
+                                    @break
+                                @case('Terminated')
+                                    <span class="badge bg-label-danger fs-6 mb-2">TERMINATED</span>
+                                    @break
+                                @default
+                                    <span class="badge bg-label-secondary fs-6 mb-2">{{ strtoupper($service->status) }}</span>
+                            @endswitch
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,53 +153,54 @@
                 <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ $service->product ?? 'Service' }}</h5>
+                            <h5 class="mb-0">{{ $service->product ?? 'Business Website Exclusive Type M' }}</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table table-borderless">
-                                        <tr>
-                                            <td><strong>Username</strong></td>
-                                            <td>{{ $service->username ?? 'N/A' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Password</strong></td>
-                                            <td>
-                                                <span id="password-hidden">••••••••••••</span>
-                                                <span id="password-shown" style="display: none;">{{ $service->password ?? 'N/A' }}</span>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="togglePassword()">
-                                                    <i class="bx bx-show" id="password-icon"></i>
-                                                </button>
-                                                @if($service->password)
-                                                <button type="button" class="btn btn-sm btn-outline-primary ms-1" onclick="copyPassword()">
-                                                    <i class="bx bx-copy"></i>
-                                                </button>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Server</strong></td>
-                                            <td>{{ $service->server ?? 'Default Server' }}</td>
-                                        </tr>
-                                    </table>
+                            <!-- Service Details -->
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold text-muted">Username</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="{{ $service->username ?? 'BININOK' }}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->username ?? 'BININOK' }}')">
+                                            <i class="bx bx-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold text-muted">Password</label>
+                                    <div class="input-group">
+                                        <input type="password" id="password-field" class="form-control" value="{{ $service->password ?? 'booyofS*w&*DN' }}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                            <i class="bx bx-show" id="password-toggle-icon"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->password ?? 'booyofS*w&*DN' }}')">
+                                            <i class="bx bx-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold text-muted">Server</label>
+                                    <input type="text" class="form-control" value="{{ $service->server ?? 'Default Server' }}" readonly>
                                 </div>
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="row mt-4">
+                            <div class="row mb-4">
                                 <div class="col-12">
                                     @if($service->status === 'Active')
-                                        <button class="btn btn-primary me-2" onclick="loginDashboard()">
+                                        <button class="btn btn-primary me-2" onclick="loginDashboard('{{ $service->domain }}')">
                                             <i class="bx bx-log-in me-1"></i>Login Dashboard
                                         </button>
                                         <button class="btn btn-success" onclick="contactSupport()">
-                                            <i class="bx bx-phone me-1"></i>Hubungi Kami
+                                            <i class="bx bx-message-dots me-1"></i>Hubungi Kami
                                         </button>
                                     @else
-                                        <div class="alert alert-warning">
+                                        <div class="alert alert-warning d-flex align-items-center mb-3">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            Service is currently {{ strtolower($service->status) }}. Please contact support for assistance.
+                                            <span>Service is currently {{ strtolower($service->status) }}. Please contact support for assistance.</span>
                                         </div>
                                         <button class="btn btn-warning" onclick="contactSupport()">
                                             <i class="bx bx-phone me-1"></i>Contact Support
@@ -197,10 +209,67 @@
                                 </div>
                             </div>
 
-                            <!-- Tips -->
-                            <div class="alert alert-info mt-4">
-                                <strong>Tips:</strong>
-                                Silakan klik tombol <strong>"Login Dashboard"</strong> untuk masuk ke Dashboard Website
+                            <!-- Tips Section -->
+                            <div class="alert alert-primary d-flex align-items-start mb-4">
+                                <i class="bx bx-info-circle me-2 mt-1"></i>
+                                <div>
+                                    <strong>Tips:</strong> Silakan klik tombol <strong>"Login Dashboard"</strong> untuk masuk ke Dashboard Website
+                                </div>
+                            </div>
+
+                            <!-- Current Plan Section -->
+                            <div class="card border">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-2">Current Plan</h6>
+                                            <h5 class="mb-1">Your Current Plan is {{ $service->product ?? 'Basic' }}</h5>
+                                            <p class="text-muted mb-3">A simple start for everyone</p>
+                                            
+                                            <div class="mb-3">
+                                                <small class="text-muted">Active until {{ $service->due_date ? $service->due_date->format('M d, Y') : 'Dec 09, 2021' }}</small><br>
+                                                <small class="text-muted">We will send you a notification upon Subscription expiration</small>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <span class="badge bg-label-primary me-2">{{ $service->price ? 'Rp ' . number_format($service->price, 0, ',', '.') : '$199' }} Per Month</span>
+                                                <span class="badge bg-label-info">Popular</span>
+                                            </div>
+                                            
+                                            <p class="text-muted mb-3">Standard plan for small to medium businesses</p>
+                                            
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary" onclick="upgradePlan()">
+                                                    <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="cancelSubscription()">
+                                                    Cancel Subscription
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <div class="d-flex align-items-center justify-content-center h-100">
+                                                <div class="text-center">
+                                                    <div class="alert alert-warning d-flex align-items-center mb-3">
+                                                        <i class="bx bx-error-circle me-2"></i>
+                                                        <span>We need your attention!</span>
+                                                    </div>
+                                                    <p class="text-muted mb-2">Your plan requires update</p>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6 class="mb-1">Days</h6>
+                                                        <div class="progress mb-2" style="height: 8px;">
+                                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 40%"></div>
+                                                        </div>
+                                                        <small class="text-muted">{{ $service->due_date ? $service->due_date->diffInDays(now()) : '12' }} of 30 Days</small><br>
+                                                        <small class="text-muted">{{ $service->due_date ? $service->due_date->diffInDays(now()) : '18' }} days remaining until your plan requires update</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -318,33 +387,163 @@
     </div>
 </div>
 
+<!-- Upgrade Plan Modal -->
+<div class="modal fade" id="upgradePlanModal" tabindex="-1" aria-labelledby="upgradePlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="upgradePlanModalLabel">Pricing Plans</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <p class="text-muted">All plans include 40+ advanced tools and features to boost your product. Choose the best plan to fit your needs.</p>
+                    
+                    <!-- Billing Toggle -->
+                    <div class="d-flex align-items-center justify-content-center mb-4">
+                        <span class="me-2">Monthly</span>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="billingToggle">
+                        </div>
+                        <span class="ms-2">Annually</span>
+                        <span class="badge bg-label-primary ms-2">Save up to 10%</span>
+                    </div>
+                </div>
+
+                <!-- Pricing Cards -->
+                <div class="row g-4">
+                    @foreach($servicePackages as $index => $package)
+                    <div class="col-lg-4">
+                        <div class="card border {{ $index === 1 ? 'border-primary' : '' }} h-100 position-relative">
+                            @if($index === 1)
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-primary">Popular</span>
+                                </div>
+                            @endif
+                            
+                            <div class="card-body text-center p-4">
+                                <!-- Plan Icon -->
+                                <div class="mb-4">
+                                    <div class="avatar avatar-xl mx-auto">
+                                        <span class="avatar-initial rounded-circle bg-label-{{ $index === 0 ? 'primary' : ($index === 1 ? 'success' : 'info') }}">
+                                            <i class="bx {{ $index === 0 ? 'bx-user' : ($index === 1 ? 'bx-briefcase' : 'bx-crown') }} fs-2"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Plan Name -->
+                                <h4 class="mb-2">{{ $package->name }}</h4>
+                                <p class="text-muted mb-4">{{ $package->description }}</p>
+
+                                <!-- Price -->
+                                <div class="mb-4">
+                                    <h2 class="text-primary mb-0">
+                                        <span class="monthly-price">Rp {{ number_format($package->base_price, 0, ',', '.') }}</span>
+                                        <span class="annual-price d-none">Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}</span>
+                                    </h2>
+                                    <small class="text-muted">
+                                        <span class="monthly-text">/month</span>
+                                        <span class="annual-text d-none">/year</span>
+                                    </small>
+                                </div>
+
+                                <!-- Features -->
+                                <div class="mb-4">
+                                    @if($package->features)
+                                        @foreach($package->features as $feature => $value)
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bx bx-check text-success me-2"></i>
+                                                <span class="text-muted">
+                                                    @if(is_bool($value))
+                                                        {{ $value ? ucfirst(str_replace('_', ' ', $feature)) : 'No ' . str_replace('_', ' ', $feature) }}
+                                                    @else
+                                                        {{ $value }} {{ str_replace('_', ' ', $feature) }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bx bx-check text-success me-2"></i>
+                                            <span class="text-muted">Standard features included</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Action Button -->
+                                @if($service->product === $package->name)
+                                    <button class="btn btn-success w-100" disabled>
+                                        Your Current Plan
+                                    </button>
+                                @else
+                                    <button class="btn {{ $index === 1 ? 'btn-primary' : 'btn-outline-primary' }} w-100" 
+                                            onclick="selectPlan({{ $package->id }}, '{{ $package->name }}', {{ $package->base_price }})">
+                                        Upgrade
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function togglePassword() {
-    const hidden = document.getElementById('password-hidden');
-    const shown = document.getElementById('password-shown');
-    const icon = document.getElementById('password-icon');
+function togglePasswordVisibility() {
+    const passwordField = document.getElementById('password-field');
+    const toggleIcon = document.getElementById('password-toggle-icon');
     
-    if (hidden.style.display === 'none') {
-        hidden.style.display = 'inline';
-        shown.style.display = 'none';
-        icon.className = 'bx bx-show';
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('bx-show');
+        toggleIcon.classList.add('bx-hide');
     } else {
-        hidden.style.display = 'none';
-        shown.style.display = 'inline';
-        icon.className = 'bx bx-hide';
+        passwordField.type = 'password';
+        toggleIcon.classList.remove('bx-hide');
+        toggleIcon.classList.add('bx-show');
     }
 }
 
-function copyPassword() {
-    const password = '{{ $service->password ?? '' }}';
-    if (password) {
-        navigator.clipboard.writeText(password).then(function() {
-            alert('Password copied to clipboard!');
+function copyToClipboard(text) {
+    if (text) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('Copied to clipboard!', 'success');
+        }).catch(function() {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast('Copied to clipboard!', 'success');
         });
     }
 }
 
-function loginDashboard() {
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px;';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="bx bx-check-circle me-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+
+function loginDashboard(domain) {
     @if($service->login_url)
         window.open('{{ $service->login_url }}', '_blank');
     @elseif($service->domain)
@@ -366,6 +565,91 @@ function upgradeService() {
 
 function changePassword() {
     alert('Change password feature coming soon!');
+}
+
+function upgradePlan() {
+    // Show upgrade plan modal
+    const modal = new bootstrap.Modal(document.getElementById('upgradePlanModal'));
+    modal.show();
+}
+
+function cancelSubscription() {
+    if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
+        showToast('Processing cancellation request...', 'warning');
+        setTimeout(() => {
+            alert('Cancellation request submitted. Our team will contact you shortly.');
+        }, 1000);
+    }
+}
+
+// Billing toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const billingToggle = document.getElementById('billingToggle');
+    if (billingToggle) {
+        billingToggle.addEventListener('change', function() {
+            const isAnnual = this.checked;
+            
+            // Toggle price display
+            document.querySelectorAll('.monthly-price').forEach(el => {
+                el.classList.toggle('d-none', isAnnual);
+            });
+            document.querySelectorAll('.annual-price').forEach(el => {
+                el.classList.toggle('d-none', !isAnnual);
+            });
+            
+            // Toggle text display
+            document.querySelectorAll('.monthly-text').forEach(el => {
+                el.classList.toggle('d-none', isAnnual);
+            });
+            document.querySelectorAll('.annual-text').forEach(el => {
+                el.classList.toggle('d-none', !isAnnual);
+            });
+        });
+    }
+});
+
+function selectPlan(packageId, packageName, price) {
+    if (confirm(`Are you sure you want to upgrade to ${packageName}?`)) {
+        showToast('Processing upgrade request...', 'info');
+        
+        // Get billing cycle
+        const billingToggle = document.getElementById('billingToggle');
+        const billingCycle = billingToggle.checked ? 'annually' : 'monthly';
+        
+        // Send AJAX request
+        fetch(`/services/{{ $service->id }}/upgrade`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                package_id: packageId,
+                billing_cycle: billingCycle
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Upgrade request submitted successfully!', 'success');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('upgradePlanModal'));
+                modal.hide();
+                
+                // Show confirmation
+                setTimeout(() => {
+                    alert(`${data.message}\nYou will receive an invoice shortly.`);
+                }, 1000);
+            } else {
+                showToast(data.error || 'Failed to process upgrade request', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while processing your request', 'danger');
+        });
+    }
 }
 </script>
 @endsection

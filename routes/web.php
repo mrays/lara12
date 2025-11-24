@@ -123,6 +123,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    
+    // Service upgrade routes
+    Route::post('/services/{service}/upgrade', [App\Http\Controllers\ServiceManagementController::class, 'requestUpgrade'])->name('services.upgrade');
 });
 
 // Public payment routes (no auth required for callbacks)
