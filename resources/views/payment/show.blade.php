@@ -12,7 +12,7 @@
                     <h5 class="mb-0">
                         <i class="bx bx-receipt me-2"></i>Invoice Payment
                     </h5>
-                    <span class="{{ $invoice->getPaymentStatusBadgeClass() }}">{{ $invoice->status }}</span>
+                    <span class="badge bg-{{ $invoice->status == 'Paid' || $invoice->status == 'Lunas' ? 'success' : ($invoice->status == 'Overdue' ? 'danger' : 'warning') }}">{{ $invoice->status }}</span>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -20,18 +20,18 @@
                             <h6 class="text-muted">Invoice Details</h6>
                             <p class="mb-1"><strong>Invoice Number:</strong> {{ $invoice->number }}</p>
                             <p class="mb-1"><strong>Title:</strong> {{ $invoice->title }}</p>
-                            <p class="mb-1"><strong>Issue Date:</strong> {{ $invoice->issue_date->format('d M Y') }}</p>
-                            <p class="mb-1"><strong>Due Date:</strong> {{ $invoice->due_date->format('d M Y') }}</p>
-                            @if($invoice->isOverdue())
+                            <p class="mb-1"><strong>Issue Date:</strong> {{ $invoice->issue_date ? $invoice->issue_date->format('d M Y') : 'N/A' }}</p>
+                            <p class="mb-1"><strong>Due Date:</strong> {{ $invoice->due_date ? $invoice->due_date->format('d M Y') : 'N/A' }}</p>
+                            @if($invoice->status == 'Overdue')
                                 <p class="mb-1 text-danger">
-                                    <strong>Overdue:</strong> {{ $invoice->getDaysOverdue() }} days
+                                    <strong>Status:</strong> Overdue
                                 </p>
                             @endif
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-muted">Client Information</h6>
-                            <p class="mb-1"><strong>Name:</strong> {{ $invoice->client->name }}</p>
-                            <p class="mb-1"><strong>Email:</strong> {{ $invoice->client->email }}</p>
+                            <p class="mb-1"><strong>Name:</strong> {{ $invoice->client->name ?? 'N/A' }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ $invoice->client->email ?? 'N/A' }}</p>
                             @if($invoice->client->company)
                                 <p class="mb-1"><strong>Company:</strong> {{ $invoice->client->company }}</p>
                             @endif

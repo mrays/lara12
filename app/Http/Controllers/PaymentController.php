@@ -32,6 +32,25 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'This invoice cannot be paid');
         }
 
+        // Load client data using direct query for consistency
+        $invoiceData = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email')
+            ->where('invoices.id', $invoice->id)
+            ->first();
+
+        if (!$invoiceData) {
+            abort(404, 'Invoice not found');
+        }
+
+        // Add client object to invoice
+        $invoice->client = (object) [
+            'name' => $invoiceData->client_name ?? 'N/A',
+            'email' => $invoiceData->client_email ?? 'N/A',
+            'company' => null,
+            'phone' => null,
+        ];
+
         $paymentMethods = $this->duitkuService->getPaymentMethods();
 
         return view('payment.show', compact('invoice', 'paymentMethods'));
