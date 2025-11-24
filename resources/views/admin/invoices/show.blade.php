@@ -268,13 +268,11 @@
                     <div class="mb-3">
                         <label for="edit_status" class="form-label">Status</label>
                         <select class="form-select" id="edit_status" name="status" required>
-                            <option value="Unpaid">Unpaid</option>
+                            <option value="Draft">Draft</option>
+                            <option value="Sent">Sent</option>
                             <option value="Paid">Paid</option>
                             <option value="Overdue">Overdue</option>
                             <option value="Cancelled">Cancelled</option>
-                            <option value="Sedang Dicek">Sedang Dicek</option>
-                            <option value="Lunas">Lunas</option>
-                            <option value="Belum Lunas">Belum Lunas</option>
                         </select>
                     </div>
                 </div>
