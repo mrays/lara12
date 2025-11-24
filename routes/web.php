@@ -69,6 +69,12 @@ Route::middleware(['auth'])->group(function () {
             ->names('admin.invoices');
         Route::post('invoices/{invoice}/send', [App\Http\Controllers\InvoiceController::class, 'send'])->name('admin.invoices.send');
         Route::post('invoices/{invoice}/mark-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
+        
+        // Status update routes
+        Route::put('invoices/{invoice}/update-status', [App\Http\Controllers\AdminDashboardController::class, 'updateInvoiceStatus'])
+            ->name('admin.invoices.update-status');
+        Route::put('services/{service}/update-status', [App\Http\Controllers\AdminDashboardController::class, 'updateServiceStatus'])
+            ->name('admin.services.update-status');
     ///akhir darigrp admin
     });
     // Payment routes

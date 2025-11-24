@@ -1,293 +1,399 @@
-@extends('layouts.sneat-dashboard')
+@extends('layouts.admin')
 
 @section('title', 'Admin Dashboard')
 
-@section('sidebar')
-<!-- Dashboard -->
-<li class="menu-item active">
-    <a href="{{ route('admin.dashboard') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-home-circle"></i>
-        <div data-i18n="Analytics">Dashboard</div>
-    </a>
-</li>
-
-<!-- Clients -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-user"></i>
-        <div data-i18n="Layouts">Clients</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item">
-            <a href="{{ route('admin.clients.index') }}" class="menu-link">
-                <div data-i18n="Without menu">All Clients</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.clients.create') }}" class="menu-link">
-                <div data-i18n="Without navbar">Add Client</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-<!-- Services -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-package"></i>
-        <div data-i18n="Account Settings">Services</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item">
-            <a href="{{ route('admin.services.index') }}" class="menu-link">
-                <div data-i18n="Account">All Services</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.services.create') }}" class="menu-link">
-                <div data-i18n="Notifications">Add Service</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-<!-- Invoices -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-receipt"></i>
-        <div data-i18n="Misc">Invoices</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item">
-            <a href="{{ route('admin.invoices.index') }}" class="menu-link">
-                <div data-i18n="Error">All Invoices</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('admin.invoices.create') }}" class="menu-link">
-                <div data-i18n="Under Maintenance">Create Invoice</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-<!-- Reports -->
-<li class="menu-item">
-    <a href="#" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-bar-chart"></i>
-        <div data-i18n="Support">Reports</div>
-    </a>
-</li>
-@endsection
-
 @section('content')
-<div class="row">
-    <div class="col-lg-8 mb-4 order-0">
-        <div class="card">
-            <div class="d-flex align-items-end row">
-                <div class="col-sm-7">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">Admin Dashboard 🎯</h5>
-                        <p class="mb-4">
-                            You have <span class="fw-bold">{{ $stats['active_services'] }}</span> active services and 
-                            <span class="fw-bold">{{ $stats['invoice_unpaid'] }}</span> unpaid invoices to manage.
-                        </p>
-                        <a href="{{ route('admin.services.index') }}" class="btn btn-sm btn-outline-primary">Manage Services</a>
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar flex-shrink-0">
+                            <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/chart-success.png') }}" alt="Total Clients" class="rounded">
+                        </div>
                     </div>
+                    <span class="fw-semibold d-block mb-1">Total Clients</span>
+                    <h3 class="card-title mb-2">{{ $stats['total_clients'] }}</h3>
+                    <small class="text-success fw-semibold">
+                        <i class="bx bx-user"></i> Registered
+                    </small>
                 </div>
-                <div class="col-sm-5 text-center text-sm-left">
-                    <div class="card-body pb-0 px-0 px-md-4">
-                        <img src="{{ asset('vendor/sneat/assets/img/illustrations/man-with-laptop-light.png') }}" height="140" alt="View Badge User" data-app-dark-img="illustrations/man-with-laptop-dark.png" data-app-light-img="illustrations/man-with-laptop-light.png" />
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar flex-shrink-0">
+                            <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/wallet-info.png') }}" alt="Total Revenue" class="rounded">
+                        </div>
                     </div>
+                    <span class="fw-semibold d-block mb-1">Total Revenue</span>
+                    <h3 class="card-title mb-2">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</h3>
+                    <small class="text-success fw-semibold">
+                        <i class="bx bx-up-arrow-alt"></i> Paid Invoices
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar flex-shrink-0">
+                            <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/paypal.png') }}" alt="Pending Revenue" class="rounded">
+                        </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Pending Revenue</span>
+                    <h3 class="card-title mb-2">Rp {{ number_format($stats['pending_revenue'], 0, ',', '.') }}</h3>
+                    <small class="text-warning fw-semibold">
+                        <i class="bx bx-time"></i> Unpaid Invoices
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar flex-shrink-0">
+                            <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/cc-primary.png') }}" alt="Active Services" class="rounded">
+                        </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Active Services</span>
+                    <h3 class="card-title mb-2">{{ $stats['active_services'] }}</h3>
+                    <small class="text-success fw-semibold">
+                        <i class="bx bx-check-circle"></i> Running
+                    </small>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-4 col-md-4 order-1">
-        <div class="row">
-            <div class="col-lg-6 col-md-12 col-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                                <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/chart-success.png') }}" alt="chart success" class="rounded" />
-                            </div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Active Services</span>
-                        <h3 class="card-title mb-2">{{ $stats['active_services'] ?? 0 }}</h3>
-                        <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Running</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-12 col-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                                <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/wallet-info.png') }}" alt="Credit Card" class="rounded" />
-                            </div>
-                        </div>
-                        <span>Unpaid Invoices</span>
-                        <h3 class="card-title text-nowrap mb-1">{{ $stats['invoice_unpaid'] ?? 0 }}</h3>
-                        <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> Pending</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <!-- Recent Invoices -->
-    <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-        <div class="card h-100">
-            <div class="card-header d-flex align-items-center justify-content-between pb-0">
-                <div class="card-title mb-0">
-                    <h5 class="m-0 me-2">Recent Invoices</h5>
-                    <small class="text-muted">{{ $invoices->count() }} Total</small>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex flex-column align-items-center gap-1">
-                        <h2 class="mb-2">{{ $stats['invoice_unpaid'] ?? 0 }}</h2>
-                        <span>Unpaid</span>
+    <!-- All Invoices Management -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bx bx-receipt me-2"></i>All Invoices Management
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" style="width: 150px;" id="filterInvoiceStatus">
+                            <option value="">All Status</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Overdue">Overdue</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
                     </div>
                 </div>
-                <ul class="p-0 m-0">
-                    @forelse($invoices as $invoice)
-                    <li class="d-flex mb-4 pb-1">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-{{ $invoice->status == 'Paid' ? 'success' : 'warning' }}">
-                                <i class="bx bx-receipt"></i>
-                            </span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <h6 class="mb-0">{{ $invoice->number }}</h6>
-                                <small class="text-muted">{{ $invoice->due_date }}</small>
-                            </div>
-                            <div class="user-progress">
-                                <small class="fw-semibold">${{ number_format($invoice->amount, 2) }}</small>
-                            </div>
-                        </div>
-                    </li>
-                    @empty
-                    <li class="text-center">
-                        <small class="text-muted">No invoices found</small>
-                    </li>
-                    @endforelse
-                </ul>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Invoice</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($invoices as $invoice)
+                                <tr>
+                                    <td><span class="fw-bold text-primary">#{{ $invoice->id }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-3">
+                                                <img src="{{ asset('vendor/sneat/assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle">
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ $invoice->client_name ?? 'N/A' }}</h6>
+                                                <small class="text-muted">{{ $invoice->client_email ?? 'N/A' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">{{ $invoice->title ?? 'Invoice #' . $invoice->id }}</h6>
+                                            <small class="text-muted">{{ $invoice->description ?? 'Service Invoice' }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') : 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        @switch($invoice->status)
+                                            @case('Paid')
+                                                <span class="badge bg-success">Paid</span>
+                                                @break
+                                            @case('Unpaid')
+                                                <span class="badge bg-warning">Unpaid</span>
+                                                @break
+                                            @case('Overdue')
+                                                <span class="badge bg-danger">Overdue</span>
+                                                @break
+                                            @case('Cancelled')
+                                                <span class="badge bg-secondary">Cancelled</span>
+                                                @break
+                                            @default
+                                                <span class="badge bg-warning">Unpaid</span>
+                                        @endswitch
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
+                                                    <i class="bx bx-check me-1 text-success"></i> Mark as Paid
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Unpaid')">
+                                                    <i class="bx bx-time me-1 text-warning"></i> Mark as Unpaid
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Overdue')">
+                                                    <i class="bx bx-x me-1 text-danger"></i> Mark as Overdue
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Cancelled')">
+                                                    <i class="bx bx-block me-1 text-secondary"></i> Cancel Invoice
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No invoices" width="150">
+                                        <p class="mt-3 text-muted">No invoices found</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    @if($invoices->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $invoices->appends(request()->query())->links() }}
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- All Services -->
-    <div class="col-md-6 col-lg-8 order-1 mb-4">
-        <div class="card">
-            <h5 class="card-header m-0 me-2 pb-3">All Services Management</h5>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-borderless">
-                        <thead>
-                            <tr>
-                                <th>Client & Service</th>
-                                <th>Price</th>
-                                <th>Due Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            @forelse($services->take(5) as $service)
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm me-3">
-                                            <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/cc-primary.png') }}" alt="Service" class="rounded" />
+
+    <!-- All Services Management -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bx bx-package me-2"></i>All Services Management
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" style="width: 150px;" id="filterServiceStatus">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Creating">Creating</option>
+                            <option value="Terminated">Terminated</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th>Domain</th>
+                                    <th>Price</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($services as $service)
+                                <tr>
+                                    <td><span class="fw-bold text-primary">#{{ $service->id }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-3">
+                                                <img src="{{ asset('vendor/sneat/assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle">
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ $service->client_name ?? 'N/A' }}</h6>
+                                                <small class="text-muted">{{ $service->client_email ?? 'N/A' }}</small>
+                                            </div>
                                         </div>
+                                    </td>
+                                    <td>
                                         <div>
-                                            <h6 class="mb-0">{{ $service->product }}</h6>
-                                            <small class="text-muted">{{ $service->client->name ?? 'N/A' }} - {{ $service->domain }}</small>
+                                            <h6 class="mb-0">{{ $service->name ?? $service->product ?? 'Service' }}</h6>
+                                            <small class="text-muted">{{ $service->billing_cycle ?? 'Monthly' }}</small>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-semibold">${{ number_format($service->price, 2) }}</span>
-                                    <br>
-                                    <small class="text-muted">{{ $service->billing_cycle }}</small>
-                                </td>
-                                <td>{{ $service->due_date }}</td>
-                                <td>
-                                    <span class="badge bg-label-{{ $service->status == 'Active' ? 'success' : 'warning' }} me-1">{{ $service->status }}</span>
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                            <i class="bx bx-dots-vertical-rounded"></i>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('admin.services.edit', $service->id) }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
-                                            <a class="dropdown-item" href="#"><i class="bx bx-receipt me-1"></i> Create Invoice</a>
+                                    </td>
+                                    <td>
+                                        <span class="text-primary">{{ $service->domain ?? 'N/A' }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">Rp {{ number_format($service->price ?? 0, 0, ',', '.') }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ $service->due_date ? \Carbon\Carbon::parse($service->due_date)->format('M d, Y') : 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        @switch($service->status)
+                                            @case('Active')
+                                                <span class="badge bg-success">Active</span>
+                                                @break
+                                            @case('Pending')
+                                                <span class="badge bg-warning">Pending</span>
+                                                @break
+                                            @case('Cancelled')
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                @break
+                                            @case('Suspended')
+                                                <span class="badge bg-secondary">Suspended</span>
+                                                @break
+                                            @case('Creating')
+                                                <span class="badge bg-info">Creating</span>
+                                                @break
+                                            @case('Terminated')
+                                                <span class="badge bg-dark">Terminated</span>
+                                                @break
+                                            @default
+                                                <span class="badge bg-warning">Pending</span>
+                                        @endswitch
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Active')">
+                                                    <i class="bx bx-check me-1 text-success"></i> Set Active
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Pending')">
+                                                    <i class="bx bx-time me-1 text-warning"></i> Set Pending
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Creating')">
+                                                    <i class="bx bx-cog me-1 text-info"></i> Creating
+                                                </button>
+                                                <div class="dropdown-divider"></div>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Suspended')">
+                                                    <i class="bx bx-pause me-1 text-secondary"></i> Suspend
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Cancelled')">
+                                                    <i class="bx bx-x me-1 text-danger"></i> Cancel
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateServiceStatus({{ $service->id }}, 'Terminated')">
+                                                    <i class="bx bx-block me-1 text-dark"></i> Terminate
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center">
-                                    <div class="py-4">
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
                                         <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No services" width="150">
                                         <p class="mt-3 text-muted">No services found</p>
-                                        <a href="{{ route('admin.services.create') }}" class="btn btn-primary">Add Service</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    @if($services->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $services->appends(request()->query())->links() }}
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title m-0">Admin Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.clients.create') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-user-plus fs-1 mb-2"></i>
-                            <span>Add New Client</span>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.services.create') }}" class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-package fs-1 mb-2"></i>
-                            <span>Add Service</span>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="{{ route('admin.invoices.create') }}" class="btn btn-outline-info d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-receipt fs-1 mb-2"></i>
-                            <span>Create Invoice</span>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 flex-column">
-                            <i class="bx bx-bar-chart fs-1 mb-2"></i>
-                            <span>View Reports</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+// Update invoice status
+function updateInvoiceStatus(invoiceId, status) {
+    if (confirm(`Are you sure you want to mark this invoice as ${status}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/invoices/${invoiceId}/update-status`;
+        form.innerHTML = `
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="status" value="${status}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Update service status
+function updateServiceStatus(serviceId, status) {
+    if (confirm(`Are you sure you want to set this service status to ${status}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/services/${serviceId}/update-status`;
+        form.innerHTML = `
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="status" value="${status}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Filter functionality
+document.getElementById('filterInvoiceStatus').addEventListener('change', function() {
+    const status = this.value;
+    const rows = document.querySelectorAll('#invoicesTable tbody tr');
+    
+    rows.forEach(row => {
+        if (status === '' || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('filterServiceStatus').addEventListener('change', function() {
+    const status = this.value;
+    const rows = document.querySelectorAll('#servicesTable tbody tr');
+    
+    rows.forEach(row => {
+        if (status === '' || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
 @endsection

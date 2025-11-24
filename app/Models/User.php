@@ -29,21 +29,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Get the services for the user (client).
-     */
-    public function services()
-    {
-        return $this->hasMany(Service::class, 'client_id');
-    }
-
-    /**
-     * Get the invoices for the user (client).
-     */
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class, 'client_id');
-    }
+    // Relasi services dan invoices dihapus karena tidak kompatibel dengan server
+    // Gunakan query langsung di controller untuk menghindari dependency issues
 
     /**
      * Check if user is admin
