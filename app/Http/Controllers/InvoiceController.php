@@ -12,53 +12,17 @@ class InvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Invoice::with(['client', 'service']);
+        // Use direct DB query to avoid relationship issues
+        $invoices = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email')
+            ->when($request->filled('status'), function($query) use ($request) {
+                return $query->where('invoices.status', $request->status);
+            })
+            ->orderBy('invoices.created_at', 'desc')
+            ->paginate(15);
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by client
-        if ($request->filled('client_id')) {
-            $query->where('client_id', $request->client_id);
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->where('issue_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('issue_date', '<=', $request->date_to);
-        }
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('number', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%")
-                  ->orWhereHas('client', function($clientQuery) use ($search) {
-                      $clientQuery->where('name', 'like', "%{$search}%")
-                                  ->orWhere('email', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        $invoices = $query->orderBy('created_at', 'desc')->paginate(15);
-        $clients = Client::active()->orderBy('name')->get();
-
-        $stats = [
-            'total' => Invoice::count(),
-            'paid' => Invoice::paid()->count(),
-            'unpaid' => Invoice::unpaid()->count(),
-            'overdue' => Invoice::overdue()->count(),
-            'total_amount' => Invoice::sum('total_amount'),
-            'paid_amount' => Invoice::paid()->sum('total_amount'),
-            'unpaid_amount' => Invoice::unpaid()->sum('total_amount'),
-        ];
-
-        return view('admin.invoices.index', compact('invoices', 'clients', 'stats'));
+        return view('admin.invoices.index', compact('invoices'));
     }
 
     public function show(Invoice $invoice)
@@ -284,5 +248,54 @@ class InvoiceController extends Controller
 
         $invoice->load(['client', 'service', 'items']);
         return view('client.invoices.show', compact('invoice'));
+    }
+
+    /**
+     * Update invoice details
+     */
+    public function update(Request $request, $invoiceId)
+    {
+        $request->validate([
+            'due_date' => 'required|date',
+            'invoice_no' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas'
+        ]);
+
+        \DB::table('invoices')
+            ->where('id', $invoiceId)
+            ->update([
+                'due_date' => $request->due_date,
+                'invoice_no' => $request->invoice_no,
+                'total_amount' => $request->amount,
+                'amount' => $request->amount, // Update both fields for compatibility
+                'status' => $request->status,
+                'paid_at' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('admin.invoices.index')
+            ->with('success', 'Invoice updated successfully');
+    }
+
+    /**
+     * Update invoice status only
+     */
+    public function updateStatus(Request $request, $invoiceId)
+    {
+        $request->validate([
+            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas'
+        ]);
+
+        \DB::table('invoices')
+            ->where('id', $invoiceId)
+            ->update([
+                'status' => $request->status,
+                'paid_at' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('admin.invoices.index')
+            ->with('success', 'Invoice status updated successfully');
     }
 }

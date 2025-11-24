@@ -75,6 +75,12 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.invoices.update-status');
         Route::put('services/{service}/update-status', [App\Http\Controllers\AdminDashboardController::class, 'updateServiceStatus'])
             ->name('admin.services.update-status');
+            
+        // Invoice edit routes
+        Route::put('invoices/{invoice}', [App\Http\Controllers\InvoiceController::class, 'update'])
+            ->name('admin.invoices.update');
+        Route::put('invoices/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])
+            ->name('admin.invoices.status-update');
     ///akhir darigrp admin
     });
     // Payment routes

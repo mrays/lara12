@@ -47,14 +47,14 @@ class AdminDashboardController extends Controller
     public function updateInvoiceStatus(Request $request, $invoiceId)
     {
         $request->validate([
-            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled'
+            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas'
         ]);
 
         \DB::table('invoices')
             ->where('id', $invoiceId)
             ->update([
                 'status' => $request->status,
-                'paid_at' => $request->status === 'Paid' ? now() : null,
+                'paid_at' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
 

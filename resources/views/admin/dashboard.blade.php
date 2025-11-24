@@ -87,6 +87,9 @@
                             <option value="Unpaid">Unpaid</option>
                             <option value="Overdue">Overdue</option>
                             <option value="Cancelled">Cancelled</option>
+                            <option value="Sedang Dicek">Sedang Dicek</option>
+                            <option value="Lunas">Lunas</option>
+                            <option value="Belum Lunas">Belum Lunas</option>
                         </select>
                     </div>
                 </div>
@@ -145,6 +148,15 @@
                                             @case('Cancelled')
                                                 <span class="badge bg-secondary">Cancelled</span>
                                                 @break
+                                            @case('Sedang Dicek')
+                                                <span class="badge bg-info">Sedang Dicek</span>
+                                                @break
+                                            @case('Lunas')
+                                                <span class="badge bg-success">Lunas</span>
+                                                @break
+                                            @case('Belum Lunas')
+                                                <span class="badge bg-warning">Belum Lunas</span>
+                                                @break
                                             @default
                                                 <span class="badge bg-warning">Unpaid</span>
                                         @endswitch
@@ -158,11 +170,21 @@
                                                 <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
                                                     <i class="bx bx-check me-1 text-success"></i> Mark as Paid
                                                 </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Lunas')">
+                                                    <i class="bx bx-check me-1 text-success"></i> Mark as Lunas
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sedang Dicek')">
+                                                    <i class="bx bx-time me-1 text-info"></i> Sedang Dicek
+                                                </button>
+                                                <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Belum Lunas')">
+                                                    <i class="bx bx-x me-1 text-warning"></i> Belum Lunas
+                                                </button>
+                                                <div class="dropdown-divider"></div>
                                                 <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Unpaid')">
                                                     <i class="bx bx-time me-1 text-warning"></i> Mark as Unpaid
                                                 </button>
                                                 <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Overdue')">
-                                                    <i class="bx bx-x me-1 text-danger"></i> Mark as Overdue
+                                                    <i class="bx bx-clock me-1 text-danger"></i> Mark as Overdue
                                                 </button>
                                                 <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Cancelled')">
                                                     <i class="bx bx-block me-1 text-secondary"></i> Cancel Invoice
