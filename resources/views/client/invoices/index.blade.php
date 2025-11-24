@@ -2,63 +2,6 @@
 
 @section('title', 'My Invoices')
 
-@section('sidebar')
-<!-- Dashboard -->
-<li class="menu-item">
-    <a href="{{ route('client.dashboard') }}" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-home-circle"></i>
-        <div data-i18n="Analytics">Dashboard</div>
-    </a>
-</li>
-
-<!-- Services -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-package"></i>
-        <div data-i18n="Layouts">My Services</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item">
-            <a href="#" class="menu-link">
-                <div data-i18n="Without menu">Active Services</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#" class="menu-link">
-                <div data-i18n="Without navbar">Service History</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-<!-- Invoices -->
-<li class="menu-item active">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-receipt"></i>
-        <div data-i18n="Account Settings">Invoices</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item active">
-            <a href="{{ route('client.invoices.index') }}" class="menu-link">
-                <div data-i18n="Account">All Invoices</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="{{ route('client.invoices.index', ['status' => 'unpaid']) }}" class="menu-link">
-                <div data-i18n="Notifications">Unpaid Invoices</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-<!-- Support -->
-<li class="menu-item">
-    <a href="#" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-support"></i>
-        <div data-i18n="Support">Support</div>
-    </a>
-</li>
-@endsection
 
 @section('content')
 <!-- Invoice Statistics -->

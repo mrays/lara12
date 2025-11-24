@@ -30,6 +30,71 @@
     <link rel="stylesheet" href="{{ asset('vendor/sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
     @stack('styles')
+    
+    <!-- Custom Mobile Styles -->
+    <style>
+        /* Mobile Responsive Improvements */
+        @media (max-width: 767.98px) {
+            .app-brand-text {
+                font-size: 1.1rem !important;
+            }
+            
+            .menu-inner .menu-item .menu-link {
+                padding: 0.625rem 1rem !important;
+                font-size: 0.9rem !important;
+            }
+            
+            .menu-icon {
+                font-size: 1.1rem !important;
+                margin-right: 0.75rem !important;
+            }
+            
+            .badge {
+                font-size: 0.7rem !important;
+                min-width: 1.2rem !important;
+                height: 1.2rem !important;
+            }
+            
+            .layout-menu {
+                width: 260px !important;
+            }
+            
+            .layout-menu.menu-collapsed {
+                width: 78px !important;
+            }
+        }
+        
+        /* Sidebar Toggle Fix */
+        .layout-menu-toggle {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .layout-menu-toggle:hover {
+            background-color: rgba(67, 89, 113, 0.1);
+            border-radius: 6px;
+        }
+        
+        /* Better badge positioning */
+        .menu-link .badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .menu-link {
+            position: relative;
+            padding-right: 3rem !important;
+        }
+        
+        /* Improved mobile menu */
+        @media (max-width: 1199.98px) {
+            .layout-menu-toggle.menu-link-toggle {
+                display: none !important;
+            }
+        }
+    </style>
 
     <!-- Helpers -->
     <script src="{{ asset('vendor/sneat/assets/vendor/js/helpers.js') }}"></script>
@@ -68,7 +133,7 @@
                         <span class="app-brand-text demo menu-text fw-bolder ms-2">Exputra</span>
                     </a>
 
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-toggle-icon d-xl-block align-top">
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link-toggle d-none d-xl-block" onclick="toggleSidebar()">
                         <i class="bx bx-chevron-left bx-sm align-middle"></i>
                     </a>
                 </div>
@@ -84,106 +149,21 @@
                         </a>
                     </li>
 
-                    <!-- My Services -->
-                    <li class="menu-item {{ request()->routeIs('client.services.*') ? 'active open' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <!-- My Services (Direct Link) -->
+                    <li class="menu-item {{ request()->routeIs('client.services.*') ? 'active' : '' }}">
+                        <a href="{{ route('client.services.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-package"></i>
                             <div data-i18n="Services">My Services</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('client.services.index') ? 'active' : '' }}">
-                                <a href="{{ route('client.services.index') }}" class="menu-link">
-                                    <div data-i18n="View Services">View Services</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Active Services (Quick Access) -->
-                    <li class="menu-item {{ request()->routeIs('client.services.active') ? 'active' : '' }}">
-                        <a href="{{ route('client.services.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-check-circle"></i>
-                            <div data-i18n="Active Services">Active Services</div>
-                        </a>
-                    </li>
-
-                    <!-- Service History -->
-                    <li class="menu-item">
-                        <a href="#" class="menu-link" onclick="comingSoon()">
-                            <i class="menu-icon tf-icons bx bx-history"></i>
-                            <div data-i18n="Service History">Service History</div>
-                        </a>
-                    </li>
-
-                    <!-- Invoices -->
-                    <li class="menu-item {{ request()->routeIs('client.invoices.*') ? 'active open' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-receipt"></i>
-                            <div data-i18n="Invoices">Invoices</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('client.invoices.index') ? 'active' : '' }}">
-                                <a href="{{ route('client.invoices.index') }}" class="menu-link">
-                                    <div data-i18n="All Invoices">All Invoices</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Support -->
-                    <li class="menu-item">
-                        <a href="#" class="menu-link" onclick="contactSupport()">
-                            <i class="menu-icon tf-icons bx bx-support"></i>
-                            <div data-i18n="Support">Support</div>
-                        </a>
-                    </li>
-
-                    <!-- Divider -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">LAYANAN</span>
-                    </li>
-
-                    <!-- Website -->
-                    <li class="menu-item">
-                        <a href="{{ route('client.services.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-globe"></i>
-                            <div data-i18n="Website">Website</div>
                             <div class="badge badge-center rounded-pill bg-success ms-auto">{{ \DB::table('services')->where('client_id', Auth::id())->where('status', 'Active')->count() ?? 0 }}</div>
                         </a>
                     </li>
 
-                    <!-- Coming Soon -->
-                    <li class="menu-item">
-                        <a href="#" class="menu-link" onclick="comingSoon()">
-                            <i class="menu-icon tf-icons bx bx-dots-horizontal"></i>
-                            <div data-i18n="Coming Soon">Coming Soon</div>
-                            <div class="badge badge-center rounded-pill bg-secondary ms-auto">0</div>
-                        </a>
-                    </li>
-
-                    <!-- Divider -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">BILLING</span>
-                    </li>
-
-                    <!-- Invoices (Quick Access) -->
-                    <li class="menu-item {{ request()->routeIs('client.invoices.index') ? 'active' : '' }}">
+                    <!-- Invoices (Direct Link) -->
+                    <li class="menu-item {{ request()->routeIs('client.invoices.*') ? 'active' : '' }}">
                         <a href="{{ route('client.invoices.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-receipt"></i>
                             <div data-i18n="Invoices">Invoices</div>
-                        </a>
-                    </li>
-
-                    <!-- Divider -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">SUPPORT</span>
-                    </li>
-
-                    <!-- WhatsApp Support -->
-                    <li class="menu-item">
-                        <a href="#" class="menu-link" onclick="contactSupport()">
-                            <i class="menu-icon tf-icons bx bx-message-dots"></i>
-                            <div data-i18n="WhatsApp Kami">WhatsApp Kami</div>
+                            <div class="badge badge-center rounded-pill bg-info ms-auto">{{ \DB::table('invoices')->where('client_id', Auth::id())->whereIn('status', ['Unpaid', 'Overdue'])->count() ?? 0 }}</div>
                         </a>
                     </li>
                 </ul>
@@ -321,8 +301,33 @@
             window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
         }
 
-        // Initialize tooltips
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const layoutMenu = document.getElementById('layout-menu');
+            const layoutContainer = document.querySelector('.layout-container');
+            
+            if (layoutMenu && layoutContainer) {
+                layoutMenu.classList.toggle('menu-collapsed');
+                layoutContainer.classList.toggle('layout-menu-collapsed');
+                
+                // Save state to localStorage
+                const isCollapsed = layoutMenu.classList.contains('menu-collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
+        }
+
+        // Initialize sidebar state from localStorage
         document.addEventListener('DOMContentLoaded', function() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            const layoutMenu = document.getElementById('layout-menu');
+            const layoutContainer = document.querySelector('.layout-container');
+            
+            if (isCollapsed && layoutMenu && layoutContainer) {
+                layoutMenu.classList.add('menu-collapsed');
+                layoutContainer.classList.add('layout-menu-collapsed');
+            }
+            
+            // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
