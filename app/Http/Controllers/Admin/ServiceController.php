@@ -133,6 +133,9 @@ class ServiceController extends Controller
             'notes' => 'nullable|string'
         ]);
 
+        // First, check if additional columns exist, if not, add them
+        $this->ensureServiceColumnsExist();
+        
         \DB::table('services')
             ->where('id', $serviceId)
             ->update([
@@ -142,6 +145,13 @@ class ServiceController extends Controller
                 'due_date' => $validated['next_due'],
                 'billing_cycle' => $validated['billing_cycle'],
                 'price' => $validated['price'],
+                'username' => $validated['username'],
+                'password' => $validated['password'],
+                'server' => $validated['server'],
+                'login_url' => $validated['login_url'],
+                'description' => $validated['description'],
+                'notes' => $validated['notes'],
+                'setup_fee' => $validated['setup_fee'] ?? 0,
                 'updated_at' => now()
             ]);
 
@@ -153,5 +163,27 @@ class ServiceController extends Controller
     {
         $service->delete();
         return redirect()->route('admin.services.index')->with('success','Service deleted');
+    }
+
+    /**
+     * Ensure service table has all required columns
+     */
+    private function ensureServiceColumnsExist()
+    {
+        try {
+            // Check if columns exist by trying to select them
+            \DB::select('SELECT username, password, server, login_url, description, notes, setup_fee FROM services LIMIT 1');
+        } catch (\Exception $e) {
+            // If columns don't exist, add them
+            \DB::statement('ALTER TABLE services 
+                ADD COLUMN IF NOT EXISTS username VARCHAR(255) NULL,
+                ADD COLUMN IF NOT EXISTS password VARCHAR(255) NULL,
+                ADD COLUMN IF NOT EXISTS server VARCHAR(255) NULL,
+                ADD COLUMN IF NOT EXISTS login_url VARCHAR(500) NULL,
+                ADD COLUMN IF NOT EXISTS description TEXT NULL,
+                ADD COLUMN IF NOT EXISTS notes TEXT NULL,
+                ADD COLUMN IF NOT EXISTS setup_fee DECIMAL(15,2) NULL DEFAULT 0'
+            );
+        }
     }
 }

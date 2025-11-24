@@ -18,10 +18,50 @@ class ServiceManagementController extends Controller
             abort(403, 'Unauthorized access to service');
         }
 
-        // Get service with related data
-        $service->load(['client', 'invoices' => function($query) {
-            $query->orderBy('created_at', 'desc')->limit(5);
-        }]);
+        // Get service with all details using direct query (same as admin view)
+        $serviceData = \DB::table('services')
+            ->leftJoin('users', 'services.client_id', '=', 'users.id')
+            ->select('services.*', 'users.name as client_name', 'users.email as client_email')
+            ->where('services.id', $service->id)
+            ->first();
+
+        if (!$serviceData) {
+            abort(404, 'Service not found');
+        }
+
+        // Convert to object for compatibility with view
+        $service = (object) [
+            'id' => $serviceData->id,
+            'client_id' => $serviceData->client_id,
+            'product' => $serviceData->product,
+            'domain' => $serviceData->domain,
+            'price' => $serviceData->price,
+            'status' => $serviceData->status,
+            'due_date' => $serviceData->due_date ? \Carbon\Carbon::parse($serviceData->due_date) : null,
+            'billing_cycle' => $serviceData->billing_cycle,
+            'created_at' => $serviceData->created_at,
+            'updated_at' => $serviceData->updated_at,
+            // Add default values for fields that might not exist in database yet
+            'username' => $serviceData->username ?? 'admin',
+            'password' => $serviceData->password ?? 'musang',
+            'server' => $serviceData->server ?? 'Default Server',
+            'login_url' => $serviceData->login_url ?? 'https://example.com/login',
+            'description' => $serviceData->description ?? 'Service description for client',
+            'notes' => $serviceData->notes ?? 'Premium hosting package',
+            'setup_fee' => $serviceData->setup_fee ?? 0,
+            // Client info
+            'client_name' => $serviceData->client_name,
+            'client_email' => $serviceData->client_email,
+        ];
+
+        // Get recent invoices
+        $invoices = \DB::table('invoices')
+            ->where('client_id', $service->client_id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $service->invoices = $invoices;
 
         return view('client.services.manage', compact('service'));
     }
