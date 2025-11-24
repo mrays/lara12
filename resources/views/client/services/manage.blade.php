@@ -1,6 +1,6 @@
 @extends('layouts.sneat-dashboard')
 
-@section('title', 'Manage Service - ' . $service->name)
+@section('title', 'Manage Service - ' . ($service->product ?? 'Service'))
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -13,7 +13,7 @@
             <li class="breadcrumb-item">
                 <a href="{{ route('client.services.index') }}">My Services</a>
             </li>
-            <li class="breadcrumb-item active">{{ $service->name }}</li>
+            <li class="breadcrumb-item active">{{ $service->product ?? 'Service' }}</li>
         </ol>
     </nav>
 
@@ -23,7 +23,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-0">{{ $service->name }}</h5>
+                        <h5 class="mb-0">{{ $service->product ?? 'Service' }}</h5>
                         <small class="text-muted">{{ $service->domain ?? 'No domain specified' }}</small>
                     </div>
                     <div>
@@ -142,7 +142,7 @@
                 <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ $service->name }}</h5>
+                            <h5 class="mb-0">{{ $service->product ?? 'Service' }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -219,7 +219,7 @@
                                     <table class="table table-borderless">
                                         <tr>
                                             <td><strong>Service Name:</strong></td>
-                                            <td>{{ $service->name }}</td>
+                                            <td>{{ $service->product ?? 'Service' }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Product:</strong></td>
@@ -356,7 +356,7 @@ function loginDashboard() {
 
 function contactSupport() {
     // WhatsApp link or support form
-    const message = encodeURIComponent('Hello, I need support for my service: {{ $service->name }}');
+    const message = encodeURIComponent('Hello, I need support for my service: {{ $service->product ?? "Service" }}');
     window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
 }
 
