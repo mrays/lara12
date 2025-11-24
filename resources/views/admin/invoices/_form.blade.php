@@ -66,9 +66,11 @@
         <label class="form-label">Status</label>
         <select name="status" class="form-select">
             <option value="Unpaid" {{ (old('status', $invoice->status ?? 'Unpaid')=='Unpaid') ? 'selected':'' }}>Unpaid</option>
+            <option value="Sent" {{ (old('status', $invoice->status ?? '')=='Sent') ? 'selected':'' }}>Sent</option>
             <option value="Paid" {{ (old('status', $invoice->status ?? '')=='Paid') ? 'selected':'' }}>Paid</option>
             <option value="Overdue" {{ (old('status', $invoice->status ?? '')=='Overdue') ? 'selected':'' }}>Overdue</option>
             <option value="Cancelled" {{ (old('status', $invoice->status ?? '')=='Cancelled') ? 'selected':'' }}>Cancelled</option>
+            <option value="Lunas" {{ (old('status', $invoice->status ?? '')=='Lunas') ? 'selected':'' }}>Lunas</option>
         </select>
         @error('status')
             <div class="text-danger small">{{ $message }}</div>

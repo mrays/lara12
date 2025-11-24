@@ -50,7 +50,7 @@ class InvoiceController extends Controller
             'invoice_no' => 'required|string|max:255|unique:invoices,number',
             'due_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Unpaid,Paid,Overdue,Cancelled',
+            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
             'description' => 'nullable|string'
         ]);
 
@@ -65,7 +65,7 @@ class InvoiceController extends Controller
             'status' => $validated['status'],
             'description' => $validated['description'] ?? '',
             'issue_date' => now(),
-            'paid_date' => $validated['status'] === 'Paid' ? now() : null,
+            'paid_date' => in_array($validated['status'], ['Paid', 'Lunas']) ? now() : null,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -209,7 +209,7 @@ class InvoiceController extends Controller
         // Calculate stats using direct queries
         $stats = [
             'total' => \DB::table('invoices')->where('client_id', $user->id)->count(),
-            'paid' => \DB::table('invoices')->where('client_id', $user->id)->where('status', 'Paid')->count(),
+            'paid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Paid', 'Lunas'])->count(),
             'unpaid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Unpaid', 'Overdue'])->count(),
             'overdue' => \DB::table('invoices')->where('client_id', $user->id)->where('status', 'Overdue')->count(),
             'total_amount' => \DB::table('invoices')->where('client_id', $user->id)->sum('total_amount'),
@@ -240,7 +240,7 @@ class InvoiceController extends Controller
             'due_date' => 'required|date',
             'invoice_no' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Unpaid,Paid,Overdue,Cancelled',
+            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
             'description' => 'nullable|string'
         ]);
 
@@ -254,7 +254,7 @@ class InvoiceController extends Controller
                 'total_amount' => $request->amount,
                 'status' => $request->status,
                 'description' => $request->description ?? '',
-                'paid_date' => $request->status === 'Paid' ? now() : null,
+                'paid_date' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
 
@@ -268,14 +268,14 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, $invoiceId)
     {
         $request->validate([
-            'status' => 'required|in:Unpaid,Paid,Overdue,Cancelled'
+            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas'
         ]);
 
         \DB::table('invoices')
             ->where('id', $invoiceId)
             ->update([
                 'status' => $request->status,
-                'paid_date' => $request->status === 'Paid' ? now() : null,
+                'paid_date' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
 
