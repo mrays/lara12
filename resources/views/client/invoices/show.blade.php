@@ -326,7 +326,7 @@ function checkPaymentStatus(invoiceId) {
 
 function downloadPDF() {
     // Generate and download PDF
-    window.open('{{ route("client.invoices.show", $invoice) }}/pdf', '_blank');
+    window.open('{{ route("client.invoices.pdf", $invoice->id) }}', '_blank');
 }
 
 function printInvoice() {
