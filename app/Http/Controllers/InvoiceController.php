@@ -198,13 +198,22 @@ class InvoiceController extends Controller
         $user = auth()->user();
         
         // Use direct DB query for better compatibility
-        $invoices = \DB::table('invoices')
+        $invoicesData = \DB::table('invoices')
             ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
             ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
             ->select('invoices.*', 'users.name as client_name', 'services.product as service_name')
             ->where('invoices.client_id', $user->id)
             ->orderBy('invoices.created_at', 'desc')
             ->paginate(10);
+
+        // Add status_color property to each invoice
+        $invoices = $invoicesData;
+        $invoices->getCollection()->transform(function ($invoice) {
+            $invoice->status_color = $this->getStatusColor($invoice->status);
+            $invoice->formatted_amount = 'Rp ' . number_format($invoice->total_amount, 0, ',', '.');
+            $invoice->due_date_formatted = $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') : 'N/A';
+            return $invoice;
+        });
 
         // Calculate stats using direct queries
         $stats = [
@@ -292,5 +301,37 @@ class InvoiceController extends Controller
 
         return redirect()->route('admin.invoices.index')
             ->with('success', 'Invoice deleted successfully');
+    }
+
+    /**
+     * Get status color for badge display
+     */
+    private function getStatusColor($status)
+    {
+        return match($status) {
+            'Unpaid' => 'warning',
+            'Sent' => 'info', 
+            'Paid' => 'success',
+            'Lunas' => 'success',
+            'Overdue' => 'danger',
+            'Cancelled' => 'secondary',
+            default => 'secondary'
+        };
+    }
+
+    /**
+     * Get status badge class
+     */
+    private function getStatusBadgeClass($status)
+    {
+        return match($status) {
+            'Unpaid' => 'badge bg-warning',
+            'Sent' => 'badge bg-info',
+            'Paid' => 'badge bg-success', 
+            'Lunas' => 'badge bg-success',
+            'Overdue' => 'badge bg-danger',
+            'Cancelled' => 'badge bg-secondary',
+            default => 'badge bg-secondary'
+        };
     }
 }

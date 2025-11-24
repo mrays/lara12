@@ -149,10 +149,12 @@
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
-                    <option value="Draft" {{ request('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="Unpaid" {{ request('status') == 'Unpaid' ? 'selected' : '' }}>Unpaid</option>
                     <option value="Sent" {{ request('status') == 'Sent' ? 'selected' : '' }}>Sent</option>
                     <option value="Paid" {{ request('status') == 'Paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                     <option value="Overdue" {{ request('status') == 'Overdue' ? 'selected' : '' }}>Overdue</option>
+                    <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -222,30 +224,23 @@
                             </div>
                         </td>
                         <td>
-                            @if($invoice->service)
-                                <span class="fw-semibold">{{ $invoice->service->product }}</span>
-                                @if($invoice->service->domain)
-                                    <br><small class="text-muted">{{ $invoice->service->domain }}</small>
-                                @endif
+                            @if($invoice->service_name)
+                                <span class="fw-semibold">{{ $invoice->service_name }}</span>
                             @else
                                 <span class="text-muted">No service linked</span>
                             @endif
                         </td>
                         <td>
-                            <span class="fw-semibold">${{ number_format($invoice->total_amount, 2) }}</span>
+                            <span class="fw-semibold">{{ $invoice->formatted_amount }}</span>
                         </td>
-                        <td>{{ $invoice->issue_date->format('M d, Y') }}</td>
+                        <td>{{ $invoice->issue_date ? \Carbon\Carbon::parse($invoice->issue_date)->format('M d, Y') : 'N/A' }}</td>
                         <td>
-                            <span class="{{ $invoice->is_overdue ? 'text-danger' : '' }}">
-                                {{ $invoice->due_date->format('M d, Y') }}
+                            <span class="{{ $invoice->status == 'Overdue' ? 'text-danger' : '' }}">
+                                {{ $invoice->due_date_formatted }}
                             </span>
-                            @if($invoice->is_overdue && $invoice->status !== 'Paid')
+                            @if($invoice->status == 'Overdue')
                                 <br><small class="text-danger">
                                     <i class="bx bx-error-circle"></i> Overdue
-                                </small>
-                            @elseif($invoice->days_until_due !== null && $invoice->days_until_due <= 7 && $invoice->days_until_due > 0)
-                                <br><small class="text-warning">
-                                    <i class="bx bx-time"></i> Due in {{ $invoice->days_until_due }} days
                                 </small>
                             @endif
                         </td>
@@ -260,16 +255,12 @@
                                     <i class="bx bx-dots-vertical-rounded"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{ route('client.invoices.show', $invoice) }}">
+                                    <a class="dropdown-item" href="{{ route('client.invoices.show', $invoice->id) }}">
                                         <i class="bx bx-show me-1"></i> View Details
                                     </a>
-                                    @if($invoice->canBePaid())
-                                        <a class="dropdown-item text-success" href="{{ route('payment.show', $invoice) }}">
+                                    @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
+                                        <a class="dropdown-item text-success" href="#" onclick="payInvoice({{ $invoice->id }})">
                                             <i class="bx bx-credit-card me-1"></i> Pay Now
-                                        </a>
-                                    @elseif($invoice->hasPendingPayment())
-                                        <a class="dropdown-item text-warning" href="{{ $invoice->getPaymentUrl() }}" target="_blank">
-                                            <i class="bx bx-time me-1"></i> Continue Payment
                                         </a>
                                     @endif
                                     <a class="dropdown-item" href="#" onclick="downloadInvoice({{ $invoice->id }})">
