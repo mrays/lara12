@@ -7,10 +7,14 @@
 <div class="card">
     <div class="card-body">
         <!-- Logo -->
-        <div class="app-brand justify-content-center">
+        <div class="app-brand justify-content-center mb-4">
             <a href="{{ url('/') }}" class="app-brand-link gap-2">
-                @if(has_company_logo())
-                    <img src="{{ company_logo() }}" alt="{{ config('company.logo.alt_text') }}" class="app-brand-logo" style="height: 25px;">
+                @php
+                    $hasLogo = function_exists('has_company_logo') && has_company_logo();
+                    $logoUrl = $hasLogo ? company_logo() : null;
+                @endphp
+                @if($hasLogo && $logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ config('company.logo.alt_text', config('company.name', 'Logo')) }}" class="app-brand-logo" style="height: 25px;">
                 @else
                     <span class="app-brand-logo demo">
                         <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
