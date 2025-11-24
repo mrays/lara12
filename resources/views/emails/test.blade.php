@@ -86,7 +86,8 @@
     </div>
     
     <div class="footer">
-        <p>Email ini dikirim dari aplikasi Laravel Anda</p>
+        <p>Email ini dikirim dari {{ config('company.name') }}</p>
+        <p>{{ config('company.email') }} | {{ config('company.phone') }}</p>
         <p>{{ now()->format('d M Y, H:i:s') }}</p>
     </div>
 </body>

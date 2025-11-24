@@ -30,6 +30,15 @@
 
                 <div class="row">
                     <div class="col-md-6">
+                        <h6 class="text-muted">Bill From:</h6>
+                        <address>
+                            <strong>{{ config('company.name') }}</strong><br>
+                            {{ config('company.address.full') }}<br>
+                            Phone: {{ config('company.phone') }}<br>
+                            Email: {{ config('company.email') }}
+                        </address>
+                    </div>
+                    <div class="col-md-6">
                         <h6 class="text-muted">Bill To:</h6>
                         <address>
                             <strong>{{ $invoice->client->name ?? 'N/A' }}</strong><br>

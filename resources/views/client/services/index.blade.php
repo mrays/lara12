@@ -133,8 +133,8 @@ function loginDashboard(domain) {
 
 function requestNewService() {
     // WhatsApp link for new service request
-    const message = encodeURIComponent('Hello, I would like to request a new service. Please provide me with available options.');
-    window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
+    const message = encodeURIComponent('{{ config('company.support_messages.general_inquiry') }}');
+    window.open(`{{ config('company.whatsapp_url') }}?text=${message}`, '_blank');
 }
 </script>
 @endsection

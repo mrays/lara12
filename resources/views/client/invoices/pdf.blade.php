@@ -143,10 +143,11 @@
     <!-- Invoice Header -->
     <div class="invoice-header">
         <div class="company-info">
-            <h1>EXPUTRA CLOUD</h1>
+            <h1>{{ strtoupper(config('company.name')) }}</h1>
             <p>Cloud Hosting & Web Services</p>
-            <p>Email: info@exputra.cloud</p>
-            <p>Website: https://exputra.cloud</p>
+            <p>Email: {{ config('company.email') }}</p>
+            <p>Phone: {{ config('company.phone') }}</p>
+            <p>Website: {{ config('company.social.website') }}</p>
         </div>
         <div class="invoice-details">
             <h2>INVOICE</h2>

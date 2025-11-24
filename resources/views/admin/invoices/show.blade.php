@@ -36,12 +36,12 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h4 class="text-primary mb-3">
-                                <i class="tf-icons bx bx-building me-2"></i>Exputra Cloud
+                                <i class="tf-icons bx bx-building me-2"></i>{{ config('company.name') }}
                             </h4>
-                            <p class="mb-1">Jl. Teknologi No. 123</p>
-                            <p class="mb-1">Jakarta, Indonesia 12345</p>
-                            <p class="mb-1">Phone: +62 21 1234 5678</p>
-                            <p class="mb-0">Email: info@exputra.cloud</p>
+                            <p class="mb-1">{{ config('company.address.street') ?: 'Jl. Teknologi No. 123' }}</p>
+                            <p class="mb-1">{{ config('company.address.city') ?: 'Jakarta' }}, {{ config('company.address.country') }} {{ config('company.address.postal_code') ?: '12345' }}</p>
+                            <p class="mb-1">Phone: {{ config('company.phone') }}</p>
+                            <p class="mb-0">Email: {{ config('company.email') }}</p>
                         </div>
                         <div class="col-md-6 text-md-end">
                             <h2 class="text-primary mb-3">INVOICE</h2>

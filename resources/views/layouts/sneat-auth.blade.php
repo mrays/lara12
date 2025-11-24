@@ -32,6 +32,53 @@
     <!-- Page CSS -->
     <link rel="stylesheet" href="{{ asset('vendor/sneat/assets/vendor/css/pages/page-auth.css') }}" />
 
+    <!-- Custom Auth Styles -->
+    <style>
+        .authentication-wrapper {
+            display: flex;
+            flex-basis: 100%;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        .authentication-inner {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+        
+        .card {
+            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+            border: 0;
+            border-radius: 0.375rem;
+        }
+        
+        .app-brand {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .app-brand-logo {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .app-brand-text {
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+        }
+        
+        @media (max-width: 575.98px) {
+            .authentication-inner {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+            
+            .card {
+                margin: 1rem 0;
+            }
+        }
+    </style>
+
     @stack('styles')
 
     <!-- Helpers -->

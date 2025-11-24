@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-body">
         <!-- Logo -->
-        <div class="app-brand justify-content-center">
+        <div class="app-brand justify-content-center mb-4">
             <a href="{{ url('/') }}" class="app-brand-link gap-2">
                 <span class="app-brand-logo demo">
                     <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -43,12 +43,12 @@
                         </g>
                     </svg>
                 </span>
-                <span class="app-brand-text demo text-body fw-bolder">{{ config('app.name', 'Laravel') }}</span>
+                <span class="app-brand-text demo text-body fw-bolder">{{ config('company.name', config('app.name')) }}</span>
             </a>
         </div>
         <!-- /Logo -->
-        <h4 class="mb-2">Welcome to {{ config('app.name', 'Laravel') }}! 👋</h4>
-        <p class="mb-4">Please sign-in to your account and start the adventure</p>
+        <h4 class="mb-2">Welcome to {{ config('company.name', config('app.name')) }}! 👋</h4>
+        <p class="mb-4">Please sign in to your account and start the adventure</p>
 
         <!-- Session Status -->
         @if (session('status'))
@@ -60,9 +60,9 @@
         <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
             @csrf
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" 
-                       placeholder="Enter your email" value="{{ old('email') }}" required autofocus autocomplete="username" />
+                <label for="email" class="form-label">Email or Username</label>
+                <input type="text" class="form-control @error('email') is-invalid @enderror" id="email" name="email" 
+                       placeholder="Enter your email or username" value="{{ old('email') }}" required autofocus autocomplete="username" />
                 @error('email')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -97,18 +97,67 @@
                 </div>
             </div>
             <div class="mb-3">
-                <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
             </div>
         </form>
 
-        @if (Route::has('register'))
+        {{-- Register link hidden --}}
+        {{-- @if (Route::has('register'))
             <p class="text-center">
                 <span>New on our platform?</span>
                 <a href="{{ route('register') }}">
                     <span>Create an account</span>
                 </a>
             </p>
-        @endif
+        @endif --}}
     </div>
 </div>
 <!-- /Login -->
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    const passwordToggle = document.querySelector('.form-password-toggle .input-group-text');
+    const passwordInput = document.querySelector('#password');
+    
+    if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bx-hide');
+                icon.classList.add('bx-show');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bx-show');
+                icon.classList.add('bx-hide');
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.getElementById('formAuthentication');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email) {
+                e.preventDefault();
+                document.getElementById('email').focus();
+                return false;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                document.getElementById('password').focus();
+                return false;
+            }
+        });
+    }
+});
+</script>
+@endpush

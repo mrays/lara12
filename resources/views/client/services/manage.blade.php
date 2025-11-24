@@ -356,8 +356,8 @@ function loginDashboard() {
 
 function contactSupport() {
     // WhatsApp link or support form
-    const message = encodeURIComponent('Hello, I need support for my service: {{ $service->product ?? "Service" }}');
-    window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
+    const message = encodeURIComponent('{{ str_replace('{service_name}', $service->product ?? 'Service', config('company.support_messages.service_issue')) }}');
+    window.open(`{{ config('company.whatsapp_url') }}?text=${message}`, '_blank');
 }
 
 function upgradeService() {
