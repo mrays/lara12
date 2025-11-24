@@ -26,6 +26,18 @@
 </div>
 
 <div class="row">
+    <div class="col-md-12 mb-3">
+        <label class="form-label">Invoice Title <span class="text-danger">*</span></label>
+        <input type="text" name="title" class="form-control" 
+               value="{{ old('title', $invoice->title ?? '') }}" 
+               placeholder="e.g., Web Hosting Service - December 2025" required>
+        @error('title')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<div class="row">
     <div class="col-md-6 mb-3">
         <label class="form-label">Due Date <span class="text-danger">*</span></label>
         <input type="date" name="due_date" class="form-control" 

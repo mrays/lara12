@@ -211,7 +211,7 @@
                                     </a>
                                 </div>
                                 <div class="d-flex gap-2 flex-wrap">
-                                    <button class="btn btn-outline-primary" onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->due_date }}', '{{ $invoice->number }}', '{{ $invoice->total_amount ?? 0 }}', '{{ $invoice->status }}')">
+                                    <button class="btn btn-outline-primary" onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->title ?? '' }}', '{{ $invoice->due_date }}', '{{ $invoice->number }}', '{{ $invoice->total_amount ?? 0 }}', '{{ $invoice->status }}')">
                                         <i class="tf-icons bx bx-edit me-1"></i>Edit Invoice
                                     </button>
                                     @if(!in_array($invoice->status, ['Paid', 'Lunas']))
@@ -250,6 +250,10 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label for="edit_title" class="form-label">Invoice Title</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="edit_due_date" class="form-label">Due Date</label>
                         <input type="date" class="form-control" id="edit_due_date" name="due_date" required>
                     </div>
@@ -287,7 +291,8 @@
 
 <script>
 // Edit invoice function
-function editInvoice(invoiceId, dueDate, invoiceNo, amount, status) {
+function editInvoice(invoiceId, title, dueDate, invoiceNo, amount, status) {
+    document.getElementById('edit_title').value = title || '';
     document.getElementById('edit_due_date').value = dueDate;
     document.getElementById('edit_invoice_no').value = invoiceNo;
     document.getElementById('edit_amount').value = amount;

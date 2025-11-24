@@ -112,7 +112,7 @@
                                             
                                             <!-- Edit Button -->
                                             <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                    onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->due_date }}', '{{ $invoice->invoice_no ?? 'INV-' . $invoice->id }}', '{{ $invoice->total_amount ?? $invoice->amount ?? 0 }}', '{{ $invoice->status }}')" 
+                                                    onclick="editInvoice({{ $invoice->id }}, '{{ $invoice->title ?? '' }}', '{{ $invoice->due_date }}', '{{ $invoice->number ?? $invoice->invoice_no ?? 'INV-' . $invoice->id }}', '{{ $invoice->total_amount ?? $invoice->amount ?? 0 }}', '{{ $invoice->status }}')" 
                                                     title="Edit Invoice">
                                                 <i class="bx bx-edit"></i>
                                             </button>
@@ -194,6 +194,12 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="edit_title" class="form-label">Invoice Title</label>
+                            <input type="text" class="form-control" id="edit_title" name="title" required>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="edit_due_date" class="form-label">Due Date</label>
                             <input type="date" class="form-control" id="edit_due_date" name="due_date" required>
@@ -238,8 +244,9 @@
 
 <script>
 // Edit invoice function
-function editInvoice(invoiceId, dueDate, invoiceNo, amount, status) {
+function editInvoice(invoiceId, title, dueDate, invoiceNo, amount, status) {
     document.getElementById('editInvoiceForm').action = `/admin/invoices/${invoiceId}/quick-update`;
+    document.getElementById('edit_title').value = title || '';
     document.getElementById('edit_due_date').value = dueDate ? dueDate.split(' ')[0] : '';
     document.getElementById('edit_invoice_no').value = invoiceNo;
     document.getElementById('edit_amount').value = amount;
