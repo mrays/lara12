@@ -31,42 +31,53 @@ class DuitkuService
     /**
      * Create payment request to Duitku
      */
-    public function createPayment(Invoice $invoice, $paymentMethod = 'SP')
+    public function createPayment(Invoice $invoice, $paymentMethod = 'SP', $customerData = null)
     {
         try {
             $merchantOrderId = $this->generateMerchantOrderId($invoice);
             $amount = (int) $invoice->total_amount;
             
-            // Prepare payment data
+            // Use customer data if provided, otherwise use client data
+            $customerName = $customerData['name'] ?? $invoice->client->name;
+            $customerEmail = $customerData['email'] ?? $invoice->client->email;
+            $customerPhone = $customerData['phone'] ?? $invoice->client->phone ?? '081234567890';
+            
+            // Prepare payment data sesuai format Duitku yang benar
             $paymentData = [
                 'merchantCode' => $this->merchantCode,
                 'paymentAmount' => $amount,
                 'paymentMethod' => $paymentMethod,
                 'merchantOrderId' => $merchantOrderId,
                 'productDetails' => $invoice->title,
-                'additionalParam' => json_encode([
-                    'invoice_id' => $invoice->id,
-                    'client_id' => $invoice->client_id
-                ]),
-                'merchantUserInfo' => $invoice->client->email,
-                'customerVaName' => $invoice->client->name,
-                'email' => $invoice->client->email,
-                'phoneNumber' => $invoice->client->phone ?? '081234567890',
-                'itemDetails' => $this->getItemDetails($invoice),
-                'customerDetail' => $this->getCustomerDetails($invoice),
+                'additionalParam' => '',
+                'merchantUserInfo' => $customerEmail,
+                'customerVaName' => $customerName,
+                'email' => $customerEmail,
+                'phoneNumber' => $customerPhone,
                 'callbackUrl' => $this->callbackUrl,
                 'returnUrl' => $this->returnUrl,
                 'expiryPeriod' => 1440 // 24 hours in minutes
             ];
 
-            // Generate signature
+            // Generate signature sesuai dokumentasi Duitku
             $signature = $this->generateSignature($paymentData);
             $paymentData['signature'] = $signature;
 
-            Log::info('Duitku Payment Request', $paymentData);
+            Log::info('Duitku Payment Request', [
+                'merchantCode' => $paymentData['merchantCode'],
+                'merchantOrderId' => $merchantOrderId,
+                'amount' => $amount,
+                'paymentMethod' => $paymentMethod,
+                'signature' => $signature
+            ]);
 
-            // Send request to Duitku
-            $response = Http::timeout(30)->post($this->baseUrl . 'v2/inquiry', $paymentData);
+            // Send request to Duitku dengan endpoint yang benar
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->post($this->baseUrl . 'v2/inquiry', $paymentData);
 
             if ($response->successful()) {
                 $result = $response->json();
@@ -246,63 +257,6 @@ class DuitkuService
         return hash_equals($calculatedSignature, $data['signature']);
     }
 
-    /**
-     * Get item details for Duitku
-     */
-    private function getItemDetails(Invoice $invoice)
-    {
-        $items = [];
-        
-        foreach ($invoice->items as $item) {
-            $items[] = [
-                'name' => $item->description,
-                'price' => (int) $item->unit_price,
-                'quantity' => $item->quantity
-            ];
-        }
-
-        // If no items, create a default item
-        if (empty($items)) {
-            $items[] = [
-                'name' => $invoice->title,
-                'price' => (int) $invoice->total_amount,
-                'quantity' => 1
-            ];
-        }
-
-        return $items;
-    }
-
-    /**
-     * Get customer details for Duitku
-     */
-    private function getCustomerDetails(Invoice $invoice)
-    {
-        return [
-            'firstName' => $invoice->client->name,
-            'lastName' => '',
-            'email' => $invoice->client->email,
-            'phoneNumber' => $invoice->client->phone ?? '081234567890',
-            'billingAddress' => [
-                'firstName' => $invoice->client->name,
-                'lastName' => '',
-                'address' => $invoice->client->address ?? 'Jakarta',
-                'city' => 'Jakarta',
-                'postalCode' => '12345',
-                'phone' => $invoice->client->phone ?? '081234567890',
-                'countryCode' => 'ID'
-            ],
-            'shippingAddress' => [
-                'firstName' => $invoice->client->name,
-                'lastName' => '',
-                'address' => $invoice->client->address ?? 'Jakarta',
-                'city' => 'Jakarta',
-                'postalCode' => '12345',
-                'phone' => $invoice->client->phone ?? '081234567890',
-                'countryCode' => 'ID'
-            ]
-        ];
-    }
 
     /**
      * Get available payment methods

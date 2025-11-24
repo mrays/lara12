@@ -77,3 +77,8 @@ Route::middleware(['auth'])->group(function () {
 // Public payment routes (no auth required for callbacks)
 Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'return'])->name('payment.return');
+
+// Test routes (remove in production)
+Route::get('/test/payment/config', [App\Http\Controllers\TestPaymentController::class, 'testConfig']);
+Route::get('/test/payment/create', [App\Http\Controllers\TestPaymentController::class, 'testPayment']);
+Route::post('/test/payment/callback', [App\Http\Controllers\TestPaymentController::class, 'testCallback']);

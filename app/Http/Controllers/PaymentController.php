@@ -45,7 +45,10 @@ class PaymentController extends Controller
         try {
             // Validate request
             $request->validate([
-                'payment_method' => 'required|string'
+                'payment_method' => 'required|string',
+                'customer_name' => 'nullable|string|max:255',
+                'customer_email' => 'nullable|email|max:255',
+                'customer_phone' => 'nullable|string|max:20'
             ]);
 
             // Check if user can access this invoice
@@ -59,9 +62,19 @@ class PaymentController extends Controller
             }
 
             $paymentMethod = $request->payment_method;
+            
+            // Prepare customer data if provided
+            $customerData = null;
+            if ($request->filled('customer_name') || $request->filled('customer_email') || $request->filled('customer_phone')) {
+                $customerData = [
+                    'name' => $request->customer_name ?: $invoice->client->name,
+                    'email' => $request->customer_email ?: $invoice->client->email,
+                    'phone' => $request->customer_phone ?: $invoice->client->phone
+                ];
+            }
 
             // Create payment with Duitku
-            $result = $this->duitkuService->createPayment($invoice, $paymentMethod);
+            $result = $this->duitkuService->createPayment($invoice, $paymentMethod, $customerData);
 
             if ($result['success']) {
                 // Redirect to Duitku payment page

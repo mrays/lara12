@@ -97,38 +97,84 @@
 
                         <form action="{{ route('payment.process', $invoice) }}" method="POST" id="paymentForm">
                             @csrf
-                            <div class="row">
-                                @foreach($paymentMethods as $code => $name)
-                                    <div class="col-md-4 col-sm-6 mb-3">
-                                        <div class="card payment-method-card" style="cursor: pointer;" onclick="selectPaymentMethod('{{ $code }}')">
-                                            <div class="card-body text-center">
-                                                <div class="payment-method-icon mb-2">
-                                                    @switch($code)
-                                                        @case('SP')
-                                                            <i class="bx bx-mobile" style="font-size: 2rem; color: #ee4d2d;"></i>
-                                                            @break
-                                                        @case('NQ')
-                                                            <i class="bx bx-qr" style="font-size: 2rem; color: #1976d2;"></i>
-                                                            @break
-                                                        @case('OV')
-                                                            <i class="bx bx-wallet" style="font-size: 2rem; color: #4c6ef5;"></i>
-                                                            @break
-                                                        @case('DA')
-                                                            <i class="bx bx-wallet" style="font-size: 2rem; color: #009cff;"></i>
-                                                            @break
-                                                        @case('LK')
-                                                            <i class="bx bx-wallet" style="font-size: 2rem; color: #e74c3c;"></i>
-                                                            @break
-                                                        @default
-                                                            <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d;"></i>
-                                                    @endswitch
+                            
+                            <!-- Customer Information -->
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="bx bx-user me-2"></i>Customer Information (Optional)
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="customer_name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="customer_name" name="customer_name" 
+                                               value="{{ $invoice->client->name }}" placeholder="Enter full name">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="customer_email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="customer_email" name="customer_email" 
+                                               value="{{ $invoice->client->email }}" placeholder="Enter email address">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="customer_phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="customer_phone" name="customer_phone" 
+                                               value="{{ $invoice->client->phone }}" placeholder="08xxxxxxxxxx">
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    You can update customer information for this payment or use the default client data.
+                                </small>
+                            </div>
+
+                            <!-- Payment Methods -->
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="bx bx-credit-card me-2"></i>Choose Payment Method <span class="text-danger">*</span>
+                                </h6>
+                                <div class="row">
+                                    @foreach($paymentMethods as $code => $name)
+                                        <div class="col-md-4 col-sm-6 mb-3">
+                                            <div class="card payment-method-card" style="cursor: pointer;" onclick="selectPaymentMethod('{{ $code }}')">
+                                                <div class="card-body text-center">
+                                                    <div class="payment-method-icon mb-2">
+                                                        @switch($code)
+                                                            @case('SP')
+                                                                <i class="bx bx-mobile" style="font-size: 2rem; color: #ee4d2d;"></i>
+                                                                @break
+                                                            @case('NQ')
+                                                                <i class="bx bx-qr" style="font-size: 2rem; color: #1976d2;"></i>
+                                                                @break
+                                                            @case('OV')
+                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #4c6ef5;"></i>
+                                                                @break
+                                                            @case('DA')
+                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #009cff;"></i>
+                                                                @break
+                                                            @case('LK')
+                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #e74c3c;"></i>
+                                                                @break
+                                                            @case('M2')
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #004CAD;"></i>
+                                                                @break
+                                                            @case('I1')
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066CC;"></i>
+                                                                @break
+                                                            @case('B1')
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #FF8B00;"></i>
+                                                                @break
+                                                            @default
+                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d;"></i>
+                                                        @endswitch
+                                                    </div>
+                                                    <h6 class="mb-0">{{ $name }}</h6>
+                                                    <small class="text-muted">Instant Payment</small>
                                                 </div>
-                                                <h6 class="mb-0">{{ $name }}</h6>
-                                                <small class="text-muted">Instant Payment</small>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
 
                             <input type="hidden" name="payment_method" id="selectedPaymentMethod">
