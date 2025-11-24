@@ -71,6 +71,14 @@
             </a>
         </li>
 
+        <!-- Service Packages -->
+        <li class="menu-item {{ request()->routeIs('admin.service-packages.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.service-packages.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-box"></i>
+                <div data-i18n="Service Packages">Service Packages</div>
+            </a>
+        </li>
+
         <!-- Invoices -->
         <li class="menu-item {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
             <a href="{{ route('admin.invoices.index') }}" class="menu-link">

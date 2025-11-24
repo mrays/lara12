@@ -135,12 +135,12 @@
                             <div class="col-md-4 mb-3">
                                 <label for="billing_cycle" class="form-label">Billing Cycle <span class="text-danger">*</span></label>
                                 <select class="form-select" id="billing_cycle" name="billing_cycle" required>
-                                    <option value="Monthly" {{ old('billing_cycle', $service->billing_cycle) == 'Monthly' ? 'selected' : '' }}>Monthly</option>
-                                    <option value="Quarterly" {{ old('billing_cycle', $service->billing_cycle) == 'Quarterly' ? 'selected' : '' }}>Quarterly</option>
-                                    <option value="Semi-Annually" {{ old('billing_cycle', $service->billing_cycle) == 'Semi-Annually' ? 'selected' : '' }}>Semi-Annually</option>
-                                    <option value="Annually" {{ old('billing_cycle', $service->billing_cycle) == 'Annually' ? 'selected' : '' }}>Annually</option>
-                                    <option value="Biennially" {{ old('billing_cycle', $service->billing_cycle) == 'Biennially' ? 'selected' : '' }}>Biennially</option>
-                                    <option value="One Time" {{ old('billing_cycle', $service->billing_cycle) == 'One Time' ? 'selected' : '' }}>One Time</option>
+                                    <option value="Monthly" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
+                                    <option value="Quarterly" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Quarterly' ? 'selected' : '' }}>Quarterly</option>
+                                    <option value="Semi-Annually" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Semi-Annually' ? 'selected' : '' }}>Semi-Annually</option>
+                                    <option value="Annually" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Annually' ? 'selected' : '' }}>Annually</option>
+                                    <option value="Biennially" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Biennially' ? 'selected' : '' }}>Biennially</option>
+                                    <option value="One Time" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'One Time' ? 'selected' : '' }}>One Time</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -172,14 +172,14 @@
                             <div class="col-md-6 mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" 
-                                       value="{{ old('username', $service->username) }}" placeholder="Enter username or leave N/A">
+                                       value="{{ old('username', $service->username ?? '') }}" placeholder="Enter username or leave N/A">
                                 <small class="text-muted">Login username for the service (leave empty for N/A)</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" name="password" 
-                                           value="{{ old('password', $service->password) }}" placeholder="Enter password or leave N/A">
+                                           value="{{ old('password', $service->password ?? '') }}" placeholder="Enter password or leave N/A">
                                     <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password')">
                                         <i class="tf-icons bx bx-show" id="password-icon"></i>
                                     </button>
@@ -189,13 +189,13 @@
                             <div class="col-md-6 mb-3">
                                 <label for="server" class="form-label">Server</label>
                                 <input type="text" class="form-control" id="server" name="server" 
-                                       value="{{ old('server', $service->server) }}" placeholder="Server name or IP">
+                                       value="{{ old('server', $service->server ?? '') }}" placeholder="Server name or IP">
                                 <small class="text-muted">Server information (leave empty for "Default Server")</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="login_url" class="form-label">Login Dashboard URL</label>
                                 <input type="url" class="form-control" id="login_url" name="login_url" 
-                                       value="{{ old('login_url', $service->login_url) }}" placeholder="https://example.com/login">
+                                       value="{{ old('login_url', $service->login_url ?? '') }}" placeholder="https://example.com/login">
                                 <small class="text-muted">URL for "Login Dashboard" button</small>
                             </div>
                         </div>
@@ -210,12 +210,12 @@
                             <div class="col-md-6 mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="4" 
-                                          placeholder="Service description for client">{{ old('description', $service->description) }}</textarea>
+                                          placeholder="Service description for client">{{ old('description', $service->description ?? '') }}</textarea>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="notes" class="form-label">Internal Notes</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="4" 
-                                          placeholder="Internal notes (not visible to client)">{{ old('notes', $service->notes) }}</textarea>
+                                          placeholder="Internal notes (not visible to client)">{{ old('notes', $service->notes ?? '') }}</textarea>
                             </div>
                         </div>
 
