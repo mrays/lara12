@@ -14,28 +14,48 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
-        $invoices = Invoice::with('client')
-            ->when($q, fn($b) => $b->where('invoice_no','like',"%$q%"))
-            ->orderBy('due_date','desc')->paginate(15)->withQueryString();
+        $invoices = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email')
+            ->when($q, fn($b) => $b->where('invoices.number','like',"%$q%"))
+            ->orderBy('invoices.due_date','desc')
+            ->paginate(15)
+            ->withQueryString();
         return view('admin.invoices.index', compact('invoices'));
     }
 
     public function create()
     {
-        $clients = Client::orderBy('name')->get();
+        $clients = \DB::table('users')->where('role', 'client')->orderBy('name')->get();
         return view('admin.invoices.create', compact('clients'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client_id'=>'required|exists:clients,id',
-            'invoice_no'=>'required|string|max:50|unique:invoices,invoice_no',
+            'client_id'=>'required|exists:users,id', // Fix: should be users table
+            'title'=>'required|string|max:255',
+            'description'=>'nullable|string',
+            'invoice_no'=>'required|string|max:50|unique:invoices,number', // Fix: should be number field
             'due_date'=>'nullable|date',
             'amount'=>'required|numeric',
-            'status'=>'required|in:Paid,Unpaid,Past Due',
+            'status'=>'required|in:Draft,Sent,Paid,Overdue,Cancelled',
         ]);
-        Invoice::create($data);
+        
+        // Map form fields to database fields
+        $invoiceData = [
+            'client_id' => $data['client_id'],
+            'number' => $data['invoice_no'], // Map invoice_no to number
+            'title' => $data['title'],
+            'description' => $data['description'] ?? '',
+            'subtotal' => $data['amount'],
+            'total_amount' => $data['amount'], // Same as subtotal for now
+            'status' => $data['status'],
+            'issue_date' => now(),
+            'due_date' => $data['due_date'],
+        ];
+        
+        Invoice::create($invoiceData);
         return redirect()->route('admin.invoices.index')->with('success','Invoice created');
     }
 
@@ -47,20 +67,35 @@ class InvoiceController extends Controller
 
     public function edit(Invoice $invoice)
     {
-        $clients = Client::orderBy('name')->get();
+        $clients = \DB::table('users')->where('role', 'client')->orderBy('name')->get();
         return view('admin.invoices.edit', compact('invoice','clients'));
     }
 
     public function update(Request $request, Invoice $invoice)
     {
         $data = $request->validate([
-            'client_id'=>'required|exists:clients,id',
-            'invoice_no'=>['required','string','max:50', \Illuminate\Validation\Rule::unique('invoices','invoice_no')->ignore($invoice->id)],
+            'client_id'=>'required|exists:users,id', // Fix: should be users table
+            'title'=>'required|string|max:255',
+            'description'=>'nullable|string',
+            'invoice_no'=>['required','string','max:50', \Illuminate\Validation\Rule::unique('invoices','number')->ignore($invoice->id)],
             'due_date'=>'nullable|date',
             'amount'=>'required|numeric',
-            'status'=>'required|in:Paid,Unpaid,Past Due',
+            'status'=>'required|in:Draft,Sent,Paid,Overdue,Cancelled',
         ]);
-        $invoice->update($data);
+        
+        // Map form fields to database fields
+        $invoiceData = [
+            'client_id' => $data['client_id'],
+            'number' => $data['invoice_no'], // Map invoice_no to number
+            'title' => $data['title'],
+            'description' => $data['description'] ?? '',
+            'subtotal' => $data['amount'],
+            'total_amount' => $data['amount'], // Same as subtotal for now
+            'status' => $data['status'],
+            'due_date' => $data['due_date'],
+        ];
+        
+        $invoice->update($invoiceData);
         return redirect()->route('admin.invoices.index')->with('success','Invoice updated');
     }
     

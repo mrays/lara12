@@ -46,6 +46,7 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate([
             'client_id' => 'required|exists:users,id',
+            'title' => 'required|string|max:255',
             'invoice_no' => 'required|string|max:255|unique:invoices,number',
             'due_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
@@ -56,11 +57,14 @@ class InvoiceController extends Controller
         // Create invoice using direct DB query for compatibility
         \DB::table('invoices')->insert([
             'client_id' => $validated['client_id'],
+            'title' => $validated['title'], // Add required title field
             'number' => $validated['invoice_no'],
             'due_date' => $validated['due_date'],
+            'subtotal' => $validated['amount'],
             'total_amount' => $validated['amount'],
             'status' => $validated['status'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? '',
+            'issue_date' => now(),
             'paid_date' => in_array($validated['status'], ['Paid', 'Lunas']) ? now() : null,
             'created_at' => now(),
             'updated_at' => now()
@@ -192,18 +196,24 @@ class InvoiceController extends Controller
     public function clientInvoices()
     {
         $user = auth()->user();
-        $invoices = Invoice::forClient($user->id)
-                          ->with(['service'])
-                          ->orderBy('created_at', 'desc')
-                          ->paginate(10);
+        
+        // Use direct DB query for better compatibility
+        $invoices = \DB::table('invoices')
+            ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
+            ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
+            ->select('invoices.*', 'users.name as client_name', 'services.product as service_name')
+            ->where('invoices.client_id', $user->id)
+            ->orderBy('invoices.created_at', 'desc')
+            ->paginate(10);
 
+        // Calculate stats using direct queries
         $stats = [
-            'total' => Invoice::forClient($user->id)->count(),
-            'paid' => Invoice::forClient($user->id)->paid()->count(),
-            'unpaid' => Invoice::forClient($user->id)->unpaid()->count(),
-            'overdue' => Invoice::forClient($user->id)->overdue()->count(),
-            'total_amount' => Invoice::forClient($user->id)->sum('total_amount'),
-            'unpaid_amount' => Invoice::forClient($user->id)->unpaid()->sum('total_amount'),
+            'total' => \DB::table('invoices')->where('client_id', $user->id)->count(),
+            'paid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Paid', 'Lunas'])->count(),
+            'unpaid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Unpaid', 'Belum Lunas', 'Overdue'])->count(),
+            'overdue' => \DB::table('invoices')->where('client_id', $user->id)->where('status', 'Overdue')->count(),
+            'total_amount' => \DB::table('invoices')->where('client_id', $user->id)->sum('total_amount'),
+            'unpaid_amount' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Unpaid', 'Belum Lunas', 'Overdue'])->sum('total_amount'),
         ];
 
         return view('client.invoices.index', compact('invoices', 'stats'));
@@ -226,19 +236,24 @@ class InvoiceController extends Controller
     public function updateInvoice(Request $request, $invoiceId)
     {
         $request->validate([
+            'title' => 'required|string|max:255',
             'due_date' => 'required|date',
             'invoice_no' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas'
+            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas',
+            'description' => 'nullable|string'
         ]);
 
         \DB::table('invoices')
             ->where('id', $invoiceId)
             ->update([
+                'title' => $request->title,
                 'due_date' => $request->due_date,
                 'number' => $request->invoice_no,
+                'subtotal' => $request->amount,
                 'total_amount' => $request->amount,
                 'status' => $request->status,
+                'description' => $request->description ?? '',
                 'paid_date' => in_array($request->status, ['Paid', 'Lunas']) ? now() : null,
                 'updated_at' => now()
             ]);
