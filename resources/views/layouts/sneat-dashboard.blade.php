@@ -148,7 +148,7 @@
                         <a href="{{ route('client.services.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-globe"></i>
                             <div data-i18n="Website">Website</div>
-                            <div class="badge badge-center rounded-pill bg-success ms-auto">{{ Auth::user()->services()->where('status', 'Active')->count() }}</div>
+                            <div class="badge badge-center rounded-pill bg-success ms-auto">{{ Auth::user()->services()->where('status', 'Active')->count() ?? 0 }}</div>
                         </a>
                     </li>
 
