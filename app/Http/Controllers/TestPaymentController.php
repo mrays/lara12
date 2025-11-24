@@ -17,23 +17,51 @@ class TestPaymentController extends Controller
     }
 
     /**
-     * Test Duitku configuration
+     * Test Duitku configuration and connectivity
      */
     public function testConfig()
     {
         $config = [
             'merchant_code' => config('services.duitku.merchant_code'),
-            'api_key' => config('services.duitku.api_key') ? 'SET' : 'NOT SET',
+            'api_key' => config('services.duitku.api_key') ? 'SET (' . strlen(config('services.duitku.api_key')) . ' chars)' : 'NOT SET',
             'env' => config('services.duitku.env'),
             'return_url' => config('services.duitku.return_url'),
             'callback_url' => config('services.duitku.callback_url'),
         ];
 
+        // Test basic connectivity
+        $env = config('services.duitku.env', 'sandbox');
+        $baseUrl = $env === 'production' 
+            ? 'https://passport.duitku.com/webapi/api/merchant/' 
+            : 'https://sandbox.duitku.com/webapi/api/merchant/';
+        
+        $testUrl = $baseUrl . 'v2/inquiry';
+        
+        // Test connection
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get($baseUrl);
+            $connectivity = [
+                'status' => 'success',
+                'message' => 'Can connect to Duitku',
+                'response_code' => $response->status()
+            ];
+        } catch (\Exception $e) {
+            $connectivity = [
+                'status' => 'error',
+                'message' => 'Cannot connect to Duitku: ' . $e->getMessage()
+            ];
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Duitku configuration test',
             'config' => $config,
-            'payment_methods' => $this->duitkuService->getPaymentMethods()
+            'test_url' => $testUrl,
+            'connectivity' => $connectivity,
+            'payment_methods' => $this->duitkuService->getPaymentMethods(),
+            'php_version' => PHP_VERSION,
+            'curl_enabled' => function_exists('curl_version'),
+            'openssl_enabled' => extension_loaded('openssl')
         ]);
     }
 

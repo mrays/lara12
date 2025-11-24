@@ -77,49 +77,88 @@ class DuitkuService
                 'signature' => $signature
             ]);
 
-            // Send request to Duitku EXACTLY like PHP native
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'User-Agent' => 'Exputra-Payment-Gateway/1.0'
-                ])
-                ->post($this->baseUrl . 'v2/inquiry', $paymentData);
+            // Debug: Log the full URL and data being sent
+            $fullUrl = $this->baseUrl . 'v2/inquiry';
+            Log::info('Duitku Request Details', [
+                'url' => $fullUrl,
+                'merchant_code' => $this->merchantCode,
+                'api_key_set' => !empty($this->apiKey),
+                'data_keys' => array_keys($paymentData)
+            ]);
 
-            if ($response->successful()) {
-                $result = $response->json();
-                
-                if ($result['statusCode'] === '00') {
-                    // Update invoice with Duitku data
-                    $invoice->update([
-                        'duitku_merchant_code' => $merchantOrderId,
-                        'duitku_reference' => $result['reference'] ?? null,
-                        'duitku_payment_url' => $result['paymentUrl'] ?? null,
-                        'status' => 'Sent'
-                    ]);
+            // Send request to Duitku with better error handling
+            try {
+                $response = Http::timeout(30)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                        'User-Agent' => 'Exputra-Payment-Gateway/1.0'
+                    ])
+                    ->post($fullUrl, $paymentData);
 
-                    return [
-                        'success' => true,
-                        'payment_url' => $result['paymentUrl'],
-                        'reference' => $result['reference'],
-                        'merchant_order_id' => $merchantOrderId,
-                        'amount' => $amount
-                    ];
+                Log::info('Duitku Response Details', [
+                    'status_code' => $response->status(),
+                    'headers' => $response->headers(),
+                    'body' => $response->body()
+                ]);
+
+                if ($response->successful()) {
+                    $result = $response->json();
+                    
+                    if (isset($result['statusCode']) && $result['statusCode'] === '00') {
+                        // Update invoice with Duitku data
+                        $invoice->update([
+                            'duitku_merchant_code' => $merchantOrderId,
+                            'duitku_reference' => $result['reference'] ?? null,
+                            'duitku_payment_url' => $result['paymentUrl'] ?? null,
+                            'status' => 'Sent'
+                        ]);
+
+                        return [
+                            'success' => true,
+                            'payment_url' => $result['paymentUrl'],
+                            'reference' => $result['reference'] ?? null,
+                            'merchant_order_id' => $merchantOrderId,
+                            'amount' => $amount
+                        ];
+                    } else {
+                        Log::error('Duitku API Error', $result);
+                        return [
+                            'success' => false,
+                            'message' => $result['statusMessage'] ?? 'Payment creation failed: ' . ($result['statusCode'] ?? 'Unknown error')
+                        ];
+                    }
                 } else {
-                    Log::error('Duitku Error Response', $result);
+                    Log::error('Duitku HTTP Error', [
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                        'url' => $fullUrl
+                    ]);
+                    
                     return [
                         'success' => false,
-                        'message' => $result['statusMessage'] ?? 'Payment creation failed'
+                        'message' => 'HTTP Error ' . $response->status() . ': ' . $response->body()
                     ];
                 }
-            } else {
-                Log::error('Duitku HTTP Error', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
+            } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                Log::error('Duitku Connection Error', [
+                    'error' => $e->getMessage(),
+                    'url' => $fullUrl
                 ]);
                 
                 return [
                     'success' => false,
-                    'message' => 'Failed to connect to payment gateway'
+                    'message' => 'Connection failed: ' . $e->getMessage()
+                ];
+            } catch (\Exception $e) {
+                Log::error('Duitku Request Exception', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                return [
+                    'success' => false,
+                    'message' => 'Request failed: ' . $e->getMessage()
                 ];
             }
         } catch (\Exception $e) {

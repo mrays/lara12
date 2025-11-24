@@ -82,3 +82,7 @@ Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'r
 Route::get('/test/payment/config', [App\Http\Controllers\TestPaymentController::class, 'testConfig']);
 Route::get('/test/payment/create', [App\Http\Controllers\TestPaymentController::class, 'testPayment']);
 Route::post('/test/payment/callback', [App\Http\Controllers\TestPaymentController::class, 'testCallback']);
+
+// Simple debug routes
+Route::get('/debug/connection', [App\Http\Controllers\SimpleTestController::class, 'testConnection']);
+Route::get('/debug/api-call', [App\Http\Controllers\SimpleTestController::class, 'testApiCall']);
