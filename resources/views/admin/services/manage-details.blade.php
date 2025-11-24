@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Service Details - ' . $service->name)
+@section('title', 'Manage Service Details - ' . ($service->product ?? 'Service'))
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -33,8 +33,8 @@
             <div class="card">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="tf-icons bx bx-info-circle me-2"></i>Service: {{ $service->name }} 
-                        <span class="badge bg-primary ms-2">{{ $service->client_name }}</span>
+                        <i class="tf-icons bx bx-info-circle me-2"></i>Service: {{ $service->product ?? 'N/A' }} 
+                        <span class="badge bg-primary ms-2">{{ $service->client_name ?? 'N/A' }}</span>
                     </h6>
                 </div>
             </div>
@@ -82,7 +82,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="service_name" class="form-label">Service Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="service_name" name="service_name" 
-                                       value="{{ old('service_name', $service->name) }}" required>
+                                       value="{{ old('service_name', $service->product) }}" required>
                                 <small class="text-muted">This will appear as the main service title</small>
                             </div>
                             <div class="col-md-6 mb-3">

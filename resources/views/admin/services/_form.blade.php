@@ -8,17 +8,45 @@
     @endforeach
   </select>
 </div>
+
 <div class="mb-3">
-  <label class="form-label">Product</label>
-  <input name="product" class="form-control" value="{{ old('product', $service->product ?? '') }}" required>
+  <label class="form-label">Service Package</label>
+  <select name="package_id" class="form-select" id="package_select" onchange="updatePackageDetails()">
+    <option value="">-- choose service package --</option>
+    @php
+      $packages = \DB::table('service_packages')->where('is_active', 1)->orderBy('name')->get();
+    @endphp
+    @foreach($packages as $pkg)
+      <option value="{{ $pkg->id }}" 
+              data-name="{{ $pkg->name }}" 
+              data-description="{{ $pkg->description }}" 
+              data-price="{{ $pkg->base_price }}"
+              {{ (old('package_id', $service->package_id ?? '') == $pkg->id) ? 'selected':'' }}>
+        {{ $pkg->name }} - Rp {{ number_format($pkg->base_price, 0, ',', '.') }}
+      </option>
+    @endforeach
+  </select>
+  <small class="form-text text-muted">Select a service package or leave empty for custom service</small>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Product/Service Name</label>
+  <input name="product" id="product_input" class="form-control" value="{{ old('product', $service->product ?? '') }}" required>
+  <small class="form-text text-muted">Will be auto-filled when you select a package</small>
 </div>
 <div class="mb-3">
   <label class="form-label">Domain</label>
   <input name="domain" class="form-control" value="{{ old('domain', $service->domain ?? '') }}">
 </div>
 <div class="mb-3">
-  <label class="form-label">Price</label>
-  <input name="price" class="form-control" value="{{ old('price', $service->price ?? '') }}" required>
+  <label class="form-label">Custom Price (Rp)</label>
+  <input name="price" id="price_input" type="number" class="form-control" value="{{ old('price', $service->price ?? '') }}" step="1000" min="0" required>
+  <small class="form-text text-muted">Will be auto-filled from package base price, but you can customize it</small>
+</div>
+
+<div class="mb-3" id="package_description" style="display: none;">
+  <label class="form-label">Package Description</label>
+  <div class="alert alert-light" id="description_content"></div>
 </div>
 <div class="mb-3">
   <label class="form-label">Billing Cycle</label>
@@ -44,3 +72,35 @@
     <option value="Cancelled" {{ (old('status', $service->status ?? '')=='Cancelled') ? 'selected':'' }}>Cancelled</option>
   </select>
 </div>
+
+<script>
+function updatePackageDetails() {
+    const select = document.getElementById('package_select');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value) {
+        // Auto-fill product name
+        document.getElementById('product_input').value = selectedOption.dataset.name;
+        
+        // Auto-fill price
+        document.getElementById('price_input').value = selectedOption.dataset.price;
+        
+        // Show package description
+        document.getElementById('description_content').innerHTML = selectedOption.dataset.description;
+        document.getElementById('package_description').style.display = 'block';
+    } else {
+        // Clear fields if no package selected
+        document.getElementById('product_input').value = '';
+        document.getElementById('price_input').value = '';
+        document.getElementById('package_description').style.display = 'none';
+    }
+}
+
+// Initialize on page load if package is already selected
+document.addEventListener('DOMContentLoaded', function() {
+    const packageSelect = document.getElementById('package_select');
+    if (packageSelect.value) {
+        updatePackageDetails();
+    }
+});
+</script>

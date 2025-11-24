@@ -64,6 +64,15 @@ Route::middleware(['auth'])->group(function () {
             
         Route::resource('services', App\Http\Controllers\Admin\ServiceController::class)
             ->names('admin.services');
+            
+        // Service Packages management
+        Route::resource('service-packages', App\Http\Controllers\Admin\ServicePackageController::class)
+            ->names('admin.service-packages');
+        Route::put('service-packages/{package}/toggle-status', [App\Http\Controllers\Admin\ServicePackageController::class, 'toggleStatus'])
+            ->name('admin.service-packages.toggle-status');
+        Route::get('api/service-packages/active', [App\Http\Controllers\Admin\ServicePackageController::class, 'getActivePackages'])
+            ->name('admin.service-packages.active');
+            
         // Invoice management
         Route::resource('invoices', App\Http\Controllers\InvoiceController::class)
             ->names('admin.invoices');
