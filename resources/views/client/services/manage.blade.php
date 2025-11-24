@@ -789,7 +789,12 @@ function submitUpgradeRequest() {
         },
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showToast('Upgrade request submitted successfully!', 'success');
@@ -807,11 +812,12 @@ function submitUpgradeRequest() {
             }, 1000);
         } else {
             showToast(data.message || 'Failed to submit upgrade request', 'danger');
+            console.error('Server error:', data);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('An error occurred while submitting your request', 'danger');
+        showToast('An error occurred while submitting your request: ' + error.message, 'danger');
     })
     .finally(() => {
         // Reset button

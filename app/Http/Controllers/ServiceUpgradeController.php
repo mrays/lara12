@@ -67,9 +67,12 @@ class ServiceUpgradeController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Log the actual error for debugging
+            \Log::error('Upgrade request submission failed: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to submit upgrade request. Please try again.'
+                'message' => 'Failed to submit upgrade request: ' . $e->getMessage()
             ], 500);
         }
     }

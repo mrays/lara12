@@ -187,21 +187,35 @@
                                     <strong>#{{ $request->id }}</strong>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm me-2">
-                                            <span class="avatar-initial rounded-circle bg-label-primary">
-                                                {{ substr($request->client->name, 0, 1) }}
-                                            </span>
+                                    @if($request->client)
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                    {{ substr($request->client->name, 0, 1) }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ $request->client->name }}</h6>
+                                                <small class="text-muted">{{ $request->client->email }}</small>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ $request->client->name }}</h6>
-                                            <small class="text-muted">{{ $request->client->email }}</small>
+                                    @else
+                                        <div class="text-muted">
+                                            <i class="bx bx-user-x me-1"></i>
+                                            Client not found
                                         </div>
-                                    </div>
+                                    @endif
                                 </td>
                                 <td>
-                                    <strong>{{ $request->service->product }}</strong><br>
-                                    <small class="text-muted">Service #{{ $request->service->id }}</small>
+                                    @if($request->service)
+                                        <strong>{{ $request->service->product }}</strong><br>
+                                        <small class="text-muted">Service #{{ $request->service->id }}</small>
+                                    @else
+                                        <div class="text-muted">
+                                            <i class="bx bx-package me-1"></i>
+                                            Service not found
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">

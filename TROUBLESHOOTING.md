@@ -144,6 +144,49 @@ SELECT id, name, email, role FROM users WHERE role = 'admin';
 
 ---
 
+## ❌ Error: Table 'password_reset_tokens' doesn't exist
+
+### **Penyebab:**
+Tabel `password_reset_tokens` belum dibuat di database. Tabel ini diperlukan untuk fitur forgot password Laravel.
+
+### **Solusi:**
+
+#### **1. Jalankan Setup Database (Recommended)**
+```bash
+# Double click atau jalankan:
+setup_database.bat
+```
+
+#### **2. Manual SQL Query**
+```sql
+-- Jalankan query ini di database:
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    email VARCHAR(255) NOT NULL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    
+    INDEX idx_password_reset_tokens_email (email),
+    INDEX idx_password_reset_tokens_token (token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+#### **3. Complete Auth Tables Setup**
+```sql
+-- Atau jalankan semua tabel auth sekaligus dari file:
+-- database_queries/create_auth_tables.sql
+```
+
+#### **4. Verifikasi**
+```sql
+-- Cek tabel sudah ada:
+SHOW TABLES LIKE 'password_reset_tokens';
+
+-- Cek struktur:
+DESCRIBE password_reset_tokens;
+```
+
+---
+
 ## ❌ Error: Table 'service_upgrade_requests' doesn't exist
 
 ### **Solusi:**
