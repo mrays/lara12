@@ -30,7 +30,14 @@ class GoogleAuthController extends Controller
 
         try {
             $token = $this->gmailService->authenticate($code);
-            return redirect('/')->with('success', 'Gmail authentication successful! You can now send emails via Gmail API.');
+            
+            // Calculate token duration
+            $expiresIn = isset($token['expires_in']) ? $token['expires_in'] : 3600;
+            $durationDays = round($expiresIn / 86400, 1);
+            
+            $message = "Gmail authentication successful! Token duration: {$durationDays} days. You can now send emails via Gmail API.";
+            
+            return redirect('/gmail-test')->with('success', $message);
         } catch (\Exception $e) {
             return redirect('/')->with('error', 'Authentication failed: ' . $e->getMessage());
         }

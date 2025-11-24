@@ -19,8 +19,16 @@ class GmailService
         $this->client->setClientSecret(config('services.google.client_secret'));
         $this->client->setRedirectUri(config('services.google.redirect_uri'));
         $this->client->addScope(Gmail::GMAIL_SEND);
+        
+        // Konfigurasi untuk token yang lebih tahan lama (1-2 bulan)
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
+        $this->client->setApprovalPrompt('force'); // Force refresh token
+        
+        // Set token expiry yang lebih lama
+        $this->client->setConfig('token_request_options', [
+            'expires_in' => 5184000, // 60 hari dalam detik (60 * 24 * 60 * 60)
+        ]);
     }
 
     public function getAuthUrl()
