@@ -249,7 +249,7 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Created:</strong></td>
-                                            <td>{{ $service->created_at->format('M d, Y') }}</td>
+                                            <td>{{ $service->created_at ? $service->created_at->format('M d, Y') : 'N/A' }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Next Due:</strong></td>

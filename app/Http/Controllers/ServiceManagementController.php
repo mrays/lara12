@@ -39,8 +39,8 @@ class ServiceManagementController extends Controller
             'status' => $serviceData->status,
             'due_date' => $serviceData->due_date ? \Carbon\Carbon::parse($serviceData->due_date) : null,
             'billing_cycle' => $serviceData->billing_cycle,
-            'created_at' => $serviceData->created_at,
-            'updated_at' => $serviceData->updated_at,
+            'created_at' => $serviceData->created_at ? \Carbon\Carbon::parse($serviceData->created_at) : null,
+            'updated_at' => $serviceData->updated_at ? \Carbon\Carbon::parse($serviceData->updated_at) : null,
             // Add default values for fields that might not exist in database yet
             'username' => $serviceData->username ?? 'admin',
             'password' => $serviceData->password ?? 'musang',
