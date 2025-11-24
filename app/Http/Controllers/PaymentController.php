@@ -43,17 +43,21 @@ class PaymentController extends Controller
             abort(404, 'Invoice not found');
         }
 
-        // Add client object to invoice
+        // Get current user data for form pre-fill
+        $currentUser = Auth::user();
+        
+        // Add client object to invoice with current user data
         $invoice->client = (object) [
-            'name' => $invoiceData->client_name ?? 'N/A',
-            'email' => $invoiceData->client_email ?? 'N/A',
-            'company' => null,
-            'phone' => null,
+            'name' => $currentUser->name ?? $invoiceData->client_name ?? 'N/A',
+            'email' => $currentUser->email ?? $invoiceData->client_email ?? 'N/A',
+            'company' => $currentUser->business_name ?? null,
+            'phone' => $currentUser->whatsapp ?? $currentUser->phone ?? null,
+            'address' => $currentUser->address ?? null,
         ];
 
         $paymentMethods = $this->duitkuService->getPaymentMethods();
 
-        return view('payment.show', compact('invoice', 'paymentMethods'));
+        return view('payment.show', compact('invoice', 'paymentMethods', 'currentUser'));
     }
 
     /**

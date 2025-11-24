@@ -30,13 +30,16 @@
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-muted">Client Information</h6>
-                            <p class="mb-1"><strong>Name:</strong> {{ $invoice->client->name ?? 'N/A' }}</p>
-                            <p class="mb-1"><strong>Email:</strong> {{ $invoice->client->email ?? 'N/A' }}</p>
-                            @if($invoice->client->company)
-                                <p class="mb-1"><strong>Company:</strong> {{ $invoice->client->company }}</p>
+                            <p class="mb-1"><strong>Name:</strong> {{ $currentUser->name ?? $invoice->client->name ?? 'N/A' }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ $currentUser->email ?? $invoice->client->email ?? 'N/A' }}</p>
+                            @if($currentUser->business_name ?? $invoice->client->company)
+                                <p class="mb-1"><strong>Company:</strong> {{ $currentUser->business_name ?? $invoice->client->company }}</p>
                             @endif
-                            @if($invoice->client->phone)
-                                <p class="mb-1"><strong>Phone:</strong> {{ $invoice->client->phone }}</p>
+                            @if($currentUser->whatsapp ?? $currentUser->phone ?? $invoice->client->phone)
+                                <p class="mb-1"><strong>Phone:</strong> {{ $currentUser->whatsapp ?? $currentUser->phone ?? $invoice->client->phone }}</p>
+                            @endif
+                            @if($currentUser->address)
+                                <p class="mb-1"><strong>Address:</strong> {{ $currentUser->address }}</p>
                             @endif
                         </div>
                     </div>
@@ -127,7 +130,7 @@
                                         </label>
                                         <input type="text" class="form-control @error('customer_name') is-invalid @enderror" 
                                                id="customer_name" name="customer_name" required
-                                               value="{{ old('customer_name', $invoice->client->name) }}" 
+                                               value="{{ old('customer_name', $currentUser->name ?? $invoice->client->name) }}" 
                                                placeholder="Enter your full name">
                                         @error('customer_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -139,7 +142,7 @@
                                         </label>
                                         <input type="email" class="form-control @error('customer_email') is-invalid @enderror" 
                                                id="customer_email" name="customer_email" required
-                                               value="{{ old('customer_email', $invoice->client->email) }}" 
+                                               value="{{ old('customer_email', $currentUser->email ?? $invoice->client->email) }}" 
                                                placeholder="your@email.com">
                                         @error('customer_email')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -153,17 +156,27 @@
                                         </label>
                                         <input type="tel" class="form-control @error('customer_phone') is-invalid @enderror" 
                                                id="customer_phone" name="customer_phone" required
-                                               value="{{ old('customer_phone', $invoice->client->phone) }}" 
+                                               value="{{ old('customer_phone', $currentUser->whatsapp ?? $currentUser->phone ?? $invoice->client->phone) }}" 
                                                placeholder="08xxxxxxxxxx" pattern="[0-9+]{10,15}">
                                         @error('customer_phone')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
-                                <small class="text-muted">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    All customer information is required for payment processing.
-                                </small>
+                                <div class="alert alert-info mt-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        <div class="flex-grow-1">
+                                            <small>
+                                                <strong>Data diambil dari profile Anda.</strong><br>
+                                                Jika data tidak sesuai, Anda dapat mengubahnya di form atau 
+                                                <a href="{{ route('profile.edit') }}" target="_blank" class="text-decoration-underline">
+                                                    update profile Anda
+                                                </a>.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Payment Methods -->
