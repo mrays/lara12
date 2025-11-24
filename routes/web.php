@@ -30,8 +30,15 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('client.dashboard');
     })->name('dashboard');
 
-    // Client (any authenticated)
+    // Client routes
     Route::get('/client', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+    
+    // Client invoice routes
+    Route::prefix('client')->name('client.')->group(function () {
+        Route::get('/invoices', [App\Http\Controllers\InvoiceController::class, 'clientInvoices'])->name('invoices.index');
+        Route::get('/invoices/{invoice}', [App\Http\Controllers\InvoiceController::class, 'clientShow'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPDF'])->name('invoices.pdf');
+    });
 
     // Admin only
     Route::prefix('admin')
@@ -48,9 +55,11 @@ Route::middleware(['auth'])->group(function () {
     ->names('admin.services');
     Route::resource('client', App\Http\Controllers\Admin\ClientController::class)
     ->names('admin.client');
-    Route::resource('invoices', App\Http\Controllers\Admin\InvoiceController::class)
-    ->names('admin.invoices');
-    Route::post('invoices/{invoice}/pay', [App\Http\Controllers\Admin\InvoiceController::class, 'pay'])->name('admin.invoices.pay');
+        // Invoice management
+        Route::resource('invoices', App\Http\Controllers\InvoiceController::class)
+            ->names('admin.invoices');
+        Route::post('invoices/{invoice}/send', [App\Http\Controllers\InvoiceController::class, 'send'])->name('admin.invoices.send');
+        Route::post('invoices/{invoice}/mark-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
     ///akhir darigrp admin
     });
     // trigger create invoice and redirect customer to payment page

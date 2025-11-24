@@ -107,9 +107,15 @@
                                 <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/wallet-info.png') }}" alt="Credit Card" class="rounded" />
                             </div>
                         </div>
-                        <span>Invoices</span>
-                        <h3 class="card-title text-nowrap mb-1">{{ $stats['total_invoices'] }}</h3>
-                        <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> {{ $stats['unpaid_invoices'] }} Unpaid</small>
+                        <span>Unpaid Amount</span>
+                        <h3 class="card-title text-nowrap mb-1">${{ number_format($stats['unpaid_amount'], 2) }}</h3>
+                        <small class="text-danger fw-semibold">
+                            <i class="bx bx-down-arrow-alt"></i> 
+                            {{ $stats['unpaid_invoices'] }} unpaid
+                            @if($stats['overdue_invoices'] > 0)
+                                ({{ $stats['overdue_invoices'] }} overdue)
+                            @endif
+                        </small>
                     </div>
                 </div>
             </div>
@@ -124,7 +130,16 @@
             <div class="card-header d-flex align-items-center justify-content-between pb-0">
                 <div class="card-title mb-0">
                     <h5 class="m-0 me-2">Recent Invoices</h5>
-                    <small class="text-muted">{{ $invoices->count() }} Total</small>
+                    <small class="text-muted">{{ $stats['total_invoices'] }} Total</small>
+                </div>
+                <div class="dropdown">
+                    <button class="btn p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="{{ route('client.invoices.index') }}">View All Invoices</a>
+                        <a class="dropdown-item" href="{{ route('client.invoices.index', ['status' => 'unpaid']) }}">Unpaid Only</a>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -133,32 +148,57 @@
                         <h2 class="mb-2">{{ $stats['unpaid_invoices'] }}</h2>
                         <span>Unpaid</span>
                     </div>
-                    <div id="orderStatisticsChart"></div>
+                    @if($stats['overdue_invoices'] > 0)
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <h2 class="mb-2 text-danger">{{ $stats['overdue_invoices'] }}</h2>
+                        <span class="text-danger">Overdue</span>
+                    </div>
+                    @endif
                 </div>
                 <ul class="p-0 m-0">
                     @forelse($invoices as $invoice)
                     <li class="d-flex mb-4 pb-1">
                         <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-{{ $invoice->status == 'Paid' ? 'success' : 'warning' }}">
+                            <span class="avatar-initial rounded bg-label-{{ $invoice->status_color }}">
                                 <i class="bx bx-receipt"></i>
                             </span>
                         </div>
                         <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
-                                <h6 class="mb-0">{{ $invoice->number }}</h6>
-                                <small class="text-muted">{{ $invoice->due_date }}</small>
+                                <h6 class="mb-0">
+                                    <a href="{{ route('client.invoices.show', $invoice) }}" class="text-decoration-none">
+                                        {{ $invoice->number }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    {{ $invoice->due_date->format('M d, Y') }}
+                                    @if($invoice->is_overdue && $invoice->status !== 'Paid')
+                                        <span class="badge bg-danger ms-1">Overdue</span>
+                                    @endif
+                                </small>
                             </div>
-                            <div class="user-progress">
-                                <small class="fw-semibold">${{ number_format($invoice->amount, 2) }}</small>
+                            <div class="user-progress text-end">
+                                <small class="fw-semibold">${{ number_format($invoice->total_amount, 2) }}</small>
+                                <br>
+                                <span class="badge bg-label-{{ $invoice->status_color }}">{{ $invoice->status }}</span>
                             </div>
                         </div>
                     </li>
                     @empty
-                    <li class="text-center">
-                        <small class="text-muted">No invoices found</small>
+                    <li class="text-center py-3">
+                        <i class="bx bx-receipt fs-1 text-muted"></i>
+                        <p class="text-muted mb-0">No invoices found</p>
+                        <small class="text-muted">Invoices will appear here when created</small>
                     </li>
                     @endforelse
                 </ul>
+                @if($invoices->count() > 0)
+                <div class="text-center mt-3">
+                    <a href="{{ route('client.invoices.index') }}" class="btn btn-sm btn-outline-primary">
+                        View All Invoices
+                    </a>
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -249,9 +289,12 @@
                         </a>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 flex-column">
+                        <a href="{{ route('client.invoices.index', ['status' => 'unpaid']) }}" class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 flex-column">
                             <i class="bx bx-credit-card fs-1 mb-2"></i>
                             <span>Pay Invoices</span>
+                            @if($stats['unpaid_invoices'] > 0)
+                                <small class="badge bg-danger mt-1">{{ $stats['unpaid_invoices'] }}</small>
+                            @endif
                         </a>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
