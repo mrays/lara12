@@ -25,9 +25,9 @@
                             <option value="Lunas">Lunas</option>
                             <option value="Belum Lunas">Belum Lunas</option>
                         </select>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
+                        <a href="{{ route('admin.invoices.create') }}" class="btn btn-primary">
                             <i class="bx bx-plus me-1"></i>New Invoice
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

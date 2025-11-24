@@ -33,71 +33,42 @@ class InvoiceController extends Controller
 
     public function create()
     {
-        $clients = Client::active()->orderBy('name')->get();
-        $services = Service::active()->with('client')->orderBy('product')->get();
+        // Get clients using direct query for compatibility
+        $clients = \DB::table('users')
+            ->where('role', 'client')
+            ->orderBy('name')
+            ->get();
         
-        return view('admin.invoices.create', compact('clients', 'services'));
+        return view('admin.invoices.create', compact('clients'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'service_id' => 'nullable|exists:services,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:issue_date',
-            'tax_rate' => 'nullable|numeric|min:0|max:100',
-            'discount_amount' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'client_id' => 'required|exists:users,id',
+            'invoice_no' => 'required|string|max:255|unique:invoices,invoice_no',
+            'due_date' => 'required|date',
+            'amount' => 'required|numeric|min:0',
+            'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas',
+            'description' => 'nullable|string'
         ]);
 
-        // Calculate totals
-        $subtotal = 0;
-        foreach ($validated['items'] as $item) {
-            $subtotal += $item['quantity'] * $item['unit_price'];
-        }
-
-        $taxRate = $validated['tax_rate'] ?? 0;
-        $taxAmount = ($subtotal * $taxRate) / 100;
-        $discountAmount = $validated['discount_amount'] ?? 0;
-        $totalAmount = $subtotal + $taxAmount - $discountAmount;
-
-        // Create invoice
-        $invoice = Invoice::create([
+        // Create invoice using direct DB query for compatibility
+        \DB::table('invoices')->insert([
             'client_id' => $validated['client_id'],
-            'service_id' => $validated['service_id'],
-            'number' => Invoice::generateInvoiceNumber(),
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'subtotal' => $subtotal,
-            'tax_rate' => $taxRate,
-            'tax_amount' => $taxAmount,
-            'discount_amount' => $discountAmount,
-            'total_amount' => $totalAmount,
-            'status' => 'Draft',
-            'issue_date' => $validated['issue_date'],
+            'invoice_no' => $validated['invoice_no'],
             'due_date' => $validated['due_date'],
-            'notes' => $validated['notes'],
+            'amount' => $validated['amount'],
+            'total_amount' => $validated['amount'],
+            'status' => $validated['status'],
+            'description' => $validated['description'],
+            'paid_at' => in_array($validated['status'], ['Paid', 'Lunas']) ? now() : null,
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
 
-        // Create invoice items
-        foreach ($validated['items'] as $item) {
-            $invoice->items()->create([
-                'description' => $item['description'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['quantity'] * $item['unit_price'],
-            ]);
-        }
-
-        return redirect()->route('admin.invoices.show', $invoice)
-                        ->with('success', 'Invoice created successfully!');
+        return redirect()->route('admin.invoices.index')
+            ->with('success', 'Invoice created successfully!');
     }
 
     public function edit(Invoice $invoice)
