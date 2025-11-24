@@ -52,14 +52,14 @@
   <label class="form-label">Billing Cycle</label>
   <select name="billing_cycle" class="form-select">
     <option value="">-- choose billing cycle --</option>
-    <option value="1 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1 Bulan') ? 'selected':'' }}>1 Bulan</option>
-    <option value="2 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2 Bulan') ? 'selected':'' }}>2 Bulan</option>
-    <option value="3 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3 Bulan') ? 'selected':'' }}>3 Bulan</option>
-    <option value="6 Bulan" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '6 Bulan') ? 'selected':'' }}>6 Bulan</option>
-    <option value="1 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1 Tahun') ? 'selected':'' }}>1 Tahun</option>
-    <option value="2 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2 Tahun') ? 'selected':'' }}>2 Tahun</option>
-    <option value="3 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3 Tahun') ? 'selected':'' }}>3 Tahun</option>
-    <option value="4 Tahun" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '4 Tahun') ? 'selected':'' }}>4 Tahun</option>
+    <option value="1M" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1M') ? 'selected':'' }}>1 Bulan</option>
+    <option value="2M" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2M') ? 'selected':'' }}>2 Bulan</option>
+    <option value="3M" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3M') ? 'selected':'' }}>3 Bulan</option>
+    <option value="6M" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '6M') ? 'selected':'' }}>6 Bulan</option>
+    <option value="1Y" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '1Y') ? 'selected':'' }}>1 Tahun</option>
+    <option value="2Y" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '2Y') ? 'selected':'' }}>2 Tahun</option>
+    <option value="3Y" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '3Y') ? 'selected':'' }}>3 Tahun</option>
+    <option value="4Y" {{ (old('billing_cycle', $service->billing_cycle ?? '') == '4Y') ? 'selected':'' }}>4 Tahun</option>
   </select>
 </div>
 <div class="mb-3">
