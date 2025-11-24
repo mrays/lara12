@@ -46,7 +46,7 @@ class InvoiceController extends Controller
     {
         $validated = $request->validate([
             'client_id' => 'required|exists:users,id',
-            'invoice_no' => 'required|string|max:255|unique:invoices,invoice_no',
+            'invoice_no' => 'required|string|max:255|unique:invoices,number',
             'due_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
             'status' => 'required|in:Paid,Unpaid,Overdue,Cancelled,Sedang Dicek,Lunas,Belum Lunas',
@@ -56,7 +56,7 @@ class InvoiceController extends Controller
         // Create invoice using direct DB query for compatibility
         \DB::table('invoices')->insert([
             'client_id' => $validated['client_id'],
-            'invoice_no' => $validated['invoice_no'],
+            'number' => $validated['invoice_no'],
             'due_date' => $validated['due_date'],
             'amount' => $validated['amount'],
             'total_amount' => $validated['amount'],
@@ -237,7 +237,7 @@ class InvoiceController extends Controller
             ->where('id', $invoiceId)
             ->update([
                 'due_date' => $request->due_date,
-                'invoice_no' => $request->invoice_no,
+                'number' => $request->invoice_no,
                 'total_amount' => $request->amount,
                 'amount' => $request->amount, // Update both fields for compatibility
                 'status' => $request->status,

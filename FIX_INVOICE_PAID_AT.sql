@@ -12,8 +12,8 @@ UPDATE `invoices` SET `paid_date` = `updated_at`
 WHERE `status` IN ('Paid', 'Lunas') AND `paid_date` IS NULL;
 
 -- 4. Verifikasi perubahan
-SELECT id, invoice_no, status, paid_date, created_at, updated_at FROM `invoices` LIMIT 5;
+SELECT id, number, status, paid_date, created_at, updated_at FROM `invoices` LIMIT 5;
 
 -- 5. Cek invoices yang sudah dibayar
-SELECT id, invoice_no, status, paid_date FROM `invoices` 
+SELECT id, number, status, paid_date FROM `invoices` 
 WHERE `status` IN ('Paid', 'Lunas') LIMIT 5;
