@@ -29,12 +29,9 @@
                 <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.services.edit', $s->id) }}" title="Edit Service">
                   <i class="tf-icons bx bx-edit"></i>
                 </a>
-                <form action="{{ route('admin.services.destroy', $s->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
-                  @csrf @method('DELETE')
-                  <button class="btn btn-sm btn-outline-danger" title="Delete Service">
-                    <i class="tf-icons bx bx-trash"></i>
-                  </button>
-                </form>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteService({{ $s->id }})" title="Delete Service">
+                  <i class="tf-icons bx bx-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -45,4 +42,21 @@
     </div>
   </div>
 </div>
+
+<script>
+// Delete service function
+function deleteService(serviceId) {
+    if (confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/services/${serviceId}`;
+        form.innerHTML = `
+            @csrf
+            @method('DELETE')
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection
