@@ -62,11 +62,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('invoices/{invoice}/mark-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
     ///akhir darigrp admin
     });
-    // trigger create invoice and redirect customer to payment page
-    Route::post('admin/invoices/{invoice}/pay', [App\Http\Controllers\Admin\InvoiceController::class, 'pay'])->name('admin.invoices.pay');
-    Route::post('/payment/callback', [App\Http\Controllers\Payment\DuitkuController::class, 'callback'])->name('duitku.callback');
-    Route::get('/payment/return', [App\Http\Controllers\Payment\DuitkuController::class, 'return'])->name('duitku.return');
+    // Payment routes
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::get('/invoice/{invoice}', [App\Http\Controllers\PaymentController::class, 'show'])->name('show');
+        Route::post('/invoice/{invoice}/process', [App\Http\Controllers\PaymentController::class, 'process'])->name('process');
+        Route::get('/invoice/{invoice}/status', [App\Http\Controllers\PaymentController::class, 'checkStatus'])->name('status');
+        Route::post('/invoice/{invoice}/cancel', [App\Http\Controllers\PaymentController::class, 'cancel'])->name('cancel');
+    });
     
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
+
+// Public payment routes (no auth required for callbacks)
+Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
+Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'return'])->name('payment.return');

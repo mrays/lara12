@@ -136,4 +136,63 @@ class Invoice extends Model
             'payment_reference' => $paymentReference,
         ]);
     }
+
+    // Payment related methods
+    public function canBePaid()
+    {
+        return in_array($this->status, ['Draft', 'Sent', 'Overdue']);
+    }
+
+    public function isPaid()
+    {
+        return $this->status === 'Paid';
+    }
+
+    public function isOverdue()
+    {
+        return $this->status === 'Overdue' || 
+               ($this->status === 'Sent' && $this->due_date < Carbon::now());
+    }
+
+    public function hasPendingPayment()
+    {
+        return !empty($this->duitku_merchant_code) && !$this->isPaid();
+    }
+
+    public function getPaymentUrl()
+    {
+        return $this->duitku_payment_url;
+    }
+
+    public function getPaymentStatusBadgeClass()
+    {
+        switch ($this->status) {
+            case 'Paid':
+                return 'badge bg-success';
+            case 'Sent':
+                return 'badge bg-primary';
+            case 'Overdue':
+                return 'badge bg-danger';
+            case 'Draft':
+                return 'badge bg-secondary';
+            case 'Cancelled':
+                return 'badge bg-dark';
+            default:
+                return 'badge bg-light';
+        }
+    }
+
+    public function getFormattedAmount()
+    {
+        return 'Rp ' . number_format($this->total_amount, 0, ',', '.');
+    }
+
+    public function getDaysOverdue()
+    {
+        if ($this->status !== 'Overdue' && !$this->isOverdue()) {
+            return 0;
+        }
+        
+        return Carbon::now()->diffInDays($this->due_date);
+    }
 }

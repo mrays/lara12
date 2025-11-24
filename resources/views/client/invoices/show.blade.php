@@ -248,9 +248,16 @@
                         <button class="btn btn-outline-secondary" onclick="downloadPDF()">
                             <i class="bx bx-download me-1"></i> Download PDF
                         </button>
-                        @if($invoice->status !== 'Paid')
-                            <button class="btn btn-success" onclick="payInvoice({{ $invoice->id }})">
+                        @if($invoice->canBePaid())
+                            <a href="{{ route('payment.show', $invoice) }}" class="btn btn-success">
                                 <i class="bx bx-credit-card me-1"></i> Pay Now
+                            </a>
+                        @elseif($invoice->hasPendingPayment())
+                            <a href="{{ $invoice->getPaymentUrl() }}" class="btn btn-warning" target="_blank">
+                                <i class="bx bx-time me-1"></i> Continue Payment
+                            </a>
+                            <button class="btn btn-outline-primary ms-1" onclick="checkPaymentStatus({{ $invoice->id }})">
+                                <i class="bx bx-refresh me-1"></i> Check Status
                             </button>
                         @endif
                     </div>
@@ -263,18 +270,54 @@
 
 @push('scripts')
 <script>
-function payInvoice(invoiceId) {
-    // Integration with payment gateway would go here
+function checkPaymentStatus(invoiceId) {
     Swal.fire({
-        title: 'Payment Gateway',
-        text: 'Redirecting to payment gateway...',
+        title: 'Checking Payment Status',
+        text: 'Please wait...',
         icon: 'info',
         showConfirmButton: false,
-        timer: 2000
+        allowOutsideClick: false
     });
     
-    // Example: redirect to payment URL
-    // window.location.href = '/payment/invoice/' + invoiceId;
+    fetch(`/payment/invoice/${invoiceId}/status`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.status === 'paid') {
+                    Swal.fire({
+                        title: 'Payment Confirmed!',
+                        text: 'Your payment has been successfully processed.',
+                        icon: 'success',
+                        confirmButtonText: 'Reload Page'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Payment Pending',
+                        text: 'Your payment is still being processed. Please try again in a few minutes.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Failed to check payment status',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to check payment status',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
 }
 
 function downloadPDF() {

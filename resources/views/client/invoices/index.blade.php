@@ -263,9 +263,13 @@
                                     <a class="dropdown-item" href="{{ route('client.invoices.show', $invoice) }}">
                                         <i class="bx bx-show me-1"></i> View Details
                                     </a>
-                                    @if($invoice->status !== 'Paid')
-                                        <a class="dropdown-item text-success" href="#" onclick="payInvoice({{ $invoice->id }})">
+                                    @if($invoice->canBePaid())
+                                        <a class="dropdown-item text-success" href="{{ route('payment.show', $invoice) }}">
                                             <i class="bx bx-credit-card me-1"></i> Pay Now
+                                        </a>
+                                    @elseif($invoice->hasPendingPayment())
+                                        <a class="dropdown-item text-warning" href="{{ $invoice->getPaymentUrl() }}" target="_blank">
+                                            <i class="bx bx-time me-1"></i> Continue Payment
                                         </a>
                                     @endif
                                     <a class="dropdown-item" href="#" onclick="downloadInvoice({{ $invoice->id }})">
