@@ -257,6 +257,7 @@ class InvoiceController extends Controller
             'title' => $invoiceData->title,
             'description' => $invoiceData->description,
             'notes' => $invoiceData->notes ?? null,
+            'payment_method' => $invoiceData->payment_method ?? null,
             'subtotal' => $invoiceData->subtotal,
             'total_amount' => $invoiceData->total_amount,
             'status' => $invoiceData->status,

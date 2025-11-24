@@ -228,7 +228,7 @@
                             <div class="alert alert-success mt-3">
                                 <i class="bx bx-check-circle me-1"></i>
                                 <strong>Paid</strong> on {{ $invoice->paid_date->format('M d, Y') }}
-                                @if($invoice->payment_method)
+                                @if($invoice->payment_method ?? null)
                                     <br><small>via {{ $invoice->payment_method }}</small>
                                 @endif
                             </div>
