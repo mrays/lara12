@@ -136,20 +136,12 @@ class ServiceController extends Controller
         \DB::table('services')
             ->where('id', $serviceId)
             ->update([
-                'name' => $validated['service_name'],
-                'product' => $validated['product'],
+                'product' => $validated['service_name'], // Use service_name for product field
                 'domain' => $validated['domain'],
                 'status' => $validated['status'],
                 'due_date' => $validated['next_due'],
                 'billing_cycle' => $validated['billing_cycle'],
                 'price' => $validated['price'],
-                'setup_fee' => $validated['setup_fee'] ?? 0,
-                'username' => $validated['username'],
-                'password' => $validated['password'],
-                'server' => $validated['server'],
-                'login_url' => $validated['login_url'],
-                'description' => $validated['description'],
-                'notes' => $validated['notes'],
                 'updated_at' => now()
             ]);
 
