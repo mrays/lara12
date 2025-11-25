@@ -40,10 +40,8 @@ class OrderController extends Controller
         $user = auth()->user();
         $package = ServicePackage::findOrFail($request->package_id);
         
-        // Calculate price based on billing cycle (sama persis dengan admin service-packages)
-        $basePrice = $package->base_price;
-        // Harga tahunan = base_price * 12 (tanpa diskon, sesuai dengan /admin/service-packages)
-        $price = $basePrice * 12;
+        // Calculate price (gunakan base_price langsung, tanpa dikali 12)
+        $price = $package->base_price;
 
         try {
             DB::beginTransaction();
@@ -67,7 +65,7 @@ class OrderController extends Controller
             
             // Create invoice
             $invoice = Invoice::create([
-                'invoice_number' => $invoiceNumber,
+                'number' => $invoiceNumber,
                 'client_id' => $user->id,
                 'service_id' => $service->id,
                 'amount' => $price,
