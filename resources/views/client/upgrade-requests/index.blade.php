@@ -25,7 +25,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-0">
-                                <i class="bx bx-up-arrow-alt me-2"></i>My Upgrade Requests
+                                <i class="bx bx-credit-card me-2"></i>My Upgrade Requests
                             </h5>
                             <p class="text-muted mb-0">Track your service upgrade requests and their status</p>
                         </div>
@@ -203,7 +203,7 @@
                         <div class="text-center py-5">
                             <div class="avatar avatar-xl mx-auto mb-3">
                                 <span class="avatar-initial rounded-circle bg-label-primary">
-                                    <i class="bx bx-up-arrow-alt fs-2"></i>
+                                    <i class="bx bx-credit-card fs-2"></i>
                                 </span>
                             </div>
                             <h5>No Upgrade Requests</h5>

@@ -11,7 +11,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="mb-0">
-                            <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Request #{{ $upgradeRequest->id }}
+                            <i class="bx bx-credit-card me-2"></i>Upgrade Request #{{ $upgradeRequest->id }}
                         </h5>
                         <small class="text-muted">Submitted on {{ $upgradeRequest->created_at->format('M d, Y \a\t H:i') }}</small>
                     </div>

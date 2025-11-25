@@ -41,7 +41,7 @@
         <!-- Upgrade Requests -->
         <li class="menu-item {{ request()->routeIs('client.upgrade-requests.*') ? 'active' : '' }}">
             <a href="{{ route('client.upgrade-requests.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-up-arrow-alt"></i>
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
                 <span>Upgrade Requests</span>
             </a>
         </li>

@@ -98,7 +98,7 @@
         <!-- Upgrade Requests -->
         <li class="menu-item {{ request()->routeIs('admin.upgrade-requests.*') ? 'active' : '' }}">
             <a href="{{ route('admin.upgrade-requests.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-up-arrow-alt"></i>
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
                 <div data-i18n="Upgrade Requests">Upgrade Requests</div>
                 @php
                     $pendingCount = \App\Models\ServiceUpgradeRequest::where('status', 'pending')->count();
