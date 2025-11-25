@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -213,10 +214,17 @@ class OrderController extends Controller
         // Check global domain availability via DNS lookup
         $globalAvailable = $this->checkGlobalDomainAvailability($domain);
         
-        if (!$globalAvailable) {
+        if ($globalAvailable === 'unknown') {
+            return response()->json([
+                'available' => 'unknown',
+                'message' => 'Tidak dapat memverifikasi ketersediaan domain global. Silakan coba lagi atau lanjutkan dengan risiko Anda sendiri.',
+                'local_check' => 'available',
+                'global_check' => 'unknown'
+            ]);
+        } elseif (!$globalAvailable) {
             return response()->json([
                 'available' => false,
-                'message' => 'Domain sudah terdaftar secara global',
+                'message' => 'Domain sudah terdaftar secara global (sudah digunakan secara global)',
                 'local_check' => 'available',
                 'global_check' => 'taken'
             ]);
@@ -247,12 +255,15 @@ class OrderController extends Controller
         // Remove https:// if still present
         $hostname = str_replace(['https://', 'http://'], '', $hostname);
         
-        // Validate domain format
-        if (!filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+        // Convert IDN to punycode for DNS queries
+        $hostname = $this->convertToPunycode($hostname);
+        
+        // Enhanced domain validation for international domains
+        if (!$this->isValidDomainFormat($hostname)) {
             return false;
         }
         
-        // Check cache first (5 minutes cache)
+        // Check cache first (3 minutes cache for better accuracy)
         $cacheKey = 'domain_check_' . md5($hostname);
         $cached = cache()->get($cacheKey);
         if ($cached !== null) {
@@ -260,55 +271,192 @@ class OrderController extends Controller
         }
         
         try {
-            // Set timeout for DNS operations
+            // Set longer timeout for international DNS operations
             $originalTimeout = ini_get('default_socket_timeout');
-            ini_set('default_socket_timeout', 3);
+            ini_set('default_socket_timeout', 8); // Increased from 3 to 8 seconds
             
-            // Check DNS records (A, AAAA, CNAME, MX, NS)
-            $hasDnsRecords = false;
-            
-            // Check A record
-            if (@checkdnsrr($hostname, 'A')) {
-                $hasDnsRecords = true;
-            }
-            
-            // Check AAAA record (IPv6)
-            if (!$hasDnsRecords && @checkdnsrr($hostname, 'AAAA')) {
-                $hasDnsRecords = true;
-            }
-            
-            // Check CNAME record
-            if (!$hasDnsRecords && @checkdnsrr($hostname, 'CNAME')) {
-                $hasDnsRecords = true;
-            }
-            
-            // Check MX record (mail)
-            if (!$hasDnsRecords && @checkdnsrr($hostname, 'MX')) {
-                $hasDnsRecords = true;
-            }
-            
-            // Check NS record (nameservers)
-            if (!$hasDnsRecords && @checkdnsrr($hostname, 'NS')) {
-                $hasDnsRecords = true;
-            }
+            // Check DNS records with improved logic
+            $dnsResult = $this->performDnsCheck($hostname);
             
             // Restore original timeout
             ini_set('default_socket_timeout', $originalTimeout);
             
-            // If no DNS records found, domain is likely available
-            $isAvailable = !$hasDnsRecords;
+            // Handle DNS check results
+            if ($dnsResult === 'timeout') {
+                // On timeout, return unknown status rather than blocking
+                Log::info("DNS timeout for domain: {$hostname}, marking as unknown");
+                cache()->put($cacheKey, 'unknown', 180); // Cache unknown for 3 minutes
+                $this->monitorUnknownRate();
+                $this->recordUnknownResult($hostname, 'timeout');
+                return 'unknown';
+            } elseif ($dnsResult === 'error') {
+                // On DNS error, log and return unknown
+                Log::warning("DNS error for domain: {$hostname}, marking as unknown");
+                cache()->put($cacheKey, 'unknown', 180);
+                $this->monitorUnknownRate();
+                $this->recordUnknownResult($hostname, 'error');
+                return 'unknown';
+            }
             
-            // Cache result for 5 minutes
-            cache()->put($cacheKey, $isAvailable, 300);
+            // Cache result for 3 minutes (reduced from 5 for better accuracy)
+            cache()->put($cacheKey, $dnsResult, 180);
             
-            return $isAvailable;
+            return $dnsResult;
             
         } catch (\Exception $e) {
             // Restore original timeout on error
             ini_set('default_socket_timeout', $originalTimeout);
             
-            // On DNS failure, assume domain is taken (safer approach)
+            Log::error("DNS check exception for {$hostname}: " . $e->getMessage());
+            // Return unknown on exception to avoid blocking legitimate registrations
+            $this->monitorUnknownRate();
+            $this->recordUnknownResult($hostname, 'exception');
+            return 'unknown';
+        }
+    }
+    
+    /**
+     * Enhanced domain format validation for international domains
+     */
+    private function isValidDomainFormat($hostname)
+    {
+        // Remove any trailing dots
+        $hostname = rtrim($hostname, '.');
+        
+        // Basic length validation
+        if (strlen($hostname) < 3 || strlen($hostname) > 253) {
             return false;
         }
+        
+        // Check for valid characters including international
+        if (!preg_match('/^[a-zA-Z0-9\-\.\p{L}\p{N}]+$/u', $hostname)) {
+            return false;
+        }
+        
+        // Check domain structure
+        $labels = explode('.', $hostname);
+        if (count($labels) < 2) {
+            return false;
+        }
+        
+        // Validate each label
+        foreach ($labels as $label) {
+            if (strlen($label) === 0 || strlen($label) > 63) {
+                return false;
+            }
+            // Labels cannot start or end with hyphen
+            if (preg_match('/^-|-$/', $label)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Perform DNS check with better error handling
+     */
+    private function performDnsCheck($hostname)
+    {
+        $hasDnsRecords = false;
+        $recordTypes = ['A', 'AAAA', 'CNAME', 'MX', 'NS'];
+        
+        foreach ($recordTypes as $recordType) {
+            try {
+                // Use @ to suppress warnings, we'll handle errors manually
+                $result = @checkdnsrr($hostname, $recordType);
+                if ($result) {
+                    $hasDnsRecords = true;
+                    break;
+                }
+            } catch (\Exception $e) {
+                // Continue to next record type on error
+                continue;
+            }
+        }
+        
+        // Additional check: try to get DNS records as fallback
+        if (!$hasDnsRecords) {
+            try {
+                $records = @dns_get_record($hostname, DNS_A + DNS_AAAA + DNS_CNAME + DNS_MX + DNS_NS);
+                if (!empty($records)) {
+                    $hasDnsRecords = true;
+                }
+            } catch (\Exception $e) {
+                // Log but don't fail
+                Log::debug("dns_get_record failed for {$hostname}: " . $e->getMessage());
+            }
+        }
+        
+        // If no DNS records found, domain is likely available
+        return !$hasDnsRecords;
+    }
+    
+    /**
+     * Convert international domain name to punycode for DNS queries
+     */
+    private function convertToPunycode($hostname)
+    {
+        // Remove any trailing dots
+        $hostname = rtrim($hostname, '.');
+        
+        // Split domain into labels
+        $labels = explode('.', $hostname);
+        $punycodeLabels = [];
+        
+        foreach ($labels as $label) {
+            // Check if label contains non-ASCII characters
+            if (mb_check_encoding($label, 'ASCII')) {
+                // ASCII-only label, keep as is
+                $punycodeLabels[] = $label;
+            } else {
+                // Non-ASCII label, convert to punycode
+                if (function_exists('idn_to_ascii')) {
+                    $punycodeLabel = idn_to_ascii($label, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+                    if ($punycodeLabel !== false) {
+                        $punycodeLabels[] = $punycodeLabel;
+                    } else {
+                        // Fallback if conversion fails
+                        $punycodeLabels[] = $label;
+                    }
+                } else {
+                    // Fallback if idn_to_ascii not available
+                    $punycodeLabels[] = $label;
+                }
+            }
+        }
+        
+        return implode('.', $punycodeLabels);
+    }
+    
+    /**
+     * Monitor for high unknown rate patterns
+     */
+    private function monitorUnknownRate()
+    {
+        $unknownCountKey = 'domain_unknown_count_' . date('Y-m-d-H'); // Per hour
+        $currentCount = cache()->increment($unknownCountKey, 1);
+        cache()->put($unknownCountKey, $currentCount, 3600); // Update with 1 hour TTL
+        
+        // If unknown rate is high (>100 per hour), log warning
+        if ($currentCount > 100) {
+            Log::warning("High domain unknown rate detected: {$currentCount} unknown results in current hour");
+        }
+    }
+    
+    /**
+     * Record unknown results for monitoring
+     */
+    private function recordUnknownResult($hostname, $reason)
+    {
+        $statsKey = 'domain_unknown_stats_' . date('Y-m-d');
+        $stats = cache()->get($statsKey, []);
+        
+        if (!isset($stats[$reason])) {
+            $stats[$reason] = 0;
+        }
+        $stats[$reason]++;
+        
+        cache()->put($statsKey, $stats, 86400); // Keep for 24 hours
     }
 }

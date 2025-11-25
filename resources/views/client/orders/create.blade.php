@@ -158,10 +158,13 @@
                                                id="domain_name" name="domain_name" 
                                                value="{{ old('domain_name') }}"
                                                placeholder="websiteanda" required
-                                               oninput="checkDomainAvailability()">
-                                        <span class="input-group-text" id="domainStatus">
-                                            <i class="bx bx-time"></i>
-                                        </span>
+                                               oninput="updateFullDomain()"
+                                               onkeypress="handleDomainKeyPress(event)">
+                                        <button class="btn btn-outline-primary" type="button" 
+                                                id="checkDomainBtn" onclick="manualDomainCheck()"
+                                                title="Cek Ketersediaan Domain">
+                                            <i class="bx bx-search"></i> Cek
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -395,9 +398,13 @@ function updateDomainPricing() {
         // Update hidden inputs
         document.getElementById('domain_extension_id').value = domainSelect.value;
         updateFullDomain();
+        
+        // Reset domain status when extension changes
+        resetDomainStatus();
     } else {
         selectedDomainExtension = null;
         document.getElementById('domain_extension_id').value = '';
+        resetDomainStatus();
     }
     
     updatePrice();
@@ -469,11 +476,31 @@ function formatNumber(num) {
 // Domain availability checking
 let domainCheckTimeout;
 let domainCheckStartTime;
-function checkDomainAvailability() {
+
+function handleDomainKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        manualDomainCheck();
+    }
+}
+
+function resetDomainStatus() {
+    const checkBtn = document.getElementById('checkDomainBtn');
+    const messageElement = document.getElementById('domainMessage');
+    
+    checkBtn.innerHTML = '<i class="bx bx-search"></i> Cek';
+    checkBtn.disabled = false;
+    checkBtn.className = 'btn btn-outline-primary';
+    
+    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain dan pilih extension yang Anda inginkan. Domain yang termasuk dalam paket promo akan ditandai GRATIS.<br><small class="text-muted">*Pengecekan domain termasuk duplikat di sistem kami dan ketersediaan global via DNS lookup.</small>';
+    messageElement.className = 'form-text text-muted';
+}
+
+function manualDomainCheck() {
     const domainName = document.getElementById('domain_name').value.trim();
     const domainExtension = document.getElementById('domain_extension');
     const selectedOption = domainExtension.options[domainExtension.selectedIndex];
-    const statusElement = document.getElementById('domainStatus');
+    const checkBtn = document.getElementById('checkDomainBtn');
     const messageElement = document.getElementById('domainMessage');
     
     // Update full domain
@@ -483,62 +510,74 @@ function checkDomainAvailability() {
     clearTimeout(domainCheckTimeout);
     
     if (domainName.length < 3 || !domainExtension.value) {
-        statusElement.innerHTML = '<i class="bx bx-time"></i>';
-        messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain dan pilih extension yang Anda inginkan. Domain yang termasuk dalam paket promo akan ditandai GRATIS.';
-        messageElement.className = 'form-text text-muted';
+        messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Masukkan nama domain minimal 3 karakter dan pilih extension terlebih dahulu.';
+        messageElement.className = 'form-text text-warning';
         return;
     }
     
     const extension = selectedOption ? selectedOption.dataset.extension : '';
     const fullDomain = domainName + '.' + extension;
     
-    // Reset status to checking
-    statusElement.innerHTML = '<i class="bx bx-loader-alt bx-spin text-info"></i>';
-    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan domain (global)...';
+    // Update button to checking state
+    checkBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Mengecek...';
+    checkBtn.disabled = true;
+    checkBtn.className = 'btn btn-outline-info';
+    
+    // Show checking message
+    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan domain...';
     messageElement.className = 'form-text text-info';
     
-    // Debounce check with longer delay for DNS operations
-    domainCheckTimeout = setTimeout(() => {
-        domainCheckStartTime = Date.now();
-        
-        // Show loading spinner with timeout warning
-        const loadingTimeout = setTimeout(() => {
-            if (Date.now() - domainCheckStartTime > 2000) {
-                messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan global... (memerlukan beberapa detik)';
-            }
-        }, 2000);
-        
-        fetch(`/api/check-domain?domain=${encodeURIComponent(fullDomain)}`)
-            .then(response => response.json())
-            .then(data => {
-                clearTimeout(loadingTimeout);
-                
-                if (data.available) {
-                    statusElement.innerHTML = '<i class="bx bx-check text-success"></i>';
-                    messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>' + data.message;
-                    messageElement.className = 'form-text text-success';
-                } else {
-                    statusElement.innerHTML = '<i class="bx bx-x text-danger"></i>';
-                    let errorMessage = data.message;
-                    
-                    // Add specific guidance based on check type
-                    if (data.local_check === 'taken') {
-                        errorMessage += ' (duplikat di sistem kami)';
-                    } else if (data.global_check === 'taken') {
-                        errorMessage += ' (sudah digunakan secara global)';
-                    }
-                    
-                    messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>' + errorMessage + '. Silakan pilih domain lain.';
-                    messageElement.className = 'form-text text-danger';
-                }
-            })
-            .catch(error => {
-                clearTimeout(loadingTimeout);
-                statusElement.innerHTML = '<i class="bx bx-error text-warning"></i>';
-                messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Gagal mengecek domain. Silakan coba lagi.';
+    domainCheckStartTime = Date.now();
+    
+    // Show loading spinner with timeout warning
+    const loadingTimeout = setTimeout(() => {
+        if (Date.now() - domainCheckStartTime > 3000) {
+            messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan global... (memerlukan beberapa detik)';
+        }
+    }, 3000);
+    
+    fetch(`/api/check-domain?domain=${encodeURIComponent(fullDomain)}`)
+        .then(response => response.json())
+        .then(data => {
+            clearTimeout(loadingTimeout);
+            
+            if (data.available === 'unknown') {
+                checkBtn.innerHTML = '<i class="bx bx-help-circle"></i> Tidak Diketahui';
+                checkBtn.className = 'btn btn-outline-warning';
+                messageElement.innerHTML = '<i class="bx bx-help-circle me-1 text-warning"></i>' + data.message;
                 messageElement.className = 'form-text text-warning';
-            });
-    }, 1000); // Increased debounce to 1 second for DNS operations
+            } else if (data.available) {
+                checkBtn.innerHTML = '<i class="bx bx-check"></i> Tersedia';
+                checkBtn.className = 'btn btn-outline-success';
+                messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>' + data.message;
+                messageElement.className = 'form-text text-success';
+            } else {
+                checkBtn.innerHTML = '<i class="bx bx-x"></i> Tidak Tersedia';
+                checkBtn.className = 'btn btn-outline-danger';
+                let errorMessage = data.message;
+                
+                // Add specific guidance based on check type
+                if (data.local_check === 'taken') {
+                    errorMessage += ' (duplikat di sistem kami)';
+                } else if (data.global_check === 'taken') {
+                    errorMessage += ' (sudah digunakan secara global)';
+                }
+                
+                messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>' + errorMessage + '. Silakan pilih domain lain.';
+                messageElement.className = 'form-text text-danger';
+            }
+            
+            // Re-enable button for re-checking
+            checkBtn.disabled = false;
+        })
+        .catch(error => {
+            clearTimeout(loadingTimeout);
+            checkBtn.innerHTML = '<i class="bx bx-error"></i> Gagal';
+            checkBtn.className = 'btn btn-outline-warning';
+            messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Gagal mengecek domain. Silakan coba lagi.';
+            messageElement.className = 'form-text text-warning';
+            checkBtn.disabled = false;
+        });
 }
 
 // Auto-select first package if only one exists
@@ -552,6 +591,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Listen for domain name changes
 document.getElementById('domain_name').addEventListener('input', function() {
     updateFullDomain();
+    resetDomainStatus();
+});
+
+// Listen for domain extension changes
+document.getElementById('domain_extension').addEventListener('change', function() {
+    resetDomainStatus();
 });
 </script>
 @endsection

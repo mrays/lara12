@@ -56,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
     // API routes (outside client prefix for easier access)
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('packages.show');
-        Route::get('/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('check-domain');
+        Route::get('/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('check-domain')->middleware('throttle:10,1'); // 10 requests per minute
     });
 
     // Admin only
