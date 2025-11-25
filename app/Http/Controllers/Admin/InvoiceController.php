@@ -41,7 +41,7 @@ class InvoiceController extends Controller
             'invoice_no'=>'required|string|max:50|unique:invoices,number', // Fix: should be number field
             'due_date'=>'nullable|date',
             'amount'=>'required|numeric',
-            'status'=>'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
+            'status'=>'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas',
         ]);
         
         // Map form fields to database fields
@@ -108,7 +108,7 @@ class InvoiceController extends Controller
             'invoice_no'=>['required','string','max:50', \Illuminate\Validation\Rule::unique('invoices','number')->ignore($invoice->id)],
             'due_date'=>'nullable|date',
             'amount'=>'required|numeric',
-            'status'=>'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
+            'status'=>'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas',
         ]);
         
         // Map form fields to database fields

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled'])->default('Draft');
+            $table->enum('status', ['Draft', 'gagal', 'Paid', 'Overdue', 'Cancelled'])->default('Draft');
             $table->date('issue_date');
             $table->date('due_date');
             $table->date('paid_date')->nullable();

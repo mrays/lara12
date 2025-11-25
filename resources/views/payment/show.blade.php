@@ -76,7 +76,7 @@
                 </div>
             </div>
 
-            @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']))
+            @if(in_array($invoice->status, ['Unpaid', 'gagal', 'Overdue']))
                 <!-- Payment Methods Card -->
                 <div class="card">
                     <div class="card-header">
