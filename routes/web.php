@@ -182,6 +182,14 @@ Route::middleware(['auth'])->group(function () {
             ->names('admin.domain-extensions')
             ->parameters(['domain_extensions' => 'domainExtension']);
         
+        // Domain Expiration monitoring
+        Route::get('domain-expiration', [App\Http\Controllers\Admin\DomainExpirationController::class, 'index'])
+            ->name('admin.domain-expiration.index');
+        Route::post('domain-expiration/{client}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
+            ->name('admin.domain-expiration.send-reminder');
+        Route::post('domain-expiration/export', [App\Http\Controllers\Admin\DomainExpirationController::class, 'export'])
+            ->name('admin.domain-expiration.export');
+        
         // Invoice management routes
         Route::put('invoices/{invoice}/service-link', [App\Http\Controllers\InvoiceController::class, 'updateServiceLink'])
             ->name('admin.invoices.update-service-link');
