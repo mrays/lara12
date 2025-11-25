@@ -14,10 +14,27 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
+        $status = $request->query('status');
         
         // Use User model instead of Client model for consistency
         $clients = User::where('role', 'client')
-            ->when($q, fn($b) => $b->where('name','like',"%$q%")->orWhere('email','like',"%$q%"))
+            ->when($q, function($query) use ($q) {
+                $query->where(function($subQuery) use ($q) {
+                    $subQuery->where('name', 'like', "%$q%")
+                        ->orWhere('email', 'like', "%$q%")
+                        ->orWhere('whatsapp', 'like', "%$q%")
+                        ->orWhere('phone', 'like', "%$q%")
+                        // Search by domain from related services using subquery
+                        ->orWhereIn('id', function($domainQuery) use ($q) {
+                            $domainQuery->select('client_id')
+                                ->from('services')
+                                ->where('domain', 'like', "%$q%");
+                        });
+                });
+            })
+            ->when($status && $status !== 'all', function($query) use ($status) {
+                $query->where('status', $status);
+            })
             ->orderBy('created_at','desc')
             ->paginate(15)
             ->withQueryString();
