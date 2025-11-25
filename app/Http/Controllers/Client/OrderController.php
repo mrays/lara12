@@ -40,14 +40,10 @@ class OrderController extends Controller
         $user = auth()->user();
         $package = ServicePackage::findOrFail($request->package_id);
         
-        // Calculate price based on billing cycle
+        // Calculate price based on billing cycle (sama persis dengan admin service-packages)
         $basePrice = $package->base_price;
-        if ($request->billing_cycle === 'annually') {
-            // Annual price with 10% discount
-            $price = $basePrice * 12 * 0.9;
-        } else {
-            $price = $basePrice;
-        }
+        // Harga tahunan = base_price * 12 (tanpa diskon, sesuai dengan /admin/service-packages)
+        $price = $basePrice * 12;
 
         try {
             DB::beginTransaction();
@@ -60,6 +56,7 @@ class OrderController extends Controller
                 'domain' => $request->domain,
                 'price' => $price,
                 'billing_cycle' => $request->billing_cycle,
+                'registration_date' => now(),
                 'status' => 'Pending',
                 'due_date' => now()->addDays(7), // Due in 7 days for first payment
                 'notes' => $request->notes,
