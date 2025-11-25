@@ -54,7 +54,7 @@ class ClientData extends Model
     }
 
     /**
-     * Check if any service is expiring soon (within 30 days)
+     * Check if any service is expiring soon (within 60 days / 2 months)
      */
     public function isAnyServiceExpiringSoon()
     {
@@ -65,7 +65,7 @@ class ClientData extends Model
         ];
 
         foreach ($dates as $date) {
-            if ($date && $date->lte(now()->addDays(30))) {
+            if ($date && $date->lte(now()->addDays(60)) && !$date->isPast()) {
                 return true;
             }
         }

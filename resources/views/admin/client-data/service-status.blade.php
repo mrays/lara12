@@ -69,7 +69,7 @@
                         </div>
                         <div>
                             <h4 class="mb-0">{{ $overview['expiring_soon'] }}</h4>
-                            <small class="text-muted">Expiring Soon (30 days)</small>
+                            <small class="text-muted">Expiring Soon (60 days)</small>
                         </div>
                     </div>
                 </div>
@@ -249,7 +249,7 @@
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">
-                <i class="bx bx-time-five me-2"></i>Upcoming Expirations (Next 30 Days)
+                <i class="bx bx-time-five me-2"></i>Upcoming Expirations (Next 60 Days)
             </h5>
         </div>
         <div class="card-body">
@@ -272,13 +272,13 @@
                             @foreach($upcomingExpirations as $client)
                                 @php
                                     $expirations = [];
-                                    if ($client->website_service_expired && $client->website_service_expired->lte(now()->addDays(30))) {
+                                    if ($client->website_service_expired && $client->website_service_expired->lte(now()->addDays(60))) {
                                         $expirations[] = ['type' => 'Website Service', 'date' => $client->website_service_expired];
                                     }
-                                    if ($client->domain_expired && $client->domain_expired->lte(now()->addDays(30))) {
+                                    if ($client->domain_expired && $client->domain_expired->lte(now()->addDays(60))) {
                                         $expirations[] = ['type' => 'Domain', 'date' => $client->domain_expired];
                                     }
-                                    if ($client->hosting_expired && $client->hosting_expired->lte(now()->addDays(30))) {
+                                    if ($client->hosting_expired && $client->hosting_expired->lte(now()->addDays(60))) {
                                         $expirations[] = ['type' => 'Hosting', 'date' => $client->hosting_expired];
                                     }
                                 @endphp
@@ -332,8 +332,10 @@
                                                 <span class="badge bg-danger">{{ $daysRounded }} hari lagi</span>
                                             @elseif($daysRounded <= 30)
                                                 <span class="badge bg-warning">{{ $daysRounded }} hari lagi</span>
-                                            @else
+                                            @elseif($daysRounded <= 60)
                                                 <span class="badge bg-info">{{ $daysRounded }} hari lagi</span>
+                                            @else
+                                                <span class="badge bg-success">{{ $daysRounded }} hari lagi</span>
                                             @endif
                                         </td>
                                         <td>

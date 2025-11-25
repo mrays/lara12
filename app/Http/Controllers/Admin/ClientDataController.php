@@ -205,12 +205,12 @@ class ClientDataController extends Controller
                 ];
             });
 
-        // Upcoming expirations (next 30 days)
+        // Upcoming expirations (next 60 days / 2 months)
         $upcomingExpirations = ClientData::with(['server', 'domainRegister'])
             ->where(function($q) {
-                $q->where('website_service_expired', '<=', now()->addDays(30))
-                  ->orWhere('domain_expired', '<=', now()->addDays(30))
-                  ->orWhere('hosting_expired', '<=', now()->addDays(30));
+                $q->where('website_service_expired', '<=', now()->addDays(60))
+                  ->orWhere('domain_expired', '<=', now()->addDays(60))
+                  ->orWhere('hosting_expired', '<=', now()->addDays(60));
             })
             ->orderBy('domain_expired')
             ->get();
