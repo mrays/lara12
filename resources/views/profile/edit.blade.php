@@ -1,4 +1,4 @@
-@extends('layouts.sneat-dashboard')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.sneat-dashboard')
 
 @section('title', 'Edit Profile')
 
