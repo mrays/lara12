@@ -182,3 +182,26 @@ Route::post('/test/payment/callback', [App\Http\Controllers\TestPaymentControlle
 // Simple debug routes
 Route::get('/debug/connection', [App\Http\Controllers\SimpleTestController::class, 'testConnection']);
 Route::get('/debug/api-call', [App\Http\Controllers\SimpleTestController::class, 'testApiCall']);
+
+// Debug route for checking user role and middleware
+Route::get('/debug/admin-check', function () {
+    $user = auth()->user();
+    return response()->json([
+        'authenticated' => !is_null($user),
+        'user_id' => $user?->id,
+        'user_name' => $user?->name,
+        'user_role' => $user?->role,
+        'is_admin' => $user?->role === 'admin',
+        'all_middleware' => app('router')->getRoutes()->getByName('admin.domain-extensions.index')?->middleware()
+    ]);
+})->middleware('auth');
+
+// Test route to verify domain extensions works
+Route::get('/debug/domain-test', function () {
+    return response()->json([
+        'message' => 'Domain extensions route works!',
+        'route_exists' => app('router')->getRoutes()->getByName('admin.domain-extensions.index') !== null,
+        'current_url' => url()->current(),
+        'intended_url' => route('admin.domain-extensions.index')
+    ]);
+})->middleware(['auth', 'role:admin']);
