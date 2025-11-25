@@ -11,7 +11,9 @@
             <div class="card-body">
                 <div class="card-title d-flex align-items-start justify-content-between">
                     <div class="avatar flex-shrink-0">
-                        <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/chart.png') }}" alt="chart" class="rounded" />
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="bx bx-bar-chart"></i>
+                        </span>
                     </div>
                     <div class="dropdown">
                         <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -34,7 +36,9 @@
             <div class="card-body">
                 <div class="card-title d-flex align-items-start justify-content-between">
                     <div class="avatar flex-shrink-0">
-                        <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/wallet-info.png') }}" alt="Credit Card" class="rounded" />
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="bx bx-wallet"></i>
+                        </span>
                     </div>
                 </div>
                 <span>Unpaid Amount</span>
@@ -52,7 +56,9 @@
             <div class="card-body">
                 <div class="card-title d-flex align-items-start justify-content-between">
                     <div class="avatar flex-shrink-0">
-                        <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/paypal.png') }}" alt="paypal" class="rounded" />
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="bx bx-dollar-circle"></i>
+                        </span>
                     </div>
                 </div>
                 <span class="fw-semibold d-block mb-1">Paid Invoices</span>
@@ -70,7 +76,9 @@
             <div class="card-body">
                 <div class="card-title d-flex align-items-start justify-content-between">
                     <div class="avatar flex-shrink-0">
-                        <img src="{{ asset('vendor/sneat/assets/img/icons/unicons/cc-warning.png') }}" alt="Credit Card" class="rounded" />
+                        <span class="avatar-initial rounded bg-label-danger">
+                            <i class="bx bx-error-circle"></i>
+                        </span>
                     </div>
                 </div>
                 <span class="fw-semibold d-block mb-1">Overdue</span>
@@ -232,7 +240,11 @@
         
         @else
         <div class="text-center py-5">
-            <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No invoices" width="200">
+            <div class="avatar avatar-lg mb-3">
+                <span class="avatar-initial rounded bg-label-secondary">
+                    <i class="bx bx-file-blank fs-1"></i>
+                </span>
+            </div>
             <h5 class="mt-3">No invoices found</h5>
             <p class="text-muted">You don't have any invoices yet. When you have active services, invoices will appear here.</p>
             <a href="{{ route('client.dashboard') }}" class="btn btn-primary">
