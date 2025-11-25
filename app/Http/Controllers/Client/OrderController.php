@@ -69,6 +69,7 @@ class OrderController extends Controller
                 'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
+                'subtotal' => $price,
                 'total_amount' => $price,
                 'status' => 'Unpaid',
                 'due_date' => now()->addDays(7),
