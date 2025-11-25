@@ -99,6 +99,28 @@ Route::middleware(['auth'])->group(function () {
         Route::put('services/{service}/update-status', [App\Http\Controllers\AdminDashboardController::class, 'updateServiceStatus'])
             ->name('admin.services.update-status');
             
+        // Server management
+        Route::resource('servers', App\Http\Controllers\Admin\ServerController::class)
+            ->names('admin.servers');
+        Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
+            ->name('admin.servers.toggle-status');
+        Route::get('servers/{server}/password', [App\Http\Controllers\Admin\ServerController::class, 'getPassword'])
+            ->name('admin.servers.password');
+            
+        // Domain Register management
+        Route::resource('domain-registers', App\Http\Controllers\Admin\DomainRegisterController::class)
+            ->names('admin.domain-registers');
+        Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
+            ->name('admin.domain-registers.toggle-status');
+            
+        // Client Data management
+        Route::resource('client-data', App\Http\Controllers\Admin\ClientDataController::class)
+            ->names('admin.client-data');
+        Route::get('client-data/service-status', [App\Http\Controllers\Admin\ClientDataController::class, 'serviceStatus'])
+            ->name('admin.client-data.service-status');
+        Route::post('client-data/export', [App\Http\Controllers\Admin\ClientDataController::class, 'export'])
+            ->name('admin.client-data.export');
+            
         // Invoice edit routes
         Route::put('invoices/{invoice}/quick-update', [App\Http\Controllers\InvoiceController::class, 'updateInvoice'])
             ->name('admin.invoices.quick-update');
