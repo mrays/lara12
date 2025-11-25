@@ -30,15 +30,15 @@
                                                id="extension" 
                                                name="extension" 
                                                value="{{ old('extension') }}" 
-                                               placeholder="com, id, org, net"
+                                               placeholder="com, id, co.id, go.id, ac.id"
                                                required
-                                               pattern="[a-z0-9-]+"
-                                               title="Hanya huruf kecil, angka, dan dash (-)">
+                                               pattern="[a-z0-9.-]+"
+                                               title="Hanya huruf kecil, angka, titik, dan dash (-)">
                                     </div>
                                     @error('extension')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Contoh: com, id, org, net</small>
+                                    <small class="form-text text-muted">Contoh: com, id, org, net, co.id, go.id, ac.id</small>
                                 </div>
                             </div>
                             
@@ -165,7 +165,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-format extension input
     const extensionInput = document.getElementById('extension');
     extensionInput.addEventListener('input', function(e) {
-        e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        // Remove invalid characters, allow letters, numbers, dots, and dashes
+        let value = e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, '');
+        // Prevent multiple consecutive dots
+        value = value.replace(/\.{2,}/g, '.');
+        // Prevent leading or trailing dots
+        value = value.replace(/^\.+|\.+$/g, '');
+        e.target.value = value;
     });
 });
 </script>
