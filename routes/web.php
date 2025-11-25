@@ -46,6 +46,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/services/{service}/manage', [App\Http\Controllers\ServiceManagementController::class, 'show'])->name('services.manage');
         Route::post('/services/{service}/update', [App\Http\Controllers\ServiceManagementController::class, 'update'])->name('services.update');
         Route::post('/services/{service}/support', [App\Http\Controllers\ServiceManagementController::class, 'contactSupport'])->name('services.support');
+        
+        // Client order routes
+        Route::get('/orders/create', [App\Http\Controllers\Client\OrderController::class, 'create'])->name('orders.create');
+        Route::post('/orders', [App\Http\Controllers\Client\OrderController::class, 'store'])->name('orders.store');
+        Route::get('/orders/{invoice}/success', [App\Http\Controllers\Client\OrderController::class, 'success'])->name('orders.success');
+        Route::get('/api/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('api.packages.show');
     });
 
     // Admin only
