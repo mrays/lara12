@@ -19,7 +19,7 @@ class IsAdmin
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
             }
-            return redirect()->route('client.dashboard')->with('error', 'Akses ditolak: Admin saja.');
+            abort(403, 'Akses ditolak: Admin saja.');
         }
 
         return $next($request);
