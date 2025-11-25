@@ -23,6 +23,7 @@ class ServiceUpgradeRequest extends Model
         'admin_notes',
         'processed_by',
         'processed_at',
+        'request_type', // 'upgrade' or 'cancellation'
     ];
 
     protected $casts = [
@@ -89,6 +90,7 @@ class ServiceUpgradeRequest extends Model
             'approved' => 'bg-success',
             'rejected' => 'bg-danger',
             'processing' => 'bg-info',
+            'cancelled' => 'bg-secondary',
             default => 'bg-secondary'
         };
     }
@@ -103,6 +105,7 @@ class ServiceUpgradeRequest extends Model
             'approved' => 'Disetujui',
             'rejected' => 'Ditolak',
             'processing' => 'Sedang Diproses',
+            'cancelled' => 'Dibatalkan',
             default => 'Unknown'
         };
     }
@@ -157,5 +160,46 @@ class ServiceUpgradeRequest extends Model
             'processed_by' => $adminId,
             'processed_at' => now(),
         ]);
+    }
+
+    /**
+     * Create a cancellation request
+     */
+    public static function createCancellationRequest($serviceId, $clientId, $reason = null)
+    {
+        $service = Service::findOrFail($serviceId);
+        
+        return self::create([
+            'service_id' => $serviceId,
+            'client_id' => $clientId,
+            'current_plan' => $service->product,
+            'requested_plan' => 'CANCELLED',
+            'current_price' => $service->price,
+            'requested_price' => 0,
+            'upgrade_reason' => 'Cancellation Request',
+            'additional_notes' => $reason,
+            'status' => 'pending',
+            'request_type' => 'cancellation',
+        ]);
+    }
+
+    /**
+     * Check if this is a cancellation request
+     */
+    public function isCancellation()
+    {
+        return $this->request_type === 'cancellation';
+    }
+
+    /**
+     * Get request type text
+     */
+    public function getRequestTypeTextAttribute()
+    {
+        return match($this->request_type) {
+            'upgrade' => 'Upgrade',
+            'cancellation' => 'Pembatalan',
+            default => 'Unknown'
+        };
     }
 }

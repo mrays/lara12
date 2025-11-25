@@ -107,19 +107,6 @@
             </div>
         @endforelse
     </div>
-
-    <!-- Pagination -->
-    @if($services->hasPages())
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        {{ $services->links() }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 </div>
 
 <script>

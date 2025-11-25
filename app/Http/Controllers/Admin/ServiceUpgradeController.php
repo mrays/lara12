@@ -44,6 +44,7 @@ class ServiceUpgradeController extends Controller
             'approved' => ServiceUpgradeRequest::where('status', 'approved')->count(),
             'rejected' => ServiceUpgradeRequest::where('status', 'rejected')->count(),
             'processing' => ServiceUpgradeRequest::where('status', 'processing')->count(),
+            'cancelled' => ServiceUpgradeRequest::where('status', 'cancelled')->count(),
         ];
 
         return view('admin.upgrade-requests.index', compact('upgradeRequests', 'statusCounts'));

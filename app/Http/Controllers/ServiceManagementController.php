@@ -108,11 +108,11 @@ class ServiceManagementController extends Controller
         $user = Auth::user();
         
         if ($user->role === 'admin') {
-            $services = Service::with('client')->orderBy('created_at', 'desc')->paginate(10);
+            $services = Service::with('client')->orderBy('created_at', 'desc')->get();
         } else {
             $services = Service::where('client_id', $user->id)
                 ->orderBy('created_at', 'desc')
-                ->paginate(10);
+                ->get();
         }
 
         return view('client.services.index', compact('services'));

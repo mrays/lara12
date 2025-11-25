@@ -185,6 +185,7 @@
                                     <input type="checkbox" id="selectAll" class="form-check-input">
                                 </th>
                                 <th>Request ID</th>
+                                <th>Type</th>
                                 <th>Client</th>
                                 <th>Service</th>
                                 <th>Current → Requested</th>
@@ -204,6 +205,17 @@
                                 </td>
                                 <td>
                                     <strong>#{{ $request->id }}</strong>
+                                </td>
+                                <td>
+                                    @if($request->request_type === 'cancellation')
+                                        <span class="badge bg-danger">
+                                            <i class="bx bx-x-circle me-1"></i>Pembatalan
+                                        </span>
+                                    @else
+                                        <span class="badge bg-primary">
+                                            <i class="bx bx-up-arrow-alt me-1"></i>Upgrade
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($request->client)

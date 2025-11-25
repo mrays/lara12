@@ -746,12 +746,44 @@ function upgradePlan() {
 }
 
 function cancelSubscription() {
-    if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
-        showToast('Processing cancellation request...', 'warning');
-        setTimeout(() => {
-            alert('Cancellation request submitted. Our team will contact you shortly.');
-        }, 1000);
+    // Show cancellation reason modal
+    const reason = prompt('Please provide a reason for cancellation:');
+    if (!reason || reason.trim() === '') {
+        showToast('Cancellation reason is required.', 'warning');
+        return;
     }
+    
+    // Show loading
+    showToast('Processing cancellation request...', 'warning');
+    
+    // Submit cancellation request
+    fetch(`/services/{{ $service->id }}/cancellation-request`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            cancellation_reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Cancellation request submitted successfully! Our admin team will review it shortly.', 'success');
+            
+            // Optionally refresh the page after a delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showToast(data.message || 'Failed to submit cancellation request', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred while submitting your request', 'danger');
+    });
 }
 
 // Billing is now fixed to annually only

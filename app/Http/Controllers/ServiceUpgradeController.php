@@ -56,6 +56,7 @@ class ServiceUpgradeController extends Controller
                 'upgrade_reason' => $validated['upgrade_reason'],
                 'additional_notes' => $validated['additional_notes'],
                 'status' => 'pending',
+                'request_type' => 'upgrade',
             ]);
 
             // TODO: Send notification to admin (implement later)
@@ -166,6 +167,63 @@ class ServiceUpgradeController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to cancel upgrade request.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Submit cancellation request from client
+     */
+    public function submitCancellationRequest(Request $request, Service $service)
+    {
+        // Validate that the service belongs to the authenticated user
+        if ($service->client_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this service.'
+            ], 403);
+        }
+
+        // Validate request data
+        $validated = $request->validate([
+            'cancellation_reason' => 'required|string|max:1000',
+        ]);
+
+        // Check if there's already a pending request for this service
+        $existingRequest = ServiceUpgradeRequest::where('service_id', $service->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have a pending request for this service. Please wait for admin approval.'
+            ], 400);
+        }
+
+        try {
+            // Create cancellation request
+            $cancellationRequest = ServiceUpgradeRequest::createCancellationRequest(
+                $service->id,
+                Auth::id(),
+                $validated['cancellation_reason']
+            );
+
+            // TODO: Send notification to admin (implement later)
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Cancellation request submitted successfully! Our admin team will review it shortly.',
+                'request_id' => $cancellationRequest->id
+            ]);
+
+        } catch (\Exception $e) {
+            // Log the actual error for debugging
+            \Log::error('Cancellation request submission failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit cancellation request: ' . $e->getMessage()
             ], 500);
         }
     }
