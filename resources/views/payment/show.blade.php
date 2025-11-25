@@ -12,7 +12,7 @@
                     <h5 class="mb-0">
                         <i class="bx bx-receipt me-2"></i>Invoice Payment
                     </h5>
-                    <span class="badge bg-{{ $invoice->status == 'Paid' || $invoice->status == 'Lunas' ? 'success' : ($invoice->status == 'Overdue' ? 'danger' : 'warning') }}">{{ $invoice->status }}</span>
+                    <span class="badge bg-{{ $invoice->status == 'Paid' || $invoice->status == 'Lunas' ? 'success' : ($invoice->status == 'Overdue' ? 'danger' : ($invoice->status == 'gagal' ? 'info' : 'warning')) }}">{{ $invoice->status }}</span>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -25,6 +25,10 @@
                             @if($invoice->status == 'Overdue')
                                 <p class="mb-1 text-danger">
                                     <strong>Status:</strong> Overdue
+                                </p>
+                            @elseif($invoice->status == 'gagal')
+                                <p class="mb-1 text-info">
+                                    <strong>Status:</strong> gagal
                                 </p>
                             @endif
                         </div>

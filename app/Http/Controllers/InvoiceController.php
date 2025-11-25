@@ -330,7 +330,7 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, $invoiceId)
     {
         $request->validate([
-            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas'
+            'status' => 'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas'
         ]);
 
         $updated = \DB::table('invoices')
