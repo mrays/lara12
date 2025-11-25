@@ -226,18 +226,7 @@
             </table>
         </div>
         
-        <!-- Pagination -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <div>
-                <small class="text-muted">
-                    Showing {{ $invoices->firstItem() }} to {{ $invoices->lastItem() }} of {{ $invoices->total() }} results
-                </small>
-            </div>
-            <div>
-                {{ $invoices->links() }}
-            </div>
-        </div>
-        
+                
         @else
         <div class="text-center py-5">
             <div class="avatar avatar-lg mb-3">
