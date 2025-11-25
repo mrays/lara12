@@ -286,9 +286,9 @@
                                             <h5 class="mb-1">Your Current Plan is {{ $service->product ?? 'Basic' }}</h5>
                                             <p class="text-muted mb-3">
                                                 @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
-                                                    Annual subscription with better value
+                                                    Berlangganan tahunan dengan nilai lebih baik
                                                 @else
-                                                    Monthly subscription plan
+                                                    Paket berlangganan bulanan
                                                 @endif
                                             </p>
                                             
@@ -301,11 +301,11 @@
                                                 <span class="badge bg-label-primary me-2">
                                                     {{ $service->price ? 'Rp ' . number_format($service->price, 0, ',', '.') : 'Rp 199.000' }} 
                                                     @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
-                                                        Per Year
+                                                        Per Tahun
                                                     @elseif($service->billing_cycle === 'monthly')
-                                                        Per Month
+                                                        Per Bulan
                                                     @else
-                                                        Per {{ ucfirst($service->billing_cycle ?? 'Month') }}
+                                                        /{{ $service->translated_billing_cycle }}
                                                     @endif
                                                 </span>
                                                 <span class="badge bg-label-info">Popular</span>
@@ -313,9 +313,9 @@
                                             
                                             <p class="text-muted mb-3">
                                                 @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
-                                                    Annual plan with cost savings for long-term commitment
+                                                    Paket tahunan dengan penghematan biaya untuk komitmen jangka panjang
                                                 @else
-                                                    Flexible monthly plan for small to medium businesses
+                                                    Paket bulanan yang fleksibel untuk bisnis kecil hingga menengah
                                                 @endif
                                             </p>
                                             
