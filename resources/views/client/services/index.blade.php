@@ -59,7 +59,7 @@
 
                         <div class="mb-3">
                             <small class="text-muted">Billing Cycle:</small>
-                            <div>{{ ucfirst($service->billing_cycle) }} - Rp {{ number_format($service->price, 0, ',', '.') }}</div>
+                            <div>{{ $service->translated_billing_cycle }} - Rp {{ number_format($service->price, 0, ',', '.') }}</div>
                         </div>
 
                         <div class="mb-3">

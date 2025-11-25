@@ -97,6 +97,30 @@ class Service extends Model
     }
 
     // Methods
+    public function getTranslatedBillingCycleAttribute()
+    {
+        $cycleMap = [
+            '1D' => '1 Hari',
+            '1W' => '1 Minggu',
+            '2W' => '2 Minggu',
+            '3W' => '3 Minggu',
+            '1M' => '1 Bulan',
+            '2M' => '2 Bulan',
+            '3M' => '3 Bulan',
+            '6M' => '6 Bulan',
+            '1Y' => '1 Tahun',
+            '2Y' => '2 Tahun',
+            '3Y' => '3 Tahun',
+            'Monthly' => 'Bulanan',
+            'Quarterly' => 'Triwulan',
+            'Semi-Annually' => 'Semester',
+            'Annually' => 'Tahunan',
+            'Biennially' => '2 Tahunan',
+        ];
+
+        return $cycleMap[$this->billing_cycle] ?? $this->billing_cycle;
+    }
+
     public function generateRenewalInvoice()
     {
         $invoice = Invoice::create([
