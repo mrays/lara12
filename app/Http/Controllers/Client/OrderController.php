@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ServicePackage;
+use App\Models\DomainExtension;
 use App\Models\Service;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -19,10 +21,39 @@ class OrderController extends Controller
     public function create()
     {
         $packages = ServicePackage::where('is_active', true)
+            ->with('domainExtension')
             ->orderBy('base_price', 'asc')
             ->get();
             
-        return view('client.orders.create', compact('packages'));
+        $domainExtensions = DomainExtension::active()
+            ->orderBy('extension')
+            ->orderBy('duration_years')
+            ->get();
+            
+        // Group domain extensions by extension for better organization
+        $groupedDomains = $domainExtensions->groupBy('extension');
+            
+        return view('client.orders.create', compact('packages', 'domainExtensions', 'groupedDomains'));
+    }
+
+    /**
+     * Calculate domain price with promo validation
+     */
+    private function calculateDomainPrice($package, $domainExtension, $selectedDomainId)
+    {
+        // Check if package has domain promo and selected domain matches
+        if ($package->domain_extension_id && $package->domain_extension_id == $selectedDomainId) {
+            // Domain is included in package promo
+            if ($package->is_domain_free) {
+                return 0; // Free domain
+            } else {
+                // Apply package discount
+                return $domainExtension->price * (1 - $package->domain_discount_percent / 100);
+            }
+        }
+        
+        // Domain not included in package, charge full price
+        return $domainExtension->price;
     }
 
     /**
@@ -32,20 +63,33 @@ class OrderController extends Controller
     {
         $request->validate([
             'package_id' => 'required|exists:service_packages,id',
-            'domain' => 'required|string|max:255|unique:services,domain',
+            'domain_name' => 'required|string|max:255',
+            'domain_extension' => 'required|exists:domain_extensions,id',
+            'domain_full' => 'required|string|max:255|unique:services,domain',
             'billing_cycle' => 'required|in:monthly,annually',
             'notes' => 'nullable|string|max:1000',
         ]);
 
         $user = auth()->user();
-        $package = ServicePackage::findOrFail($request->package_id);
+        $package = ServicePackage::with('domainExtension')->findOrFail($request->package_id);
+        $domainExtension = DomainExtension::findOrFail($request->domain_extension);
         
-        // Calculate price based on billing cycle using the model method
-        $price = $package->getPrice($request->billing_cycle);
+        // Calculate package price
+        $packagePrice = $package->getPrice($request->billing_cycle);
+        
+        // Calculate domain price with promo validation
+        $domainPrice = $this->calculateDomainPrice($package, $domainExtension, $request->domain_extension);
+        
+        // Total price
+        $totalPrice = $packagePrice + $domainPrice;
         
         // Ensure price is not null
-        if (is_null($price)) {
-            $price = 0;
+        if (is_null($packagePrice)) {
+            $packagePrice = 0;
+        }
+        
+        if (is_null($totalPrice)) {
+            $totalPrice = 0;
         }
 
         try {
@@ -56,8 +100,8 @@ class OrderController extends Controller
                 'client_id' => $user->id,
                 'package_id' => $package->id,
                 'product' => $package->name,
-                'domain' => $request->domain,
-                'price' => $price,
+                'domain' => $request->domain_full,
+                'price' => $totalPrice,
                 'billing_cycle' => $request->billing_cycle,
                 'registration_date' => now(),
                 'status' => 'Pending',
@@ -74,12 +118,12 @@ class OrderController extends Controller
                 'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
-                'subtotal' => $price,
-                'total_amount' => $price,
+                'subtotal' => $totalPrice,
+                'total_amount' => $totalPrice,
                 'status' => 'Unpaid',
                 'issue_date' => now()->toDateString(),
                 'due_date' => now()->addDays(7),
-                'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
+                'description' => "Order: {$package->name} - {$request->domain_full} ({$request->billing_cycle})",
                 'notes' => $request->notes,
             ]);
 

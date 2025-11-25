@@ -59,6 +59,11 @@
                                      data-package-id="{{ $package->id }}"
                                      data-package-name="{{ $package->name }}"
                                      data-base-price="{{ $package->base_price }}"
+                                     data-domain-promo="{{ $package->domainExtension ? 'true' : 'false' }}"
+                                     data-domain-extension-id="{{ $package->domain_extension_id ?? '' }}"
+                                     data-domain-duration="{{ $package->domain_duration_years ?? '' }}"
+                                     data-domain-discount="{{ $package->domain_discount_percent ?? 0 }}"
+                                     data-domain-free="{{ $package->is_domain_free ? 'true' : 'false' }}"
                                      onclick="selectPackage({{ $package->id }})">
                                     
                                     @if($index === 1)
@@ -142,28 +147,58 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label for="domain" class="form-label">
+                            <label for="domain_name" class="form-label">
                                 Nama Domain <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group">
-                                <span class="input-group-text">https://</span>
-                                <input type="text" class="form-control @error('domain') is-invalid @enderror" 
-                                       id="domain" name="domain" 
-                                       value="{{ old('domain') }}"
-                                       placeholder="contoh: websiteanda.com" required
-                                       oninput="checkDomainAvailability()">
-                                <span class="input-group-text" id="domainStatus">
-                                    <i class="bx bx-time"></i>
-                                </span>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">https://</span>
+                                        <input type="text" class="form-control @error('domain_name') is-invalid @enderror" 
+                                               id="domain_name" name="domain_name" 
+                                               value="{{ old('domain_name') }}"
+                                               placeholder="websiteanda" required
+                                               oninput="checkDomainAvailability()">
+                                        <span class="input-group-text" id="domainStatus">
+                                            <i class="bx bx-time"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select @error('domain_extension') is-invalid @enderror" 
+                                            id="domain_extension" 
+                                            name="domain_extension"
+                                            onchange="updateDomainPricing()">
+                                        <option value="">Pilih Extension</option>
+                                        @foreach($groupedDomains as $extension => $domains)
+                                            <optgroup label=".{{ $extension }}">
+                                                @foreach($domains as $domain)
+                                                    <option value="{{ $domain->id }}" 
+                                                            data-price="{{ $domain->price }}"
+                                                            data-extension="{{ $domain->extension }}"
+                                                            data-duration="{{ $domain->duration_years }}"
+                                                            {{ old('domain_extension') == $domain->id ? 'selected' : '' }}>
+                                                        .{{ $domain->extension }} ({{ $domain->duration_years }} tahun) - {{ $domain->formatted_price }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-                            @error('domain')
+                            @error('domain_name')
+                                <div class="text-danger small mt-1">
+                                    <i class="bx bx-error-circle me-1"></i>{{ $message }}
+                                </div>
+                            @enderror
+                            @error('domain_extension')
                                 <div class="text-danger small mt-1">
                                     <i class="bx bx-error-circle me-1"></i>{{ $message }}
                                 </div>
                             @enderror
                             <div class="form-text" id="domainMessage">
                                 <i class="bx bx-info-circle me-1"></i>
-                                Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.
+                                Masukkan nama domain dan pilih extension yang Anda inginkan. Domain yang termasuk dalam paket promo akan ditandai GRATIS.
                                 <br><small class="text-muted">*Pengecekan domain termasuk duplikat di sistem kami dan ketersediaan global via DNS lookup.</small>
                             </div>
                         </div>
@@ -219,9 +254,18 @@
 
                             <!-- Price Breakdown -->
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Harga Paket/Bulan:</span>
+                                <span class="text-muted">Harga Paket/Tahun:</span>
                                 <span id="summaryBasePrice">Rp 0</span>
                             </div>
+                            
+                            <!-- Domain Pricing -->
+                            <div id="domainPricingSection" class="d-none">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted" id="domainLabel">Domain:</span>
+                                    <span id="summaryDomainPrice">Rp 0</span>
+                                </div>
+                            </div>
+                            
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Periode:</span>
                                 <span>12 Bulan</span>
@@ -235,6 +279,8 @@
                             </div>
 
                             <input type="hidden" name="billing_cycle" value="annually">
+                            <input type="hidden" name="domain_full" id="domain_full" value="">
+                            <input type="hidden" name="domain_extension_id" id="domain_extension_id" value="">
 
                             <!-- Submit Button -->
                             <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn" disabled>
@@ -279,6 +325,7 @@
 
 <script>
 let selectedPackage = null;
+let selectedDomainExtension = null;
 
 function selectPackage(packageId) {
     // Remove selected class from all cards
@@ -290,14 +337,24 @@ function selectPackage(packageId) {
     const selectedCard = document.querySelector(`[data-package-id="${packageId}"]`);
     selectedCard.classList.add('selected');
     
-    // Get package data
+    // Get package data from data attributes
     const packageName = selectedCard.dataset.packageName;
     const basePrice = parseFloat(selectedCard.dataset.basePrice);
+    const hasDomainPromo = selectedCard.dataset.domainPromo === 'true';
+    const domainExtensionId = selectedCard.dataset.domainExtensionId || '';
+    const domainDuration = selectedCard.dataset.domainDuration || '';
+    const domainDiscount = parseFloat(selectedCard.dataset.domainDiscount) || 0;
+    const isDomainFree = selectedCard.dataset.domainFree === 'true';
     
     selectedPackage = {
         id: packageId,
         name: packageName,
-        basePrice: basePrice
+        basePrice: basePrice,
+        hasDomainPromo: hasDomainPromo,
+        domainExtensionId: domainExtensionId,
+        domainDuration: domainDuration,
+        domainDiscount: domainDiscount,
+        isDomainFree: isDomainFree
     };
     
     // Update hidden input
@@ -310,6 +367,12 @@ function selectPackage(packageId) {
     // Update summary
     document.getElementById('summaryPackage').textContent = packageName;
     
+    // Auto-select domain if package has promo
+    if (hasDomainPromo && domainExtensionId) {
+        document.getElementById('domain_extension').value = domainExtensionId;
+        updateDomainPricing();
+    }
+    
     // Update price
     updatePrice();
     
@@ -317,15 +380,85 @@ function selectPackage(packageId) {
     document.getElementById('submitBtn').disabled = false;
 }
 
+function updateDomainPricing() {
+    const domainSelect = document.getElementById('domain_extension');
+    const selectedOption = domainSelect.options[domainSelect.selectedIndex];
+    
+    if (domainSelect.value) {
+        selectedDomainExtension = {
+            id: domainSelect.value,
+            extension: selectedOption.dataset.extension,
+            duration: selectedOption.dataset.duration,
+            price: parseFloat(selectedOption.dataset.price)
+        };
+        
+        // Update hidden inputs
+        document.getElementById('domain_extension_id').value = domainSelect.value;
+        updateFullDomain();
+    } else {
+        selectedDomainExtension = null;
+        document.getElementById('domain_extension_id').value = '';
+    }
+    
+    updatePrice();
+}
+
+function updateFullDomain() {
+    const domainName = document.getElementById('domain_name').value.trim();
+    const domainExtension = document.getElementById('domain_extension');
+    const selectedOption = domainExtension.options[domainExtension.selectedIndex];
+    
+    if (domainName && domainExtension.value && selectedOption) {
+        const extension = selectedOption.dataset.extension;
+        const fullDomain = domainName + '.' + extension;
+        document.getElementById('domain_full').value = fullDomain;
+    } else {
+        document.getElementById('domain_full').value = '';
+    }
+}
+
 function updatePrice() {
     if (!selectedPackage) return;
     
     const basePrice = selectedPackage.basePrice;
+    let domainPrice = 0;
+    let domainLabel = 'Domain:';
     
-    // Harga = base_price langsung (tanpa dikali 12)
-    const totalPrice = basePrice;
+    // Calculate domain price
+    if (selectedDomainExtension) {
+        if (selectedPackage.hasDomainPromo && selectedPackage.domainExtensionId == selectedDomainExtension.id) {
+            // Domain is included in package promo
+            if (selectedPackage.isDomainFree) {
+                domainPrice = 0;
+                domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+            } else {
+                // Apply package discount
+                domainPrice = selectedDomainExtension.price * (1 - selectedPackage.domainDiscount / 100);
+                domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+            }
+        } else {
+            // Domain not included in package, charge full price
+            domainPrice = selectedDomainExtension.price;
+            domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+        }
+    }
     
+    // Calculate total
+    const totalPrice = basePrice + domainPrice;
+    
+    // Update price display
     document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(basePrice);
+    
+    // Show/hide domain pricing section
+    const domainPricingSection = document.getElementById('domainPricingSection');
+    if (selectedDomainExtension) {
+        domainPricingSection.classList.remove('d-none');
+        document.getElementById('domainLabel').textContent = domainLabel;
+        document.getElementById('summaryDomainPrice').textContent = domainPrice === 0 ? 'FREE' : 'Rp ' + formatNumber(domainPrice);
+    } else {
+        domainPricingSection.classList.add('d-none');
+    }
+    
     document.getElementById('summaryTotal').textContent = 'Rp ' + formatNumber(totalPrice);
 }
 
@@ -337,19 +470,27 @@ function formatNumber(num) {
 let domainCheckTimeout;
 let domainCheckStartTime;
 function checkDomainAvailability() {
-    const domain = document.getElementById('domain').value.trim();
+    const domainName = document.getElementById('domain_name').value.trim();
+    const domainExtension = document.getElementById('domain_extension');
+    const selectedOption = domainExtension.options[domainExtension.selectedIndex];
     const statusElement = document.getElementById('domainStatus');
     const messageElement = document.getElementById('domainMessage');
+    
+    // Update full domain
+    updateFullDomain();
     
     // Clear timeout
     clearTimeout(domainCheckTimeout);
     
-    if (domain.length < 3) {
+    if (domainName.length < 3 || !domainExtension.value) {
         statusElement.innerHTML = '<i class="bx bx-time"></i>';
-        messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.';
+        messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain dan pilih extension yang Anda inginkan. Domain yang termasuk dalam paket promo akan ditandai GRATIS.';
         messageElement.className = 'form-text text-muted';
         return;
     }
+    
+    const extension = selectedOption ? selectedOption.dataset.extension : '';
+    const fullDomain = domainName + '.' + extension;
     
     // Reset status to checking
     statusElement.innerHTML = '<i class="bx bx-loader-alt bx-spin text-info"></i>';
@@ -367,7 +508,7 @@ function checkDomainAvailability() {
             }
         }, 2000);
         
-        fetch(`/api/check-domain?domain=${encodeURIComponent(domain)}`)
+        fetch(`/api/check-domain?domain=${encodeURIComponent(fullDomain)}`)
             .then(response => response.json())
             .then(data => {
                 clearTimeout(loadingTimeout);
@@ -406,6 +547,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (packages.length === 1) {
         selectPackage(packages[0].dataset.packageId);
     }
+});
+
+// Listen for domain name changes
+document.getElementById('domain_name').addEventListener('input', function() {
+    updateFullDomain();
 });
 </script>
 @endsection
