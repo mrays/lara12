@@ -167,7 +167,7 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{{ route('admin.domain-expiration.send-reminder', $client) }}" target="_blank">
+                                        <form method="POST" action="{{ route('admin.domain-expiration.send-reminder', $client->id) }}" target="_blank">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-warning">
                                                 <i class="bx bx-bell me-1"></i>Send Reminder
@@ -277,7 +277,7 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <form method="POST" action="{{ route('admin.domain-expiration.send-reminder', $client) }}" target="_blank">
+                                                        <form method="POST" action="{{ route('admin.domain-expiration.send-reminder', $client->id) }}" target="_blank">
                                                             @csrf
                                                             <button type="submit" class="dropdown-item">
                                                                 <i class="bx bx-bell me-2"></i>Send Reminder
@@ -285,12 +285,12 @@
                                                         </form>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('admin.client-data.edit', $client) }}" class="dropdown-item">
+                                                        <a href="{{ route('admin.client-data.edit', $client->id) }}" class="dropdown-item">
                                                             <i class="bx bx-edit me-2"></i>Edit Client
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('admin.client-data.show', $client) }}" class="dropdown-item">
+                                                        <a href="{{ route('admin.client-data.show', $client->id) }}" class="dropdown-item">
                                                             <i class="bx bx-show me-2"></i>View Details
                                                         </a>
                                                     </li>

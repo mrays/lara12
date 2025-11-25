@@ -130,13 +130,26 @@ class DomainExpirationController extends Controller
     /**
      * Send renewal reminder for client domain
      */
-    public function sendReminder(ClientData $client)
+    public function sendReminder($clientId)
     {
+        // Get client data using MySQL query
+        $client = DB::select('SELECT * FROM client_data WHERE id = ?', [$clientId]);
+        
+        if (empty($client)) {
+            return redirect()->route('admin.domain-expiration.index')
+                ->with('error', 'Client not found');
+        }
+        
+        $client = $client[0]; // Get first result
+        
+        // Convert date strings to Carbon objects
+        $domainExpired = new Carbon($client->domain_expired);
+        
         // Create WhatsApp message for renewal reminder
         $message = "Halo {$client->name},\n\n" .
                   "Ini adalah pengingat bahwa domain Anda akan segera expired:\n" .
-                  "📅 Tanggal Expired: {$client->domain_expired->format('d F Y')}\n" .
-                  "⏰ {$client->domain_expired->diffInDays(now())} hari lagi\n\n" .
+                  "📅 Tanggal Expired: {$domainExpired->format('d F Y')}\n" .
+                  "⏰ {$domainExpired->diffInDays(now())} hari lagi\n\n" .
                   "Silakan lakukan perpanjangan sebelum tanggal kadaluarsa untuk menghindari downtime.\n\n" .
                   "Terima kasih.";
         

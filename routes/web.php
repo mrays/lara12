@@ -187,7 +187,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.domain-expiration.index');
         Route::get('domain-expiration/guide', [App\Http\Controllers\Admin\DomainExpirationController::class, 'guide'])
             ->name('admin.domain-expiration.guide');
-        Route::post('domain-expiration/{client}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
+        Route::post('domain-expiration/{clientId}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
             ->name('admin.domain-expiration.send-reminder');
         Route::post('domain-expiration/export', [App\Http\Controllers\Admin\DomainExpirationController::class, 'export'])
             ->name('admin.domain-expiration.export');
