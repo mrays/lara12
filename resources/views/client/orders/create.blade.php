@@ -83,8 +83,8 @@
 
                                         <!-- Price -->
                                         <div class="mb-3">
-                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price * 12 * 0.9 }}">
-                                                Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}
+                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price * 12 }}">
+                                                Rp {{ number_format($package->base_price * 12, 0, ',', '.') }}
                                             </h3>
                                             <small class="text-muted">/tahun</small>
                                         </div>
@@ -202,9 +202,9 @@
                                 <div class="d-flex gap-2">
                                     <div class="form-check flex-fill">
                                         <input class="form-check-input" type="radio" name="billing_cycle" 
-                                               id="billingAnnual" value="annually" checked onchange="updatePrice()">
+                                               id="billingAnnual" value="annually" checked>
                                         <label class="form-check-label" for="billingAnnual">
-                                            Tahunan <span class="badge bg-success">Hemat 10%</span>
+                                            Tahunan
                                         </label>
                                     </div>
                                 </div>
@@ -214,12 +214,12 @@
 
                             <!-- Price Breakdown -->
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Harga Paket:</span>
+                                <span class="text-muted">Harga Paket/Bulan:</span>
                                 <span id="summaryBasePrice">Rp 0</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2" id="discountRow">
-                                <span class="text-muted">Diskon (10%):</span>
-                                <span class="text-success" id="summaryDiscount">- Rp 0</span>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Periode:</span>
+                                <span>12 Bulan</span>
                             </div>
 
                             <hr>
@@ -316,18 +316,11 @@ function updatePrice() {
     if (!selectedPackage) return;
     
     const basePrice = selectedPackage.basePrice;
-    const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'annually';
     
-    let totalPrice, discount;
+    // Harga tahunan = base_price * 12 (sama persis dengan /admin/service-packages)
+    const totalPrice = basePrice * 12;
     
-    // Always use annual pricing (fixed to annually)
-    totalPrice = basePrice * 12 * 0.9;
-    discount = basePrice * 12 * 0.1;
-    
-    document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(basePrice * 12);
-    document.getElementById('summaryDiscount').textContent = '- Rp ' + formatNumber(discount);
-    document.getElementById('discountRow').classList.remove('d-none');
-    
+    document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(basePrice);
     document.getElementById('summaryTotal').textContent = 'Rp ' + formatNumber(totalPrice);
 }
 
