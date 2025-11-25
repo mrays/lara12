@@ -257,7 +257,7 @@
                     </div>
                     <div class="mb-3">
                         <small class="text-muted">Billing Cycle:</small>
-                        <div>{{ ucfirst($request->service->billing_cycle) }}</div>
+                        <div>{{ $request->service->translated_billing_cycle }}</div>
                     </div>
                     @if($request->service->due_date)
                         <div class="mb-3">

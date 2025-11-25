@@ -427,7 +427,7 @@
                                     <table class="table table-borderless">
                                         <tr>
                                             <td><strong>Billing Cycle:</strong></td>
-                                            <td>{{ ucfirst($service->billing_cycle) }}</td>
+                                            <td>{{ $service->translated_billing_cycle }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Price:</strong></td>

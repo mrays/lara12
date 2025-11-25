@@ -194,7 +194,7 @@
                                 <td>
                                     <span class="fw-semibold">${{ number_format($service->price, 2) }}</span>
                                     <br>
-                                    <small class="text-muted">{{ $service->billing_cycle }}</small>
+                                    <small class="text-muted">{{ $service->translated_billing_cycle }}</small>
                                 </td>
                                 <td>{{ $service->due_date }}</td>
                                 <td>

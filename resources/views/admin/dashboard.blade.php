@@ -271,7 +271,7 @@
                                     <td>
                                         <div>
                                             <h6 class="mb-0">{{ $service->name ?? $service->product ?? 'Service' }}</h6>
-                                            <small class="text-muted">{{ $service->billing_cycle ?? 'Monthly' }}</small>
+                                            <small class="text-muted">{{ $service->translated_billing_cycle ?? 'Bulanan' }}</small>
                                         </div>
                                     </td>
                                     <td>
