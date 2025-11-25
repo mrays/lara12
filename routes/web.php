@@ -108,36 +108,44 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.servers.password');
         Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
             ->name('admin.servers.toggle-status');
-        Route::resource('servers', App\Http\Controllers\Admin\ServerController::class, [
-            'names' => [
-                'index' => 'admin.servers.index',
-                'create' => 'admin.servers.create',
-                'store' => 'admin.servers.store',
-                'show' => 'admin.servers.show',
-                'edit' => 'admin.servers.edit',
-                'update' => 'admin.servers.update',
-                'destroy' => 'admin.servers.destroy'
-            ],
-            'parameters' => ['servers' => 'server']
-        ]);
+        
+        // Explicit servers routes to fix parameter issue
+        Route::get('servers', [App\Http\Controllers\Admin\ServerController::class, 'index'])
+            ->name('admin.servers.index');
+        Route::get('servers/create', [App\Http\Controllers\Admin\ServerController::class, 'create'])
+            ->name('admin.servers.create');
+        Route::post('servers', [App\Http\Controllers\Admin\ServerController::class, 'store'])
+            ->name('admin.servers.store');
+        Route::get('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'show'])
+            ->name('admin.servers.show');
+        Route::get('servers/{server}/edit', [App\Http\Controllers\Admin\ServerController::class, 'edit'])
+            ->name('admin.servers.edit');
+        Route::put('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'update'])
+            ->name('admin.servers.update');
+        Route::delete('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'destroy'])
+            ->name('admin.servers.destroy');
             
         // Domain Register management
         Route::get('domain-registers/{register}/password', [App\Http\Controllers\Admin\DomainRegisterController::class, 'getPassword'])
             ->name('admin.domain-registers.password');
         Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
             ->name('admin.domain-registers.toggle-status');
-        Route::resource('domain-registers', App\Http\Controllers\Admin\DomainRegisterController::class, [
-            'names' => [
-                'index' => 'admin.domain-registers.index',
-                'create' => 'admin.domain-registers.create',
-                'store' => 'admin.domain-registers.store',
-                'show' => 'admin.domain-registers.show',
-                'edit' => 'admin.domain-registers.edit',
-                'update' => 'admin.domain-registers.update',
-                'destroy' => 'admin.domain-registers.destroy'
-            ],
-            'parameters' => ['domain_registers' => 'register']
-        ]);
+        
+        // Explicit domain-registers routes to fix parameter issue
+        Route::get('domain-registers', [App\Http\Controllers\Admin\DomainRegisterController::class, 'index'])
+            ->name('admin.domain-registers.index');
+        Route::get('domain-registers/create', [App\Http\Controllers\Admin\DomainRegisterController::class, 'create'])
+            ->name('admin.domain-registers.create');
+        Route::post('domain-registers', [App\Http\Controllers\Admin\DomainRegisterController::class, 'store'])
+            ->name('admin.domain-registers.store');
+        Route::get('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'show'])
+            ->name('admin.domain-registers.show');
+        Route::get('domain-registers/{register}/edit', [App\Http\Controllers\Admin\DomainRegisterController::class, 'edit'])
+            ->name('admin.domain-registers.edit');
+        Route::put('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'update'])
+            ->name('admin.domain-registers.update');
+        Route::delete('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'destroy'])
+            ->name('admin.domain-registers.destroy');
             
         // Client Data management
         Route::get('client-data/service-status', [App\Http\Controllers\Admin\ClientDataController::class, 'serviceStatus'])
