@@ -84,22 +84,28 @@
                         <!-- Service Information -->
                         <h6 class="fw-semibold mb-3 mt-4">Informasi Layanan</h6>
 
-                        <!-- Website Service Expired -->
-                        <div class="mb-3">
-                            <label for="website_service_expired" class="form-label">Expired Website Service <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('website_service_expired') is-invalid @enderror" 
-                                   id="website_service_expired" name="website_service_expired" value="{{ old('website_service_expired', $client->website_service_expired->format('Y-m-d')) }}" required>
-                            @error('website_service_expired')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         <!-- Domain Expired -->
                         <div class="mb-3">
                             <label for="domain_expired" class="form-label">Expired Domain <span class="text-danger">*</span></label>
                             <input type="date" class="form-control @error('domain_expired') is-invalid @enderror" 
                                    id="domain_expired" name="domain_expired" value="{{ old('domain_expired', $client->domain_expired->format('Y-m-d')) }}" required>
                             @error('domain_expired')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Website Service Expired -->
+                        <div class="mb-3">
+                            <label for="website_service_expired" class="form-label">Expired Website Service <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="date" class="form-control @error('website_service_expired') is-invalid @enderror" 
+                                       id="website_service_expired" name="website_service_expired" value="{{ old('website_service_expired', $client->website_service_expired->format('Y-m-d')) }}" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="syncWebsiteWithDomain()">
+                                    <i class="bx bx-sync"></i> Sync dengan Domain
+                                </button>
+                            </div>
+                            <small class="text-muted">Website service expiration akan mengikuti expired domain</small>
+                            @error('website_service_expired')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -135,15 +141,30 @@
 
                         <!-- Domain Register -->
                         <div class="mb-3">
-                            <label for="domain_register_id" class="form-label">Domain Register</label>
-                            <select class="form-select @error('domain_register_id') is-invalid @enderror" id="domain_register_id" name="domain_register_id">
-                                <option value="">Pilih Register</option>
-                                @foreach($domainRegisters as $register)
-                                    <option value="{{ $register->id }}" {{ old('domain_register_id', $client->domain_register_id) == $register->id ? 'selected' : '' }}>
-                                        {{ $register->name }}
-                                    </option>
-                                @endforeach
+                            <label for="domain_register_id" class="form-label">Domain Register <small class="text-muted">(Opsional)</small></label>
+                            <select class="form-select @error('domain_register_id') is-invalid @enderror" id="domain_register_id" name="domain_register_id" onchange="syncDatesFromRegister()">
+                                <option value="">-- Pilih Domain Register --</option>
+                                @if($domainRegisters->count() > 0)
+                                    @foreach($domainRegisters as $register)
+                                        <option value="{{ $register->id }}" 
+                                                data-domain-expired="{{ $register->expired_date ? $register->expired_date->format('Y-m-d') : '' }}"
+                                                {{ old('domain_register_id', $client->domain_register_id) == $register->id ? 'selected' : '' }}>
+                                            {{ $register->name }} 
+                                            @if($register->expired_date)
+                                                (Exp: {{ $register->expired_date->format('M d, Y') }})
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="" disabled>Tidak ada domain register tersedia</option>
+                                @endif
                             </select>
+                            @if($domainRegisters->count() == 0)
+                                <small class="text-warning">
+                                    <i class="bx bx-info-circle"></i> 
+                                    <a href="{{ route('admin.domain-registers.create') }}" target="_blank">Tambah Domain Register</a> terlebih dahulu
+                                </small>
+                            @endif
                             @error('domain_register_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -395,6 +416,34 @@ function showToast(message, type) {
     setTimeout(() => {
         toast.remove();
     }, 5000);
+}
+
+// Sync dates from domain register selection
+function syncDatesFromRegister() {
+    const select = document.getElementById('domain_register_id');
+    const selectedOption = select.options[select.selectedIndex];
+    const domainExpired = selectedOption.getAttribute('data-domain-expired');
+    
+    if (domainExpired) {
+        // Auto-fill domain expired date
+        document.getElementById('domain_expired').value = domainExpired;
+        
+        // Auto-sync website service expired with domain
+        syncWebsiteWithDomain();
+        
+        showToast('Tanggal expired domain dan website service di-sync otomatis', 'success');
+    }
+}
+
+// Sync website service expired with domain expired
+function syncWebsiteWithDomain() {
+    const domainExpired = document.getElementById('domain_expired').value;
+    if (domainExpired) {
+        document.getElementById('website_service_expired').value = domainExpired;
+        showToast('Website service expiration di-sync dengan domain expiration', 'success');
+    } else {
+        showToast('Pilih tanggal domain expired terlebih dahulu', 'warning');
+    }
 }
 </script>
 @endsection

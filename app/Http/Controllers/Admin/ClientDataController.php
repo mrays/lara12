@@ -92,6 +92,10 @@ class ClientDataController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // Auto-sync website service expiration with domain expiration
+        // Website service should follow domain expiration
+        $validated['website_service_expired'] = $validated['domain_expired'];
+
         ClientData::create($validated);
 
         return redirect()->route('admin.client-data.index')
@@ -128,6 +132,10 @@ class ClientDataController extends Controller
             'status' => 'required|in:active,expired,warning',
             'notes' => 'nullable|string',
         ]);
+
+        // Auto-sync website service expiration with domain expiration
+        // Website service should follow domain expiration
+        $validated['website_service_expired'] = $validated['domain_expired'];
 
         $client->update($validated);
 
