@@ -108,5 +108,50 @@
                 @endif
             </a>
         </li>
+
+        <!-- Server Management -->
+        <li class="menu-item {{ request()->routeIs('admin.servers.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.servers.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-server"></i>
+                <div data-i18n="Server Management">Server Management</div>
+                @php
+                    $serverCount = \App\Models\Server::count();
+                @endphp
+                <span class="badge badge-center rounded-pill bg-primary ms-auto">{{ $serverCount }}</span>
+            </a>
+        </li>
+
+        <!-- Domain Register Management -->
+        <li class="menu-item {{ request()->routeIs('admin.domain-registers.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.domain-registers.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-globe"></i>
+                <div data-i18n="Domain Register">Domain Register</div>
+                @php
+                    $registerCount = \App\Models\DomainRegister::count();
+                @endphp
+                <span class="badge badge-center rounded-pill bg-info ms-auto">{{ $registerCount }}</span>
+            </a>
+        </li>
+
+        <!-- Client Data Management -->
+        <li class="menu-item {{ request()->routeIs('admin.client-data.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.client-data.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-voice"></i>
+                <div data-i18n="Client Data">Client Data</div>
+                @php
+                    $clientCount = \App\Models\ClientData::count();
+                    $expiringCount = \App\Models\ClientData::where(function($q) {
+                        $q->where('website_service_expired', '<=', now()->addDays(30))
+                          ->orWhere('domain_expired', '<=', now()->addDays(30))
+                          ->orWhere('hosting_expired', '<=', now()->addDays(30));
+                    })->count();
+                @endphp
+                @if($expiringCount > 0)
+                    <span class="badge badge-center rounded-pill bg-warning ms-auto">{{ $expiringCount }}</span>
+                @else
+                    <span class="badge badge-center rounded-pill bg-success ms-auto">{{ $clientCount }}</span>
+                @endif
+            </a>
+        </li>
     </ul>
 </aside>

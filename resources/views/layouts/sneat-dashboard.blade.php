@@ -94,6 +94,68 @@
                 display: none !important;
             }
         }
+        
+        /* Management Panel Dropdown Styling */
+        .dropdown-management .dropdown-menu {
+            border: 1px solid rgba(67, 89, 113, 0.15);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .dropdown-management .dropdown-header {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-management .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-management .dropdown-item:hover {
+            background-color: rgba(67, 89, 113, 0.06);
+            transform: translateX(2px);
+        }
+        
+        .dropdown-management .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .dropdown-management .nav-link {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-management .nav-link:hover {
+            transform: scale(1.05);
+        }
+        
+        .dropdown-management .badge.rounded-pill {
+            min-width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            padding: 0;
+        }
+        
+        /* Alert animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .dropdown-management .badge.bg-danger {
+            animation: pulse 2s infinite;
+        }
     </style>
 
     <!-- Helpers -->
@@ -128,6 +190,127 @@
                         </div>
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Management Panel -->
+                            @if(auth()->user()->role === 'admin')
+                            <li class="nav-item navbar-dropdown dropdown-management dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" title="Management Panel">
+                                    <i class="bx bx-cog fs-4 lh-0"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @php
+                                            $expiringCount = \App\Models\ClientData::where(function($q) {
+                                                $q->where('website_service_expired', '<=', now()->addDays(30))
+                                                  ->orWhere('domain_expired', '<=', now()->addDays(30))
+                                                  ->orWhere('hosting_expired', '<=', now()->addDays(30));
+                                            })->count();
+                                            $serverIssues = \App\Models\Server::where('status', 'expired')->orWhere('expired_date', '<=', now()->addDays(7))->count();
+                                            $registerIssues = \App\Models\DomainRegister::where('status', 'expired')->orWhere('expired_date', '<=', now()->addDays(7))->count();
+                                            $totalAlerts = $expiringCount + $serverIssues + $registerIssues;
+                                        @endphp
+                                        {{ $totalAlerts > 0 ? $totalAlerts : '' }}
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" style="min-width: 280px;">
+                                    <!-- Header -->
+                                    <li class="dropdown-header d-flex align-items-center justify-content-between">
+                                        <span>Management Panel</span>
+                                        <span class="badge {{ $totalAlerts > 0 ? 'bg-danger' : 'bg-success' }}">{{ $totalAlerts }} Alerts</span>
+                                    </li>
+                                    <li><div class="dropdown-divider"></div></li>
+                                    
+                                    <!-- Quick Stats -->
+                                    <li class="dropdown-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span><i class="bx bx-server me-2"></i>Servers</span>
+                                            <div>
+                                                <span class="badge bg-primary">{{ \App\Models\Server::count() }}</span>
+                                                @if($serverIssues > 0)
+                                                    <span class="badge bg-danger ms-1">{{ $serverIssues }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span><i class="bx bx-globe me-2"></i>Registers</span>
+                                            <div>
+                                                <span class="badge bg-info">{{ \App\Models\DomainRegister::count() }}</span>
+                                                @if($registerIssues > 0)
+                                                    <span class="badge bg-danger ms-1">{{ $registerIssues }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span><i class="bx bx-user-voice me-2"></i>Clients</span>
+                                            <div>
+                                                <span class="badge bg-success">{{ \App\Models\ClientData::count() }}</span>
+                                                @if($expiringCount > 0)
+                                                    <span class="badge bg-warning ms-1">{{ $expiringCount }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><div class="dropdown-divider"></div></li>
+                                    
+                                    <!-- Quick Actions -->
+                                    <li><h6 class="dropdown-header">Quick Actions</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.servers.index') }}">
+                                            <i class="bx bx-server me-2"></i>
+                                            <span>Server Management</span>
+                                            <i class="bx bx-right-arrow-alt ms-auto"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.domain-registers.index') }}">
+                                            <i class="bx bx-globe me-2"></i>
+                                            <span>Domain Register</span>
+                                            <i class="bx bx-right-arrow-alt ms-auto"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.client-data.index') }}">
+                                            <i class="bx bx-user-voice me-2"></i>
+                                            <span>Client Data</span>
+                                            <i class="bx bx-right-arrow-alt ms-auto"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.client-data.service-status') }}">
+                                            <i class="bx bx-bar-chart me-2"></i>
+                                            <span>Service Status Overview</span>
+                                            <i class="bx bx-right-arrow-alt ms-auto"></i>
+                                        </a>
+                                    </li>
+                                    <li><div class="dropdown-divider"></div></li>
+                                    
+                                    <!-- Alerts Summary -->
+                                    @if($totalAlerts > 0)
+                                    <li><h6 class="dropdown-header text-danger">Alerts Summary</h6></li>
+                                    @if($expiringCount > 0)
+                                    <li class="dropdown-item text-warning">
+                                        <i class="bx bx-time-five me-2"></i>
+                                        <span>{{ $expiringCount }} services expiring soon</span>
+                                    </li>
+                                    @endif
+                                    @if($serverIssues > 0)
+                                    <li class="dropdown-item text-danger">
+                                        <i class="bx bx-error me-2"></i>
+                                        <span>{{ $serverIssues }} server issues</span>
+                                    </li>
+                                    @endif
+                                    @if($registerIssues > 0)
+                                    <li class="dropdown-item text-danger">
+                                        <i class="bx bx-error me-2"></i>
+                                        <span>{{ $registerIssues }} register issues</span>
+                                    </li>
+                                    @endif
+                                    @endif
+                                </ul>
+                            </li>
+                            @endif
+                            
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
