@@ -222,6 +222,45 @@ class InvoiceController extends Controller
         $invoice->delete();
         return redirect()->route('admin.invoices.index')->with('success','Invoice deleted');
     }
+
+    /**
+     * Update invoice service link
+     */
+    public function updateServiceLink(Request $request, $id)
+    {
+        $request->validate([
+            'service_id' => 'nullable|exists:services,id'
+        ]);
+
+        $updated = \DB::table('invoices')
+            ->where('id', $id)
+            ->update([
+                'service_id' => $request->service_id,
+                'updated_at' => now()
+            ]);
+
+        if ($updated) {
+            return redirect()->back()
+                ->with('success', 'Invoice service link updated successfully!');
+        } else {
+            return redirect()->back()
+                ->with('error', 'Failed to update invoice service link.');
+        }
+    }
+
+    /**
+     * Get services for a client (AJAX)
+     */
+    public function getClientServices($clientId)
+    {
+        $services = \DB::table('services')
+            ->where('client_id', $clientId)
+            ->select('id', 'product', 'domain')
+            ->orderBy('product')
+            ->get();
+
+        return response()->json($services);
+    }
     
     
 }

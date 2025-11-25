@@ -362,6 +362,31 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Update invoice service link
+     */
+    public function updateServiceLink(Request $request, $invoiceId)
+    {
+        $request->validate([
+            'service_id' => 'nullable|exists:services,id'
+        ]);
+
+        $updated = \DB::table('invoices')
+            ->where('id', $invoiceId)
+            ->update([
+                'service_id' => $request->service_id,
+                'updated_at' => now()
+            ]);
+
+        if ($updated) {
+            return redirect()->back()
+                ->with('success', 'Invoice service link updated successfully!');
+        } else {
+            return redirect()->back()
+                ->with('error', 'Failed to update invoice service link.');
+        }
+    }
+
+    /**
      * Get status color for badge display
      */
     private function getStatusColor($status)

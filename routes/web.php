@@ -94,6 +94,10 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.invoices.status-update');
         Route::delete('invoices/{invoice}/delete', [App\Http\Controllers\InvoiceController::class, 'deleteInvoice'])
             ->name('admin.invoices.delete');
+        Route::put('invoices/{invoice}/service-link', [App\Http\Controllers\InvoiceController::class, 'updateServiceLink'])
+            ->name('admin.invoices.update-service-link');
+        Route::get('api/clients/{client}/services', [App\Http\Controllers\InvoiceController::class, 'getClientServices'])
+            ->name('admin.invoices.client-services');
             
         // Client management routes
         Route::put('clients/{client}/toggle-status', [App\Http\Controllers\Admin\ClientController::class, 'toggleStatus'])
