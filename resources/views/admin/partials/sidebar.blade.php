@@ -147,8 +147,9 @@
                 <i class="menu-icon tf-icons bx bx-time-five"></i>
                 <div data-i18n="Domain Expiration">Domain Expiration</div>
                 @php
-                    $expiringCount = \App\Models\ClientData::where('domain_expired', '<=', now()->addMonths(3))->count();
-                    $expiredCount = \App\Models\ClientData::where('domain_expired', '<', now())->count();
+                    // Use MySQL queries for better performance
+                    $expiringCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count;
+                    $expiredCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count;
                     $totalAlerts = $expiringCount + $expiredCount;
                 @endphp
                 @if($totalAlerts > 0)

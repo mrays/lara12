@@ -185,10 +185,14 @@ Route::middleware(['auth'])->group(function () {
         // Domain Expiration monitoring
         Route::get('domain-expiration', [App\Http\Controllers\Admin\DomainExpirationController::class, 'index'])
             ->name('admin.domain-expiration.index');
+        Route::get('domain-expiration/guide', [App\Http\Controllers\Admin\DomainExpirationController::class, 'guide'])
+            ->name('admin.domain-expiration.guide');
         Route::post('domain-expiration/{client}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
             ->name('admin.domain-expiration.send-reminder');
         Route::post('domain-expiration/export', [App\Http\Controllers\Admin\DomainExpirationController::class, 'export'])
             ->name('admin.domain-expiration.export');
+        Route::post('domain-expiration/load-sample-data', [App\Http\Controllers\Admin\DomainExpirationController::class, 'loadSampleData'])
+            ->name('admin.domain-expiration.load-sample-data');
         
         // Invoice management routes
         Route::put('invoices/{invoice}/service-link', [App\Http\Controllers\InvoiceController::class, 'updateServiceLink'])

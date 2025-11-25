@@ -26,6 +26,9 @@
                         <small class="text-muted">Monitor domain expiration for all clients</small>
                     </div>
                     <div class="d-flex gap-2">
+                        <a href="{{ route('admin.domain-expiration.guide') }}" class="btn btn-outline-info btn-sm">
+                            <i class="bx bx-book-reader me-1"></i>Guide
+                        </a>
                         <form method="GET" class="d-flex gap-2">
                             <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
                                 <option value="all" {{ $filter == 'all' ? 'selected' : '' }}>All Domains</option>
@@ -231,7 +234,9 @@
                                                 <div>{{ $client->domainRegister->name }}</div>
                                                 <small class="text-muted">{{ $client->domainRegister->login_link }}</small>
                                             @else
-                                                <span class="text-muted">N/A</span>
+                                                <span class="text-muted">
+                                                    <i class="bx bx-info-circle"></i> No domain assigned
+                                                </span>
                                             @endif
                                         </td>
                                         <td>
@@ -304,7 +309,7 @@
                                     <i class="bx bx-globe fs-2"></i>
                                 </span>
                             </div>
-                            <h5>No {{ ucfirst($filter) }} Domains</h5>
+                            <h5>No Client Data Found</h5>
                             <p class="text-muted mb-4">
                                 @if($filter == 'expired')
                                     No expired domains found. Great job!
@@ -313,12 +318,19 @@
                                 @elseif($filter == 'safe')
                                     All domains need attention within 3 months.
                                 @else
-                                    No client domains found.
+                                    No client data found. You need to add client data first to monitor domain expiration.
                                 @endif
                             </p>
-                            <a href="{{ route('admin.client-data.create') }}" class="btn btn-primary">
-                                <i class="bx bx-plus me-1"></i>Add Client Data
-                            </a>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a href="{{ route('admin.client-data.create') }}" class="btn btn-primary">
+                                    <i class="bx bx-plus me-1"></i>Add Client Data
+                                </a>
+                                @if($stats['total'] == 0)
+                                    <button type="button" class="btn btn-outline-secondary" onclick="loadSampleData()">
+                                        <i class="bx bx-data me-1"></i>Load Sample Data
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -327,3 +339,30 @@
     </div>
 </div>
 @endsection
+
+<script>
+function loadSampleData() {
+    if(confirm('Are you sure you want to load sample client data? This will create 6 sample clients with various expiration scenarios.')) {
+        fetch('/admin/domain-expiration/load-sample-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Sample data loaded successfully! Refreshing the page...');
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading sample data');
+        });
+    }
+}
+</script>
