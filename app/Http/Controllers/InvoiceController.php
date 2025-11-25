@@ -393,7 +393,7 @@ class InvoiceController extends Controller
     {
         return match($status) {
             'Unpaid' => 'warning',
-            'gagal' => 'info', 
+            'gagal' => 'danger', 
             'Paid' => 'success',
             'Lunas' => 'success',
             'Overdue' => 'danger',
@@ -409,7 +409,7 @@ class InvoiceController extends Controller
     {
         return match($status) {
             'Unpaid' => 'badge bg-warning',
-            'gagal' => 'badge bg-info',
+            'gagal' => 'badge bg-danger',
             'Paid' => 'badge bg-success', 
             'Lunas' => 'badge bg-success',
             'Overdue' => 'badge bg-danger',
