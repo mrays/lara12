@@ -58,7 +58,7 @@
                         </div>
                         <div class="avatar">
                             <span class="avatar-initial rounded bg-label-warning">
-                                <i class="bx bx-time-five bx-sm"></i>
+                                <i class="bx bx-time bx-sm"></i>
                             </span>
                         </div>
                     </div>
@@ -97,6 +97,25 @@
                         <div class="avatar">
                             <span class="avatar-initial rounded bg-label-info">
                                 <i class="bx bx-cog bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span>Rejected</span>
+                            <div class="d-flex align-items-end mt-2">
+                                <h4 class="mb-0 me-2">{{ $statusCounts['rejected'] }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-danger">
+                                <i class="bx bx-x-circle bx-sm"></i>
                             </span>
                         </div>
                     </div>
