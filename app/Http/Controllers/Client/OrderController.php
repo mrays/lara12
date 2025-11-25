@@ -66,6 +66,7 @@ class OrderController extends Controller
             // Create invoice
             $invoice = Invoice::create([
                 'number' => $invoiceNumber,
+                'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
                 'total_amount' => $price,

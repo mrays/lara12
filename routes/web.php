@@ -51,8 +51,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/orders/create', [App\Http\Controllers\Client\OrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [App\Http\Controllers\Client\OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{invoice}/success', [App\Http\Controllers\Client\OrderController::class, 'success'])->name('orders.success');
-        Route::get('/api/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('api.packages.show');
-        Route::get('/api/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('api.check-domain');
+    });
+
+    // API routes (outside client prefix for easier access)
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('packages.show');
+        Route::get('/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('check-domain');
     });
 
     // Admin only
