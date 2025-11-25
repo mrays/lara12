@@ -17,7 +17,6 @@ class Invoice extends Model
         'title',
         'description',
         'subtotal',
-        'amount',
         'tax_rate',
         'tax_amount', 
         'discount_amount',
