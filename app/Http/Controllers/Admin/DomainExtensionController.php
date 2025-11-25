@@ -32,7 +32,7 @@ class DomainExtensionController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $domainExtensions = $query->orderBy('extension')->orderBy('duration_years')->paginate(15);
+        $domainExtensions = $query->orderBy('extension')->orderBy('duration_years')->get();
         
         // Get unique extensions for filter dropdown
         $extensions = DomainExtension::distinct()->pluck('extension')->sort();

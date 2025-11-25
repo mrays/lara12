@@ -248,20 +248,6 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Pagination -->
-                    @if($clients->hasPages())
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div>
-                            <small class="text-muted">
-                                Showing {{ $clients->firstItem() }} to {{ $clients->lastItem() }} of {{ $clients->total() }} results
-                            </small>
-                        </div>
-                        <div>
-                            {{ $clients->links() }}
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>

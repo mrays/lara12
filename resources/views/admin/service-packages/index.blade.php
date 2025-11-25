@@ -137,13 +137,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Pagination -->
-                    @if($packages->hasPages())
-                        <div class="mt-3">
-                            {{ $packages->links() }}
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>

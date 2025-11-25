@@ -20,7 +20,7 @@ class InvoiceController extends Controller
                 return $query->where('invoices.status', $request->status);
             })
             ->orderBy('invoices.created_at', 'desc')
-            ->paginate(15);
+            ->get();
 
         return view('admin.invoices.index', compact('invoices'));
     }

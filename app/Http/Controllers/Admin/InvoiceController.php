@@ -21,8 +21,7 @@ class InvoiceController extends Controller
                      'services.product as service_name', 'services.domain as service_domain')
             ->when($q, fn($b) => $b->where('invoices.number','like',"%$q%"))
             ->orderBy('invoices.due_date','desc')
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
         return view('admin.invoices.index', compact('invoices'));
     }
 

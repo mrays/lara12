@@ -146,17 +146,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Pagination -->
-                    @if($domainExtensions->hasPages())
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div class="text-muted">
-                                Menampilkan {{ $domainExtensions->firstItem() }} sampai {{ $domainExtensions->lastItem() }} 
-                                dari {{ $domainExtensions->total() }} data
-                            </div>
-                            {{ $domainExtensions->links() }}
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>

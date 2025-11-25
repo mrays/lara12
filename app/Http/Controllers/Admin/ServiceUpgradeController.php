@@ -37,7 +37,7 @@ class ServiceUpgradeController extends Controller
 
         $upgradeRequests = $query->with(['service', 'client', 'processedBy'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->get();
 
         // Get counts for status badges
         $statusCounts = [

@@ -194,13 +194,6 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Pagination -->
-                    @if($invoices->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $invoices->links() }}
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>

@@ -18,7 +18,7 @@ class ServicePackageController extends Controller
     {
         $packages = ServicePackage::select('id', 'name', 'description', 'base_price', 'is_active', 'created_at')
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->get();
 
         return view('admin.service-packages.index', compact('packages'));
     }

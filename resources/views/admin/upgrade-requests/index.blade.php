@@ -333,19 +333,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div>
-                        <small class="text-muted">
-                            Showing {{ $upgradeRequests->firstItem() }} to {{ $upgradeRequests->lastItem() }} 
-                            of {{ $upgradeRequests->total() }} results
-                        </small>
-                    </div>
-                    <div>
-                        {{ $upgradeRequests->links() }}
-                    </div>
-                </div>
             @else
                 <div class="text-center py-5">
                     <div class="avatar avatar-xl mx-auto mb-3">

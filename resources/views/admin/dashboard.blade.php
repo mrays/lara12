@@ -204,13 +204,6 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Pagination -->
-                    @if($invoices->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $invoices->appends(request()->query())->links() }}
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -359,13 +352,6 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Pagination -->
-                    @if($services->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $services->appends(request()->query())->links() }}
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>

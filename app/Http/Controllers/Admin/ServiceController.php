@@ -20,7 +20,7 @@ class ServiceController extends Controller
                            ->orWhere('services.domain', 'like', "%$q%");
             })
             ->orderBy('services.created_at', 'desc')
-            ->paginate(15);
+            ->get();
             
         return view('admin.services.index', compact('services'));
     }

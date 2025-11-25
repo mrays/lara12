@@ -744,16 +744,22 @@ function changePassword() {
     // Show loading
     showToast('Membuat invoice perpanjangan...', 'info');
     
+    console.log('Service ID: {{ $service->id }}');
+    console.log('Renewal URL: /client/services/{{ $service->id }}/renewal');
+    
     // Create renewal invoice
-    fetch(`/services/{{ $service->id }}/renewal`, {
+    fetch(`/client/services/{{ $service->id }}/renewal`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
     .then(response => {
         console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         if (!response.ok) {
             return response.text().then(text => {
                 console.log('Error response text:', text);
