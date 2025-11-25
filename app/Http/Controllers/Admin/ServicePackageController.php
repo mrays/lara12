@@ -96,17 +96,41 @@ class ServicePackageController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
-            'free_domains' => 'nullable|array',
-            'free_domains.*.domain_extension_id' => 'required|exists:domain_extensions,id',
-            'free_domains.*.duration_years' => 'required|integer|min:1|max:10',
-            'free_domains.*.discount_percent' => 'required|numeric|min:0|max:100',
-            'free_domains.*.is_free' => 'boolean'
+            'is_active' => 'boolean'
         ]);
 
-        // Check for duplicate domain extensions within the same package
-        if (!empty($validated['free_domains'])) {
-            $domainIds = array_column($validated['free_domains'], 'domain_extension_id');
+        // Process free domains separately with custom validation
+        $freeDomains = $request->input('free_domains', []);
+        $processedDomains = [];
+        
+        if (!empty($freeDomains)) {
+            foreach ($freeDomains as $index => $domain) {
+                // Skip empty domain rows
+                if (empty($domain['domain_extension_id'])) {
+                    continue;
+                }
+                
+                // Validate required fields for non-empty rows
+                if (empty($domain['duration_years']) || !isset($domain['discount_percent'])) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['free_domains' => 'Domain yang dipilih harus memiliki durasi dan diskon.']);
+                }
+                
+                $processedDomains[] = [
+                    'service_package_id' => $package->id,
+                    'domain_extension_id' => $domain['domain_extension_id'],
+                    'duration_years' => $domain['duration_years'],
+                    'discount_percent' => $domain['discount_percent'],
+                    'is_free' => isset($domain['is_free']) ? 1 : 0,
+                    'sort_order' => count($processedDomains),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            
+            // Check for duplicates in processed domains
+            $domainIds = array_column($processedDomains, 'domain_extension_id');
             if (count($domainIds) !== count(array_unique($domainIds))) {
                 return redirect()->back()
                     ->withInput()
@@ -114,7 +138,7 @@ class ServicePackageController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $package, $validated) {
+        DB::transaction(function () use ($request, $package, $validated, $processedDomains) {
             // Update package basic info
             $package->update([
                 'name' => $validated['name'],
@@ -126,22 +150,9 @@ class ServicePackageController extends Controller
             // Remove existing free domains
             $package->freeDomains()->delete();
 
-            // Add new free domains if provided
-            if (!empty($validated['free_domains'])) {
-                $freeDomains = [];
-                foreach ($validated['free_domains'] as $index => $domain) {
-                    $freeDomains[] = [
-                        'service_package_id' => $package->id,
-                        'domain_extension_id' => $domain['domain_extension_id'],
-                        'duration_years' => $domain['duration_years'],
-                        'discount_percent' => $domain['discount_percent'],
-                        'is_free' => isset($domain['is_free']) ? 1 : 0,
-                        'sort_order' => $index,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-                ServicePackageFreeDomain::insert($freeDomains);
+            // Add new free domains if any
+            if (!empty($processedDomains)) {
+                ServicePackageFreeDomain::insert($processedDomains);
             }
         });
 
