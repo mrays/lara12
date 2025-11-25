@@ -117,6 +117,100 @@
         </div>
     </div>
 
+    <!-- Free Domains Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="tf-icons bx bx-globe me-2"></i>Free Domains & Promotions
+                    </h6>
+                    <span class="badge bg-primary">{{ count($package->freeDomains) }} Domains</span>
+                </div>
+                <div class="card-body">
+                    @if($package->freeDomains->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Domain Extension</th>
+                                        <th>Duration</th>
+                                        <th>Normal Price</th>
+                                        <th>Discount</th>
+                                        <th>Promo Price</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($package->freeDomains->sortBy('sort_order') as $freeDomain)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-2">
+                                                        <span class="avatar-initial rounded bg-label-primary">
+                                                            <i class="bx bx-globe"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <strong>.{{ $freeDomain->domainExtension->extension }}</strong>
+                                                        <br><small class="text-muted">{{ $freeDomain->domainExtension->formatted_price }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-label-info">{{ $freeDomain->duration_years }} Tahun</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">Rp {{ number_format($freeDomain->domainExtension->price, 0, ',', '.') }}</span>
+                                            </td>
+                                            <td>
+                                                @if($freeDomain->is_free)
+                                                    <span class="badge bg-success">100% OFF</span>
+                                                @else
+                                                    <span class="badge bg-warning">{{ $freeDomain->discount_percent }}% OFF</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($freeDomain->is_free)
+                                                    <span class="text-success fw-bold">FREE</span>
+                                                @else
+                                                    <span class="text-primary fw-bold">
+                                                        Rp {{ number_format($freeDomain->domainExtension->price * (1 - $freeDomain->discount_percent / 100), 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($freeDomain->is_free)
+                                                    <span class="badge bg-success">
+                                                        <i class="bx bx-gift me-1"></i>Gratis
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning">
+                                                        <i class="bx bx-tag me-1"></i>Diskon
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="tf-icons bx bx-globe fs-1 mb-2"></i>
+                                <p>No free domains or promotions configured for this package.</p>
+                                <a href="{{ route('admin.service-packages.edit', $package->id) }}" class="btn btn-primary">
+                                    <i class="tf-icons bx bx-edit me-1"></i>Add Domain Promotions
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Services Using This Package -->
     <div class="row mt-4">
         <div class="col-12">

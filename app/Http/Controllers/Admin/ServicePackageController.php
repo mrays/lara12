@@ -59,7 +59,7 @@ class ServicePackageController extends Controller
      */
     public function show($id)
     {
-        $package = ServicePackage::findOrFail($id);
+        $package = ServicePackage::with('freeDomains.domainExtension')->findOrFail($id);
 
         // Get services using this package
         $services = \DB::table('services')
