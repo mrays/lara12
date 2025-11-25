@@ -16,6 +16,15 @@ class ServiceManagementController extends Controller
      */
     public function translateBillingCycle($billingCycle)
     {
+        return self::staticTranslateBillingCycle($billingCycle);
+    }
+
+    /**
+     * Static method to translate billing cycle abbreviations to Indonesian
+     * This can be called from views
+     */
+    public static function staticTranslateBillingCycle($billingCycle)
+    {
         $cycleMap = [
             '1D' => '1 Hari',
             '1W' => '1 Minggu',

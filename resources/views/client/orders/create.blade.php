@@ -247,7 +247,7 @@
                                         <input class="form-check-input" type="radio" name="billing_cycle" 
                                                id="billingAnnual" value="annually" checked>
                                         <label class="form-check-label" for="billingAnnual">
-                                            {{ \App\Http\Controllers\ServiceManagementController::translateBillingCycle('annually') }}
+                                            {{ \App\Http\Controllers\ServiceManagementController::staticTranslateBillingCycle('annually') }}
                                         </label>
                                     </div>
                                 </div>
