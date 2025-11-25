@@ -191,7 +191,11 @@
                                 <div class="row">
                                     @foreach($paymentMethods as $code => $method)
                                         <div class="col-md-4 col-sm-6 mb-3">
+                                            @if($method['type'] === 'manual_transfer')
+                                            <div class="card payment-method-card" style="cursor: pointer;" onclick="redirectToWhatsApp('{{ $code }}')">
+                                        @else
                                             <div class="card payment-method-card" style="cursor: pointer;" onclick="selectPaymentMethod('{{ $code }}')">
+                                        @endif
                                                 <div class="card-body text-center">
                                                     <div class="payment-method-icon mb-2">
                                                         @switch($code)
@@ -339,6 +343,92 @@ function validateForm() {
     }
     
     return true;
+}
+
+function redirectToWhatsApp(method) {
+    // Get customer data from form
+    const customerName = document.getElementById('customer_name').value.trim();
+    const customerEmail = document.getElementById('customer_email').value.trim();
+    const customerPhone = document.getElementById('customer_phone').value.trim();
+    
+    // Validate required fields
+    if (!customerName || !customerEmail || !customerPhone) {
+        alert('Please fill in your name, email, and phone number first');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerEmail)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Create WhatsApp message with client and invoice details
+    const whatsappNumber = '6281234567890'; // Replace with your actual WhatsApp number
+    let message = "Halo, saya ingin melakukan pembayaran manual transfer untuk invoice:\n\n";
+    message += "📄 *Invoice Details:*\n";
+    message += "Nomor: {{ $invoice->number }}\n";
+    message += "Judul: {{ $invoice->title }}\n";
+    message += "Jumlah: Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}\n";
+    message += "Tanggal Jatuh Tempo: {{ $invoice->due_date->format('d M Y') }}\n\n";
+    message += "👤 *Client Information:*\n";
+    message += "Nama: " + customerName + "\n";
+    message += "Email: " + customerEmail + "\n";
+    message += "Phone: " + customerPhone + "\n\n";
+    message += "Mohon informasikan rekening bank tujuan untuk pembayaran.";
+    
+    // URL encode the message
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = "https://wa.me/" + whatsappNumber + "?text=" + encodedMessage;
+    
+    // Create form to submit payment method update
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("payment.process", $invoice) }}';
+    form.style.display = 'none';
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = '_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    form.appendChild(csrfInput);
+    
+    // Add payment method
+    const methodInput = document.createElement('input');
+    methodInput.type = 'hidden';
+    methodInput.name = 'payment_method';
+    methodInput.value = method;
+    form.appendChild(methodInput);
+    
+    // Add customer data
+    const nameInput = document.createElement('input');
+    nameInput.type = 'hidden';
+    nameInput.name = 'customer_name';
+    nameInput.value = customerName;
+    form.appendChild(nameInput);
+    
+    const emailInput = document.createElement('input');
+    emailInput.type = 'hidden';
+    emailInput.name = 'customer_email';
+    emailInput.value = customerEmail;
+    form.appendChild(emailInput);
+    
+    const phoneInput = document.createElement('input');
+    phoneInput.type = 'hidden';
+    phoneInput.name = 'customer_phone';
+    phoneInput.value = customerPhone;
+    form.appendChild(phoneInput);
+    
+    // Submit form to update invoice status, then redirect to WhatsApp
+    document.body.appendChild(form);
+    form.submit();
+    
+    // Open WhatsApp after a short delay
+    setTimeout(() => {
+        window.open(whatsappUrl, '_blank');
+    }, 1000);
 }
 
 function selectPaymentMethod(method) {
