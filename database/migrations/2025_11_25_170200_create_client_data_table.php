@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('client_data', function (Blueprint $table) {
+        if (!Schema::hasTable('client_data')) {
+            Schema::create('client_data', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('address');
@@ -30,7 +31,8 @@ return new class extends Migration
             $table->timestamps();
             
             $table->index(['status', 'website_service_expired', 'domain_expired', 'hosting_expired']);
-        });
+            });
+        }
     }
 
     /**

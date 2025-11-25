@@ -36,7 +36,8 @@ class ClientController extends Controller
                 $query->where('status', $status);
             })
             ->orderBy('created_at','desc')
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
             
         return view('admin.clients.index', compact('clients'));
     }
