@@ -1,4 +1,4 @@
-@extends('layouts.sneat-dashboard')
+@extends('layouts.admin')
 
 @section('title', 'Tambah Domain Extension - Admin')
 
