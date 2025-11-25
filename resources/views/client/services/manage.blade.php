@@ -511,7 +511,7 @@
                                 <!-- Price -->
                                 <div class="mb-4">
                                     <h2 class="text-primary mb-0">
-                                        Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}
+                                        Rp {{ number_format($package->base_price, 0, ',', '.') }}
                                     </h2>
                                     <small class="text-muted">/year</small>
                                 </div>
@@ -768,9 +768,9 @@ function selectPlan(packageId, packageName, price) {
     // Set billing cycle to annually (fixed)
     document.getElementById('billing_cycle').value = 'annually';
     
-    // Update price comparison (annual price with 10% discount)
+    // Update price comparison (use base price directly)
     const currentPrice = {{ $service->price }};
-    const newPrice = price * 12 * 0.9;
+    const newPrice = price;
     const priceDifference = newPrice - currentPrice;
     
     document.getElementById('new_price_display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(newPrice);
