@@ -382,53 +382,11 @@ function redirectToWhatsApp(method) {
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = "https://api.whatsapp.com/send?phone=" + whatsappNumber + "&text=" + encodedMessage;
     
-    // Create form to submit payment method update
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route("payment.process", $invoice) }}';
-    form.style.display = 'none';
+    // Open WhatsApp directly
+    window.open(whatsappUrl, '_blank');
     
-    // Add CSRF token
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_token';
-    csrfInput.value = '{{ csrf_token() }}';
-    form.appendChild(csrfInput);
-    
-    // Add payment method
-    const methodInput = document.createElement('input');
-    methodInput.type = 'hidden';
-    methodInput.name = 'payment_method';
-    methodInput.value = method;
-    form.appendChild(methodInput);
-    
-    // Add customer data
-    const nameInput = document.createElement('input');
-    nameInput.type = 'hidden';
-    nameInput.name = 'customer_name';
-    nameInput.value = customerName;
-    form.appendChild(nameInput);
-    
-    const emailInput = document.createElement('input');
-    emailInput.type = 'hidden';
-    emailInput.name = 'customer_email';
-    emailInput.value = customerEmail;
-    form.appendChild(emailInput);
-    
-    const phoneInput = document.createElement('input');
-    phoneInput.type = 'hidden';
-    phoneInput.name = 'customer_phone';
-    phoneInput.value = customerPhone;
-    form.appendChild(phoneInput);
-    
-    // Submit form to update invoice status, then redirect to WhatsApp
-    document.body.appendChild(form);
-    form.submit();
-    
-    // Open WhatsApp after a short delay
-    setTimeout(() => {
-        window.open(whatsappUrl, '_blank');
-    }, 1000);
+    // Update invoice status in background (optional - can be handled later by admin)
+    // For now, just open WhatsApp without form submission
 }
 
 function selectPaymentMethod(method) {
