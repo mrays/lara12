@@ -174,7 +174,7 @@ class OrderController extends Controller
      */
     public function getPackageDetails($id)
     {
-        $package = ServicePackage::findOrFail($id);
+        $package = ServicePackage::with(['freeDomains.domainExtension'])->findOrFail($id);
         
         return response()->json([
             'id' => $package->id,
@@ -184,6 +184,25 @@ class OrderController extends Controller
             'monthly_price' => $package->base_price,
             'annual_price' => $package->base_price * 12 * 0.9,
             'features' => $package->features,
+            'free_domains' => $package->freeDomains->map(function($freeDomain) {
+                return [
+                    'domain_extension_id' => $freeDomain->domain_extension_id,
+                    'duration_years' => $freeDomain->duration_years,
+                    'discount_percent' => $freeDomain->discount_percent,
+                    'is_free' => $freeDomain->is_free,
+                    'domain_extension' => [
+                        'id' => $freeDomain->domainExtension->id,
+                        'extension' => $freeDomain->domainExtension->extension,
+                        'price' => $freeDomain->domainExtension->price,
+                        'duration_years' => $freeDomain->domainExtension->duration_years,
+                    ]
+                ];
+            }),
+            // Legacy fields for backward compatibility
+            'hasDomainPromo' => !is_null($package->domain_extension_id),
+            'domainExtensionId' => $package->domain_extension_id,
+            'isDomainFree' => $package->is_domain_free,
+            'domainDiscount' => $package->domain_discount_percent,
         ]);
     }
 
