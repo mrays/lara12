@@ -164,6 +164,7 @@
                             <div class="form-text" id="domainMessage">
                                 <i class="bx bx-info-circle me-1"></i>
                                 Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.
+                                <br><small class="text-muted">*Pengecekan domain termasuk duplikat di sistem kami dan ketersediaan global via DNS lookup.</small>
                             </div>
                         </div>
 
@@ -334,6 +335,7 @@ function formatNumber(num) {
 
 // Domain availability checking
 let domainCheckTimeout;
+let domainCheckStartTime;
 function checkDomainAvailability() {
     const domain = document.getElementById('domain').value.trim();
     const statusElement = document.getElementById('domainStatus');
@@ -342,11 +344,6 @@ function checkDomainAvailability() {
     // Clear timeout
     clearTimeout(domainCheckTimeout);
     
-    // Reset status
-    statusElement.innerHTML = '<i class="bx bx-time"></i>';
-    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan domain...';
-    messageElement.className = 'form-text text-muted';
-    
     if (domain.length < 3) {
         statusElement.innerHTML = '<i class="bx bx-time"></i>';
         messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.';
@@ -354,27 +351,53 @@ function checkDomainAvailability() {
         return;
     }
     
-    // Debounce check
+    // Reset status to checking
+    statusElement.innerHTML = '<i class="bx bx-loader-alt bx-spin text-info"></i>';
+    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan domain (global)...';
+    messageElement.className = 'form-text text-info';
+    
+    // Debounce check with longer delay for DNS operations
     domainCheckTimeout = setTimeout(() => {
+        domainCheckStartTime = Date.now();
+        
+        // Show loading spinner with timeout warning
+        const loadingTimeout = setTimeout(() => {
+            if (Date.now() - domainCheckStartTime > 2000) {
+                messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan global... (memerlukan beberapa detik)';
+            }
+        }, 2000);
+        
         fetch(`/api/check-domain?domain=${encodeURIComponent(domain)}`)
             .then(response => response.json())
             .then(data => {
+                clearTimeout(loadingTimeout);
+                
                 if (data.available) {
                     statusElement.innerHTML = '<i class="bx bx-check text-success"></i>';
-                    messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>Domain tersedia!';
+                    messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>' + data.message;
                     messageElement.className = 'form-text text-success';
                 } else {
                     statusElement.innerHTML = '<i class="bx bx-x text-danger"></i>';
-                    messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>Domain sudah digunakan. Silakan pilih domain lain.';
+                    let errorMessage = data.message;
+                    
+                    // Add specific guidance based on check type
+                    if (data.local_check === 'taken') {
+                        errorMessage += ' (duplikat di sistem kami)';
+                    } else if (data.global_check === 'taken') {
+                        errorMessage += ' (sudah digunakan secara global)';
+                    }
+                    
+                    messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>' + errorMessage + '. Silakan pilih domain lain.';
                     messageElement.className = 'form-text text-danger';
                 }
             })
             .catch(error => {
+                clearTimeout(loadingTimeout);
                 statusElement.innerHTML = '<i class="bx bx-error text-warning"></i>';
                 messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Gagal mengecek domain. Silakan coba lagi.';
                 messageElement.className = 'form-text text-warning';
             });
-    }, 500);
+    }, 1000); // Increased debounce to 1 second for DNS operations
 }
 
 // Auto-select first package if only one exists

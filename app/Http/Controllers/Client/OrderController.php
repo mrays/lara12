@@ -69,6 +69,7 @@ class OrderController extends Controller
                 'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
+                'subtotal' => $price,
                 'total_amount' => $price,
                 'status' => 'Unpaid',
                 'due_date' => now()->addDays(7),
@@ -131,12 +132,117 @@ class OrderController extends Controller
             return response()->json(['available' => false, 'message' => 'Domain terlalu pendek']);
         }
         
-        // Check if domain exists in services table
-        $exists = Service::where('domain', $domain)->exists();
+        // Check if domain exists in our services table
+        $localExists = Service::where('domain', $domain)->exists();
+        
+        if ($localExists) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Domain sudah terdaftar di sistem kami',
+                'local_check' => 'taken',
+                'global_check' => 'unknown'
+            ]);
+        }
+        
+        // Check global domain availability via DNS lookup
+        $globalAvailable = $this->checkGlobalDomainAvailability($domain);
+        
+        if (!$globalAvailable) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Domain sudah terdaftar secara global',
+                'local_check' => 'available',
+                'global_check' => 'taken'
+            ]);
+        }
         
         return response()->json([
-            'available' => !$exists,
-            'message' => $exists ? 'Domain sudah digunakan' : 'Domain tersedia'
+            'available' => true,
+            'message' => 'Domain tersedia (belum terdaftar di sistem kami maupun global)',
+            'local_check' => 'available',
+            'global_check' => 'available'
         ]);
+    }
+    
+    /**
+     * Check global domain availability via DNS lookup
+     */
+    private function checkGlobalDomainAvailability($domain)
+    {
+        // Add protocol if missing for validation
+        if (!preg_match('/^https?:\/\//', $domain)) {
+            $domain = 'https://' . $domain;
+        }
+        
+        // Extract domain from URL
+        $parsedUrl = parse_url($domain);
+        $hostname = $parsedUrl['host'] ?? $domain;
+        
+        // Remove https:// if still present
+        $hostname = str_replace(['https://', 'http://'], '', $hostname);
+        
+        // Validate domain format
+        if (!filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            return false;
+        }
+        
+        // Check cache first (5 minutes cache)
+        $cacheKey = 'domain_check_' . md5($hostname);
+        $cached = cache()->get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
+        
+        try {
+            // Set timeout for DNS operations
+            $originalTimeout = ini_get('default_socket_timeout');
+            ini_set('default_socket_timeout', 3);
+            
+            // Check DNS records (A, AAAA, CNAME, MX, NS)
+            $hasDnsRecords = false;
+            
+            // Check A record
+            if (@checkdnsrr($hostname, 'A')) {
+                $hasDnsRecords = true;
+            }
+            
+            // Check AAAA record (IPv6)
+            if (!$hasDnsRecords && @checkdnsrr($hostname, 'AAAA')) {
+                $hasDnsRecords = true;
+            }
+            
+            // Check CNAME record
+            if (!$hasDnsRecords && @checkdnsrr($hostname, 'CNAME')) {
+                $hasDnsRecords = true;
+            }
+            
+            // Check MX record (mail)
+            if (!$hasDnsRecords && @checkdnsrr($hostname, 'MX')) {
+                $hasDnsRecords = true;
+            }
+            
+            // Check NS record (nameservers)
+            if (!$hasDnsRecords && @checkdnsrr($hostname, 'NS')) {
+                $hasDnsRecords = true;
+            }
+            
+            // Restore original timeout
+            ini_set('default_socket_timeout', $originalTimeout);
+            
+            // If no DNS records found, domain is likely available
+            $isAvailable = !$hasDnsRecords;
+            
+            // Cache result for 5 minutes
+            cache()->put($cacheKey, $isAvailable, 300);
+            
+            return $isAvailable;
+            
+        } catch (\Exception $e) {
+            // Restore original timeout on error
+            ini_set('default_socket_timeout', $originalTimeout);
+            
+            // On DNS failure, assume domain is taken (safer approach)
+            return false;
+        }
     }
 }
