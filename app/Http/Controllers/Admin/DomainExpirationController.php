@@ -18,11 +18,11 @@ class DomainExpirationController extends Controller
         $filter = $request->get('filter', 'all'); // all, expired, expiring, safe
         
         // Build base query with MySQL for domain registers
-        $baseQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+        $baseQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
                      FROM domain_registers dr 
                      LEFT JOIN client_data cd ON dr.id = cd.domain_register_id';
         
-        $groupBy = ' GROUP BY dr.id';
+        $groupBy = ' GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at';
         $whereClause = '';
         $bindings = [];
         
@@ -57,29 +57,29 @@ class DomainExpirationController extends Controller
         ];
         
         // Get upcoming expirations (next 30 days) using MySQL
-        $upcomingQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+        $upcomingQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
                           FROM domain_registers dr 
                           LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
                           WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
-                          GROUP BY dr.id
+                          GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
                           ORDER BY dr.expired_date ASC LIMIT 10';
         $upcomingExpirations = DB::select($upcomingQuery, [now(), now()->addDays(30)]);
         
         // Critical expirations (next 7 days) using MySQL
-        $criticalQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+        $criticalQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
                          FROM domain_registers dr 
                          LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
                          WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
-                         GROUP BY dr.id
+                         GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
                          ORDER BY dr.expired_date ASC';
         $criticalExpirations = DB::select($criticalQuery, [now(), now()->addDays(7)]);
         
         // Recently expired (last 30 days) using MySQL
-        $recentQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+        $recentQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
                        FROM domain_registers dr 
                        LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
                        WHERE dr.expired_date < ? AND dr.expired_date >= ? 
-                       GROUP BY dr.id
+                       GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
                        ORDER BY dr.expired_date DESC';
         $recentlyExpired = DB::select($recentQuery, [now(), now()->subDays(30)]);
         
@@ -166,11 +166,11 @@ class DomainExpirationController extends Controller
         $filter = $request->get('filter', 'all');
         
         // Build MySQL query for export
-        $baseQuery = 'SELECT dr.name, dr.login_link, dr.expired_date, dr.username, dr.notes, COUNT(cd.id) as client_count
+        $baseQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count
                       FROM domain_registers dr 
                       LEFT JOIN client_data cd ON dr.id = cd.domain_register_id';
         
-        $groupBy = ' GROUP BY dr.id';
+        $groupBy = ' GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at';
         $whereClause = '';
         $bindings = [];
         
