@@ -131,8 +131,11 @@
 
     <!-- Registers List -->
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Register Domain</h5>
+            <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+            </button>
         </div>
         <div class="card-body">
             @if($registers->count() > 0)
@@ -140,6 +143,9 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th width="30">
+                                    <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                </th>
                                 <th>Nama Register</th>
                                 <th>Username</th>
                                 <th>Login Link</th>
@@ -152,6 +158,9 @@
                         <tbody>
                             @foreach($registers as $register)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input register-checkbox" value="{{ $register->id }}" onclick="updateSelectedCount()">
+                                    </td>
                                     <td>
                                         <div>
                                             <strong>{{ $register->name }}</strong>
@@ -366,6 +375,70 @@ function showToast(message, type) {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.register-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateSelectedCount();
+}
+
+// Update selected count
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.register-checkbox:checked');
+    const count = checkboxes.length;
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const countSpan = document.getElementById('selectedCount');
+    
+    countSpan.textContent = count;
+    deleteBtn.style.display = count > 0 ? 'block' : 'none';
+    
+    // Update select all checkbox state
+    const allCheckboxes = document.querySelectorAll('.register-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
+}
+
+// Delete selected registers
+function deleteSelected() {
+    const checkboxes = document.querySelectorAll('.register-checkbox:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (ids.length === 0) {
+        showToast('Pilih minimal satu item untuk dihapus', 'warning');
+        return;
+    }
+    
+    if (!confirm(`Apakah Anda yakin ingin menghapus ${ids.length} register yang dipilih?`)) {
+        return;
+    }
+    
+    fetch('/admin/domain-registers/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: ids })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(data.message || 'Gagal menghapus register', 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Error menghapus register', 'danger');
+    });
 }
 </script>
 @endsection

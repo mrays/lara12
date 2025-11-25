@@ -146,6 +146,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.domains.send-reminder');
         Route::post('domains/export', [App\Http\Controllers\Admin\DomainController::class, 'export'])
             ->name('admin.domains.export');
+        Route::get('domain-registers/{register}/password', [App\Http\Controllers\Admin\DomainRegisterController::class, 'getPassword'])
+            ->name('admin.domain-registers.password');
         Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
             ->name('admin.domain-registers.toggle-status');
         
@@ -162,6 +164,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.domain-registers.edit');
         Route::put('domain-registers/{registerId}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'update'])
             ->name('admin.domain-registers.update');
+        Route::post('domain-registers/bulk-delete', [App\Http\Controllers\Admin\DomainRegisterController::class, 'bulkDelete'])
+            ->name('admin.domain-registers.bulk-delete');
         Route::delete('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'destroy'])
             ->name('admin.domain-registers.destroy');
             

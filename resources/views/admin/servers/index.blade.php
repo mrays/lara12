@@ -191,43 +191,9 @@
                                         <span class="badge bg-label-primary">{{ $server->clients->count() }}</span>
                                     </td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-horizontal"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
-                                                    <a class="dropdown-item" href="#" onclick="showPassword({{ $server->id }})">
-                                                        <i class="bx bx-lock-open me-2"></i>Show Password
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item" href="{{ $server->login_link }}" target="_blank">
-                                                        <i class="bx bx-link me-2"></i>Login to Server
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item" href="{{ route('admin.servers.edit', $server) }}">
-                                                        <i class="bx bx-edit me-2"></i>Edit
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" onclick="toggleStatus({{ $server->id }})">
-                                                        <i class="bx bx-power-off me-2"></i>Toggle Status
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <form action="{{ route('admin.servers.destroy', $server) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus server ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item text-danger">
-                                                            <i class="bx bx-trash me-2"></i>Delete
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary" type="button" onclick="openActionModal({{ $server->id }}, '{{ $server->name }}', '{{ $server->login_link }}', '{{ route('admin.servers.edit', $server) }}')">
+                                            <i class="bx bx-dots-horizontal"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -272,6 +238,38 @@
                             <i class="bx bx-copy"></i>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionModalTitle">Server Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-primary text-start" onclick="showPasswordFromAction()">
+                        <i class="bx bx-lock-open me-2"></i>Show Password
+                    </button>
+                    <a id="loginLinkBtn" href="#" target="_blank" class="btn btn-outline-info text-start">
+                        <i class="bx bx-link me-2"></i>Login to Server
+                    </a>
+                    <hr class="my-2">
+                    <a id="editLinkBtn" href="#" class="btn btn-outline-secondary text-start">
+                        <i class="bx bx-edit me-2"></i>Edit Server
+                    </a>
+                    <button type="button" class="btn btn-outline-warning text-start" onclick="toggleStatusFromAction()">
+                        <i class="bx bx-power-off me-2"></i>Toggle Status
+                    </button>
+                    <button type="button" class="btn btn-outline-danger text-start" onclick="deleteServerFromAction()">
+                        <i class="bx bx-trash me-2"></i>Delete Server
+                    </button>
                 </div>
             </div>
         </div>
@@ -358,6 +356,77 @@ function showToast(message, type) {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+// Action Modal Variables
+let currentServerId = null;
+let currentServerName = '';
+
+// Open action modal
+function openActionModal(serverId, serverName, loginLink, editUrl) {
+    currentServerId = serverId;
+    currentServerName = serverName;
+    
+    document.getElementById('actionModalTitle').textContent = `Actions - ${serverName}`;
+    document.getElementById('loginLinkBtn').href = loginLink;
+    document.getElementById('editLinkBtn').href = editUrl;
+    
+    const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+    modal.show();
+}
+
+// Show password from action modal
+function showPasswordFromAction() {
+    // Close action modal
+    const actionModal = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+    actionModal.hide();
+    
+    // Show password
+    setTimeout(() => {
+        showPassword(currentServerId);
+    }, 300);
+}
+
+// Toggle status from action modal
+function toggleStatusFromAction() {
+    if (confirm(`Apakah Anda yakin ingin mengubah status server ${currentServerName}?`)) {
+        const actionModal = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+        actionModal.hide();
+        
+        setTimeout(() => {
+            toggleStatus(currentServerId);
+        }, 300);
+    }
+}
+
+// Delete server from action modal
+function deleteServerFromAction() {
+    if (confirm(`Apakah Anda yakin ingin menghapus server ${currentServerName}?`)) {
+        const actionModal = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+        actionModal.hide();
+        
+        setTimeout(() => {
+            // Create and submit a delete form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/servers/${currentServerId}`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            const methodField = document.createElement('input');
+            methodField.type = 'hidden';
+            methodField.name = '_method';
+            methodField.value = 'DELETE';
+            
+            form.appendChild(csrfToken);
+            form.appendChild(methodField);
+            document.body.appendChild(form);
+            form.submit();
+        }, 300);
+    }
 }
 </script>
 @endsection

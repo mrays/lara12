@@ -126,6 +126,40 @@ class DomainRegisterController extends Controller
     }
 
     /**
+     * Bulk delete domain registers
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:domain_registers,id'
+        ]);
+
+        $ids = $validated['ids'];
+        
+        // Check if any register has clients
+        $registersWithClients = DomainRegister::whereIn('id', $ids)
+            ->withCount('clients')
+            ->having('clients_count', '>', 0)
+            ->get();
+
+        if ($registersWithClients->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Beberapa register tidak dapat dihapus karena masih memiliki client terkait'
+            ], 422);
+        }
+
+        // Delete the registers
+        $deletedCount = DomainRegister::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$deletedCount} register domain berhasil dihapus"
+        ]);
+    }
+
+    /**
      * Toggle register status
      */
     public function toggleStatus(DomainRegister $register)
