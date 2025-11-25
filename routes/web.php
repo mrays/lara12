@@ -103,23 +103,25 @@ Route::middleware(['auth'])->group(function () {
         Route::put('services/{service}/update-status', [App\Http\Controllers\AdminDashboardController::class, 'updateServiceStatus'])
             ->name('admin.services.update-status');
             
-        // Server management
-        Route::get('servers/{server}/password', [App\Http\Controllers\Admin\ServerController::class, 'getPassword'])
-            ->name('admin.servers.password');
-        Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
-            ->name('admin.servers.toggle-status');
-        
-        // Explicit servers routes to fix parameter issue
+        // Server management - Explicit routes first to avoid conflicts
         Route::get('servers', [App\Http\Controllers\Admin\ServerController::class, 'index'])
             ->name('admin.servers.index');
         Route::get('servers/create', [App\Http\Controllers\Admin\ServerController::class, 'create'])
             ->name('admin.servers.create');
         Route::post('servers', [App\Http\Controllers\Admin\ServerController::class, 'store'])
             ->name('admin.servers.store');
-        Route::get('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'show'])
-            ->name('admin.servers.show');
+        
+        // Specific server routes (before wildcard {server} routes)
+        Route::get('servers/{server}/password', [App\Http\Controllers\Admin\ServerController::class, 'getPassword'])
+            ->name('admin.servers.password');
         Route::get('servers/{server}/edit', [App\Http\Controllers\Admin\ServerController::class, 'edit'])
             ->name('admin.servers.edit');
+        Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
+            ->name('admin.servers.toggle-status');
+        
+        // Generic server routes (after specific routes)
+        Route::get('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'show'])
+            ->name('admin.servers.show');
         Route::put('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'update'])
             ->name('admin.servers.update');
         Route::delete('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'destroy'])
