@@ -75,16 +75,18 @@ class DomainRegisterController extends Controller
     /**
      * Show the form for editing the specified domain register
      */
-    public function edit(DomainRegister $register)
+    public function edit($registerId)
     {
+        $register = DomainRegister::findOrFail($registerId);
         return view('admin.domain-registers.edit', compact('register'));
     }
 
     /**
      * Update the specified domain register
      */
-    public function update(Request $request, DomainRegister $register)
+    public function update(Request $request, $registerId)
     {
+        $register = DomainRegister::findOrFail($registerId);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255',

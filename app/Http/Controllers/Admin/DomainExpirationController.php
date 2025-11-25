@@ -47,41 +47,74 @@ class DomainExpirationController extends Controller
         $fullQuery = $baseQuery . $whereClause . $groupBy . $orderBy;
         $domainRegisters = DB::select($fullQuery, $bindings);
         
-        // Calculate statistics using MySQL queries
-        $stats = [
-            'total' => DB::select('SELECT COUNT(*) as count FROM domain_registers')[0]->count,
-            'expired' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count,
-            'expiring' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count,
-            'safe' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date > ?', [now()->addMonths(3)])[0]->count,
-            'total_clients' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
-        ];
+        // Debug: Check if we have domain registers
+        if (empty($domainRegisters)) {
+            // Try to get all domain registers without joins to see if table exists
+            $allRegisters = DB::select('SELECT * FROM domain_registers LIMIT 5');
+            if (empty($allRegisters)) {
+                // No domain registers found, create empty array for view
+                $domainRegisters = [];
+            }
+        }
+        
+        // Calculate statistics using MySQL queries (safe version)
+        try {
+            $stats = [
+                'total' => DB::select('SELECT COUNT(*) as count FROM domain_registers')[0]->count,
+                'expired' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count,
+                'expiring' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count,
+                'safe' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date > ?', [now()->addMonths(3)])[0]->count,
+                'total_clients' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
+            ];
+        } catch (\Exception $e) {
+            // If queries fail, set default stats
+            $stats = [
+                'total' => 0,
+                'expired' => 0,
+                'expiring' => 0,
+                'safe' => 0,
+                'total_clients' => 0,
+            ];
+        }
         
         // Get upcoming expirations (next 30 days) using MySQL
-        $upcomingQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
-                          FROM domain_registers dr 
-                          LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
-                          WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
-                          GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
-                          ORDER BY dr.expired_date ASC LIMIT 10';
-        $upcomingExpirations = DB::select($upcomingQuery, [now(), now()->addDays(30)]);
+        try {
+            $upcomingQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
+                              FROM domain_registers dr 
+                              LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                              WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
+                              GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
+                              ORDER BY dr.expired_date ASC LIMIT 10';
+            $upcomingExpirations = DB::select($upcomingQuery, [now(), now()->addDays(30)]);
+        } catch (\Exception $e) {
+            $upcomingExpirations = [];
+        }
         
         // Critical expirations (next 7 days) using MySQL
-        $criticalQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
-                         FROM domain_registers dr 
-                         LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
-                         WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
-                         GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
-                         ORDER BY dr.expired_date ASC';
-        $criticalExpirations = DB::select($criticalQuery, [now(), now()->addDays(7)]);
+        try {
+            $criticalQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
+                             FROM domain_registers dr 
+                             LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                             WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
+                             GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
+                             ORDER BY dr.expired_date ASC';
+            $criticalExpirations = DB::select($criticalQuery, [now(), now()->addDays(7)]);
+        } catch (\Exception $e) {
+            $criticalExpirations = [];
+        }
         
         // Recently expired (last 30 days) using MySQL
-        $recentQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
-                       FROM domain_registers dr 
-                       LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
-                       WHERE dr.expired_date < ? AND dr.expired_date >= ? 
-                       GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
-                       ORDER BY dr.expired_date DESC';
-        $recentlyExpired = DB::select($recentQuery, [now(), now()->subDays(30)]);
+        try {
+            $recentQuery = 'SELECT dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at, COUNT(cd.id) as client_count 
+                           FROM domain_registers dr 
+                           LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                           WHERE dr.expired_date < ? AND dr.expired_date >= ? 
+                           GROUP BY dr.id, dr.name, dr.login_link, dr.expired_date, dr.username, dr.password, dr.notes, dr.created_at, dr.updated_at
+                           ORDER BY dr.expired_date DESC';
+            $recentlyExpired = DB::select($recentQuery, [now(), now()->subDays(30)]);
+        } catch (\Exception $e) {
+            $recentlyExpired = [];
+        }
         
         // Convert stdClass objects to arrays for view compatibility
         $domainRegisters = $this->convertStdClassToArray($domainRegisters);

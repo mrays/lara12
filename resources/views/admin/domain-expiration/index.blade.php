@@ -270,7 +270,7 @@
                                                         </form>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('admin.domain-registers.edit', $domain) }}" class="dropdown-item">
+                                                        <a href="{{ route('admin.domain-registers.edit', $domain->id) }}" class="dropdown-item">
                                                             <i class="bx bx-edit me-2"></i>Edit Domain Register
                                                         </a>
                                                     </li>

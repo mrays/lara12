@@ -158,9 +158,9 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.domain-registers.store');
         Route::get('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'show'])
             ->name('admin.domain-registers.show');
-        Route::get('domain-registers/{register}/edit', [App\Http\Controllers\Admin\DomainRegisterController::class, 'edit'])
+        Route::get('domain-registers/{registerId}/edit', [App\Http\Controllers\Admin\DomainRegisterController::class, 'edit'])
             ->name('admin.domain-registers.edit');
-        Route::put('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'update'])
+        Route::put('domain-registers/{registerId}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'update'])
             ->name('admin.domain-registers.update');
         Route::delete('domain-registers/{register}', [App\Http\Controllers\Admin\DomainRegisterController::class, 'destroy'])
             ->name('admin.domain-registers.destroy');
