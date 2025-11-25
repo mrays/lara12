@@ -216,19 +216,51 @@ class DomainExpirationController extends Controller
     }
     
     /**
-     * Load sample client data for demonstration
+     * Load sample client data using SQL file
      */
     public function loadSampleData()
     {
         try {
-            // Run the seeder
-            \Artisan::call('db:seed', ['--class' => 'ClientDataSeeder']);
+            // Read SQL file
+            $sqlFile = database_path('sql/simple_sample_data.sql');
+            if (!file_exists($sqlFile)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'SQL file not found: ' . $sqlFile
+                ], 500);
+            }
+            
+            $sql = file_get_contents($sqlFile);
+            
+            // Split SQL by semicolons and execute each statement
+            $statements = array_filter(array_map('trim', explode(';', $sql)));
+            
+            DB::beginTransaction();
+            
+            foreach ($statements as $statement) {
+                if (!empty($statement) && !preg_match('/^--/', $statement)) {
+                    DB::statement($statement);
+                }
+            }
+            
+            DB::commit();
+            
+            // Get statistics after insertion
+            $stats = [
+                'total' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
+                'expired' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count,
+                'expiring' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count,
+                'safe' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired > ?', [now()->addMonths(3)])[0]->count,
+            ];
             
             return response()->json([
                 'success' => true,
-                'message' => 'Sample client data loaded successfully!'
+                'message' => 'Sample client data loaded successfully!',
+                'stats' => $stats
             ]);
+            
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error loading sample data: ' . $e->getMessage()
