@@ -126,6 +126,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Service upgrade routes
     Route::post('/services/{service}/upgrade-request', [App\Http\Controllers\ServiceUpgradeController::class, 'submitRequest'])->name('services.upgrade.request');
+    Route::get('/services/{service}/upgrade-status', [App\Http\Controllers\ServiceUpgradeController::class, 'checkUpgradeStatus'])->name('services.upgrade.status');
     Route::get('/upgrade-requests', [App\Http\Controllers\ServiceUpgradeController::class, 'clientRequests'])->name('client.upgrade-requests.index');
     Route::get('/upgrade-requests/{request}', [App\Http\Controllers\ServiceUpgradeController::class, 'clientShow'])->name('client.upgrade-requests.show');
     Route::post('/upgrade-requests/{upgradeRequest}/cancel', [App\Http\Controllers\ServiceUpgradeController::class, 'cancel'])->name('client.upgrade-requests.cancel');

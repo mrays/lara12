@@ -106,6 +106,31 @@ class ServiceUpgradeController extends Controller
     }
 
     /**
+     * Check upgrade request status (for auto-refresh)
+     */
+    public function checkUpgradeStatus(Service $service)
+    {
+        // Validate that the service belongs to the authenticated user
+        if ($service->client_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this service.'
+            ], 403);
+        }
+
+        $upgradeRequest = ServiceUpgradeRequest::where('service_id', $service->id)
+            ->where('client_id', Auth::id())
+            ->whereIn('status', ['pending', 'approved', 'processing'])
+            ->first();
+
+        return response()->json([
+            'hasUpgradeRequest' => $upgradeRequest !== null,
+            'status' => $upgradeRequest ? $upgradeRequest->status : null,
+            'request_id' => $upgradeRequest ? $upgradeRequest->id : null,
+        ]);
+    }
+
+    /**
      * Cancel upgrade request (only if pending)
      */
     public function cancel(ServiceUpgradeRequest $upgradeRequest)

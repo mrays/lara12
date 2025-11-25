@@ -187,6 +187,66 @@
                                 </div>
                             </div>
 
+                            <!-- Upgrade Request Status -->
+                            @php
+                                $pendingUpgradeRequest = \App\Models\ServiceUpgradeRequest::where('service_id', $service->id)
+                                    ->where('client_id', auth()->id())
+                                    ->whereIn('status', ['pending', 'approved', 'processing'])
+                                    ->first();
+                            @endphp
+                            
+                            @if($pendingUpgradeRequest)
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="alert alert-{{ $pendingUpgradeRequest->status === 'pending' ? 'warning' : ($pendingUpgradeRequest->status === 'approved' ? 'success' : 'info') }} d-flex align-items-start">
+                                            <i class="bx bx-{{ $pendingUpgradeRequest->status === 'pending' ? 'time' : ($pendingUpgradeRequest->status === 'approved' ? 'check-circle' : 'cog') }} me-2 mt-1"></i>
+                                            <div class="flex-grow-1">
+                                                <strong>Upgrade Request Status:</strong>
+                                                <div class="mt-2">
+                                                    <span class="badge bg-{{ $pendingUpgradeRequest->status === 'pending' ? 'warning' : ($pendingUpgradeRequest->status === 'approved' ? 'success' : 'info') }} me-2">
+                                                        {{ ucfirst($pendingUpgradeRequest->status) }}
+                                                    </span>
+                                                    <small class="text-muted">
+                                                        Request #{{ $pendingUpgradeRequest->id }} submitted on {{ $pendingUpgradeRequest->created_at->format('M d, Y') }}
+                                                    </small>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <strong>From:</strong> {{ $pendingUpgradeRequest->current_plan }} 
+                                                    <i class="bx bx-right-arrow-alt mx-2"></i>
+                                                    <strong>To:</strong> {{ $pendingUpgradeRequest->requested_plan }}
+                                                </div>
+                                                
+                                                @if($pendingUpgradeRequest->status === 'approved')
+                                                    <div class="mt-2 text-success">
+                                                        <i class="bx bx-check-circle me-1"></i>
+                                                        Your upgrade request has been approved! 
+                                                        <a href="{{ route('client.invoices.index') }}" class="alert-link">Check your invoices</a> for payment details.
+                                                    </div>
+                                                @elseif($pendingUpgradeRequest->status === 'processing')
+                                                    <div class="mt-2 text-info">
+                                                        <i class="bx bx-cog me-1"></i>
+                                                        Your upgrade request is currently being processed by our team.
+                                                    </div>
+                                                @else
+                                                    <div class="mt-2 text-warning">
+                                                        <i class="bx bx-time me-1"></i>
+                                                        Your upgrade request is pending admin approval.
+                                                    </div>
+                                                @endif
+                                                
+                                                @if($pendingUpgradeRequest->admin_notes)
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            <strong>Admin Notes:</strong> {{ $pendingUpgradeRequest->admin_notes }}
+                                                        </small>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <!-- Action Buttons -->
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -260,9 +320,19 @@
                                             </p>
                                             
                                             <div class="d-flex gap-2">
-                                                <button class="btn btn-primary" onclick="upgradePlan()">
-                                                    <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
-                                                </button>
+                                                @if($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'pending')
+                                                    <button class="btn btn-warning" disabled>
+                                                        <i class="bx bx-time me-1"></i>Upgrade Pending
+                                                    </button>
+                                                @elseif($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'approved')
+                                                    <button class="btn btn-success" disabled>
+                                                        <i class="bx bx-check me-1"></i>Upgrade Approved
+                                                    </button>
+                                                @else
+                                                    <button class="btn btn-primary" onclick="upgradePlan()">
+                                                        <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
+                                                    </button>
+                                                @endif
                                                 <button class="btn btn-outline-danger" onclick="cancelSubscription()">
                                                     Cancel Subscription
                                                 </button>
@@ -385,9 +455,21 @@
                                 <div class="col-md-6">
                                     <h6>Service Management</h6>
                                     <div class="list-group">
-                                        <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
-                                            <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
-                                        </a>
+                                        @if($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'pending')
+                                            <a href="#" class="list-group-item list-group-item-action disabled" style="pointer-events: none;">
+                                                <i class="bx bx-time me-2"></i>Upgrade Pending
+                                                <small class="text-muted d-block">Request #{{ $pendingUpgradeRequest->id }} is being processed</small>
+                                            </a>
+                                        @elseif($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'approved')
+                                            <a href="#" class="list-group-item list-group-item-action disabled" style="pointer-events: none;">
+                                                <i class="bx bx-check me-2"></i>Upgrade Approved
+                                                <small class="text-muted d-block">Request #{{ $pendingUpgradeRequest->id }} has been approved</small>
+                                            </a>
+                                        @else
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
+                                                <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
+                                            </a>
+                                        @endif
                                         <a href="#" class="list-group-item list-group-item-action" onclick="changePassword()">
                                             <i class="bx bx-key me-2"></i>Perpanjang Website
                                         </a>
@@ -821,5 +903,38 @@ function submitUpgradeRequest() {
         submitBtn.disabled = false;
     });
 }
+
+// Auto-refresh upgrade request status every 30 seconds
+function refreshUpgradeStatus() {
+    fetch(`/services/{{ $service->id }}/upgrade-status`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.hasUpgradeRequest && data.status !== 'pending') {
+            // Status changed, reload page to show updated status
+            showToast('Your upgrade request status has been updated!', 'info');
+            setTimeout(() => location.reload(), 2000);
+        }
+    })
+    .catch(error => {
+        console.log('Error checking upgrade status:', error);
+    });
+}
+
+// Start auto-refresh if there's a pending request
+@php
+    $hasPendingRequest = \App\Models\ServiceUpgradeRequest::where('service_id', $service->id)
+        ->where('client_id', auth()->id())
+        ->where('status', 'pending')
+        ->exists();
+@endphp
+
+@if($hasPendingRequest)
+    setInterval(refreshUpgradeStatus, 30000); // Check every 30 seconds
+@endif
 </script>
 @endsection
