@@ -513,7 +513,11 @@ function checkDomainAvailability() {
             .then(data => {
                 clearTimeout(loadingTimeout);
                 
-                if (data.available) {
+                if (data.available === 'unknown') {
+                    statusElement.innerHTML = '<i class="bx bx-help-circle text-warning"></i>';
+                    messageElement.innerHTML = '<i class="bx bx-help-circle me-1 text-warning"></i>' + data.message;
+                    messageElement.className = 'form-text text-warning';
+                } else if (data.available) {
                     statusElement.innerHTML = '<i class="bx bx-check text-success"></i>';
                     messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>' + data.message;
                     messageElement.className = 'form-text text-success';
