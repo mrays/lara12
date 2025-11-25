@@ -104,28 +104,31 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.services.update-status');
             
         // Server management
-        Route::resource('servers', App\Http\Controllers\Admin\ServerController::class)
-            ->names('admin.servers');
-        Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
-            ->name('admin.servers.toggle-status');
         Route::get('servers/{server}/password', [App\Http\Controllers\Admin\ServerController::class, 'getPassword'])
             ->name('admin.servers.password');
+        Route::put('servers/{server}/toggle-status', [App\Http\Controllers\Admin\ServerController::class, 'toggleStatus'])
+            ->name('admin.servers.toggle-status');
+        Route::resource('servers', App\Http\Controllers\Admin\ServerController::class)
+            ->names('admin.servers')
+            ->parameters(['servers' => 'server']);
             
         // Domain Register management
-        Route::resource('domain-registers', App\Http\Controllers\Admin\DomainRegisterController::class)
-            ->names('admin.domain-registers');
-        Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
-            ->name('admin.domain-registers.toggle-status');
         Route::get('domain-registers/{register}/password', [App\Http\Controllers\Admin\DomainRegisterController::class, 'getPassword'])
             ->name('admin.domain-registers.password');
+        Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
+            ->name('admin.domain-registers.toggle-status');
+        Route::resource('domain-registers', App\Http\Controllers\Admin\DomainRegisterController::class)
+            ->names('admin.domain-registers')
+            ->parameters(['domain_registers' => 'register']);
             
         // Client Data management
-        Route::resource('client-data', App\Http\Controllers\Admin\ClientDataController::class)
-            ->names('admin.client-data');
         Route::get('client-data/service-status', [App\Http\Controllers\Admin\ClientDataController::class, 'serviceStatus'])
             ->name('admin.client-data.service-status');
         Route::post('client-data/export', [App\Http\Controllers\Admin\ClientDataController::class, 'export'])
             ->name('admin.client-data.export');
+        Route::resource('client-data', App\Http\Controllers\Admin\ClientDataController::class)
+            ->names('admin.client-data')
+            ->parameters(['client_data' => 'client']);
             
         // Invoice edit routes
         Route::put('invoices/{invoice}/quick-update', [App\Http\Controllers\InvoiceController::class, 'updateInvoice'])
@@ -134,12 +137,13 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.invoices.status');
             
         // Domain Extensions management
-        Route::resource('domain-extensions', App\Http\Controllers\Admin\DomainExtensionController::class)
-            ->names('admin.domain-extensions');
         Route::put('domain-extensions/{domainExtension}/toggle-status', [App\Http\Controllers\Admin\DomainExtensionController::class, 'toggleStatus'])
             ->name('admin.domain-extensions.toggle-status');
-        Route::delete('invoices/{invoice}/delete', [App\Http\Controllers\InvoiceController::class, 'deleteInvoice'])
-            ->name('admin.invoices.delete');
+        Route::resource('domain-extensions', App\Http\Controllers\Admin\DomainExtensionController::class)
+            ->names('admin.domain-extensions')
+            ->parameters(['domain_extensions' => 'domainExtension']);
+        
+        // Invoice management routes
         Route::put('invoices/{invoice}/service-link', [App\Http\Controllers\InvoiceController::class, 'updateServiceLink'])
             ->name('admin.invoices.update-service-link');
         Route::get('api/clients/{client}/services', [App\Http\Controllers\InvoiceController::class, 'getClientServices'])
