@@ -113,7 +113,7 @@ class DuitkuService
                             'duitku_merchant_code' => $merchantOrderId,
                             'duitku_reference' => $result['reference'] ?? null,
                             'duitku_payment_url' => $result['paymentUrl'] ?? null,
-                            'status' => 'Sent'
+                            'status' => 'gagal'
                         ]);
 
                         return [
