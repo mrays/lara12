@@ -79,6 +79,14 @@
             </a>
         </li>
 
+        <!-- Domain Extensions -->
+        <li class="menu-item {{ request()->routeIs('admin.domain-extensions.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.domain-extensions.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-globe"></i>
+                <div data-i18n="Domain Extensions">Domain Extensions</div>
+            </a>
+        </li>
+
         <!-- Invoices -->
         <li class="menu-item {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
             <a href="{{ route('admin.invoices.index') }}" class="menu-link">

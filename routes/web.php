@@ -102,7 +102,13 @@ Route::middleware(['auth'])->group(function () {
         Route::put('invoices/{invoice}/quick-update', [App\Http\Controllers\InvoiceController::class, 'updateInvoice'])
             ->name('admin.invoices.quick-update');
         Route::put('invoices/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])
-            ->name('admin.invoices.status-update');
+            ->name('admin.invoices.status');
+            
+        // Domain Extensions management
+        Route::resource('domain-extensions', App\Http\Controllers\Admin\DomainExtensionController::class)
+            ->names('admin.domain-extensions');
+        Route::put('domain-extensions/{domainExtension}/toggle-status', [App\Http\Controllers\Admin\DomainExtensionController::class, 'toggleStatus'])
+            ->name('admin.domain-extensions.toggle-status');
         Route::delete('invoices/{invoice}/delete', [App\Http\Controllers\InvoiceController::class, 'deleteInvoice'])
             ->name('admin.invoices.delete');
         Route::put('invoices/{invoice}/service-link', [App\Http\Controllers\InvoiceController::class, 'updateServiceLink'])
