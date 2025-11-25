@@ -193,36 +193,79 @@ class InvoiceController extends Controller
         return redirect()->back()->with('success', 'Invoice marked as paid!');
     }
 
-    public function clientInvoices()
+    public function clientInvoices(Request $request)
     {
         $user = auth()->user();
         
         // Use direct DB query for better compatibility
-        $invoicesData = \DB::table('invoices')
+        $invoicesQuery = \DB::table('invoices')
             ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
             ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
             ->select('invoices.*', 'users.name as client_name', 'services.product as service_name')
-            ->where('invoices.client_id', $user->id)
-            ->orderBy('invoices.created_at', 'desc')
-            ->paginate(10);
+            ->where('invoices.client_id', $user->id);
+
+        // Apply filters
+        if ($request->filled('status')) {
+            $invoicesQuery->where('invoices.status', $request->status);
+        }
+
+        if ($request->filled('date_from')) {
+            $invoicesQuery->whereDate('invoices.created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $invoicesQuery->whereDate('invoices.created_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $invoicesQuery->where(function($query) use ($search) {
+                $query->where('invoices.invoice_number', 'like', "%{$search}%")
+                      ->orWhere('invoices.title', 'like', "%{$search}%")
+                      ->orWhere('invoices.description', 'like', "%{$search}%");
+            });
+        }
+
+        $invoicesData = $invoicesQuery->orderBy('invoices.created_at', 'desc')->get();
 
         // Add status_color property to each invoice
         $invoices = $invoicesData;
-        $invoices->getCollection()->transform(function ($invoice) {
+        $invoices->transform(function ($invoice) {
             $invoice->status_color = $this->getStatusColor($invoice->status);
             $invoice->formatted_amount = 'Rp ' . number_format($invoice->total_amount, 0, ',', '.');
             $invoice->due_date_formatted = $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') : 'N/A';
             return $invoice;
         });
 
-        // Calculate stats using direct queries
+        // Calculate stats using the same filters
+        $statsQuery = \DB::table('invoices')->where('client_id', $user->id);
+        
+        // Apply same filters to stats
+        if ($request->filled('status')) {
+            $statsQuery->where('status', $request->status);
+        }
+        if ($request->filled('date_from')) {
+            $statsQuery->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $statsQuery->whereDate('created_at', '<=', $request->date_to);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $statsQuery->where(function($query) use ($search) {
+                $query->where('invoice_number', 'like', "%{$search}%")
+                      ->orWhere('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
         $stats = [
-            'total' => \DB::table('invoices')->where('client_id', $user->id)->count(),
-            'paid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Paid', 'Lunas'])->count(),
-            'unpaid' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Unpaid', 'Overdue'])->count(),
-            'overdue' => \DB::table('invoices')->where('client_id', $user->id)->where('status', 'Overdue')->count(),
-            'total_amount' => \DB::table('invoices')->where('client_id', $user->id)->sum('total_amount'),
-            'unpaid_amount' => \DB::table('invoices')->where('client_id', $user->id)->whereIn('status', ['Unpaid', 'Overdue'])->sum('total_amount'),
+            'total' => $statsQuery->count(),
+            'paid' => $statsQuery->clone()->whereIn('status', ['Paid', 'Lunas'])->count(),
+            'unpaid' => $statsQuery->clone()->whereIn('status', ['Unpaid', 'Overdue'])->count(),
+            'overdue' => $statsQuery->clone()->where('status', 'Overdue')->count(),
+            'total_amount' => $statsQuery->clone()->sum('total_amount'),
+            'unpaid_amount' => $statsQuery->clone()->whereIn('status', ['Unpaid', 'Overdue'])->sum('total_amount'),
         ];
 
         return view('client.invoices.index', compact('invoices', 'stats'));

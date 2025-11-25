@@ -752,8 +752,18 @@ function changePassword() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.log('Error response text:', text);
+                throw new Error(`HTTP ${response.status}: ${text}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             showToast('Invoice perpanjangan berhasil dibuat!', 'success');
             
@@ -779,7 +789,7 @@ function changePassword() {
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('Terjadi kesalahan saat membuat invoice perpanjangan', 'danger');
+        showToast('Terjadi kesalahan: ' + error.message, 'danger');
     });
 }
 

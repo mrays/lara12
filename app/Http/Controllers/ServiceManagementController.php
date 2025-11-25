@@ -199,10 +199,30 @@ class ServiceManagementController extends Controller
     /**
      * Create renewal invoice for service
      */
-    public function createRenewalInvoice(Request $request, Service $service)
+    public function createRenewalInvoice(Request $request, $serviceId)
     {
+        \Log::info('Renewal request for service ID: ' . $serviceId);
+        
+        // Get service data using the same approach as show method
+        $serviceData = \DB::table('services')
+            ->leftJoin('users', 'services.client_id', '=', 'users.id')
+            ->select('services.*', 'users.name as client_name', 'users.email as client_email')
+            ->where('services.id', $serviceId)
+            ->first();
+
+        if (!$serviceData) {
+            \Log::error('Service not found: ' . $serviceId);
+            return response()->json([
+                'success' => false,
+                'message' => 'Service not found.'
+            ], 404);
+        }
+
+        \Log::info('Service data found: ', (array)$serviceData);
+
         // Check if user can access this service
-        if (Auth::user()->role !== 'admin' && $service->client_id !== Auth::id()) {
+        if (Auth::user()->role !== 'admin' && $serviceData->client_id !== Auth::id()) {
+            \Log::error('Unauthorized access attempt by user: ' . Auth::id() . ' for service: ' . $serviceId);
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized access to this service.'
@@ -216,29 +236,35 @@ class ServiceManagementController extends Controller
             $lastInvoice = Invoice::orderBy('id', 'desc')->first();
             $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(($lastInvoice ? $lastInvoice->id + 1 : 1), 4, '0', STR_PAD_LEFT);
 
+            \Log::info('Generated invoice number: ' . $invoiceNumber);
+
             // Calculate due date based on service billing cycle
             $issueDate = now();
-            $dueDate = $this->calculateDueDate($service->billing_cycle, $issueDate);
+            $dueDate = $this->calculateDueDate($serviceData->billing_cycle, $issueDate);
+
+            \Log::info('Due date calculated: ' . $dueDate->format('Y-m-d'));
 
             // Create renewal invoice
             $invoice = Invoice::create([
-                'client_id' => $service->client_id,
-                'service_id' => $service->id,
+                'client_id' => $serviceData->client_id,
+                'service_id' => $serviceData->id,
                 'number' => $invoiceNumber,
                 'invoice_number' => $invoiceNumber,
-                'title' => "Perpanjang Layanan - {$service->product}",
-                'description' => "Perpanjangan layanan untuk {$service->product}" . ($service->domain ? " ({$service->domain})" : ""),
-                'subtotal' => $service->price,
-                'amount' => $service->price,
+                'title' => "Perpanjang Layanan - {$serviceData->product}",
+                'description' => "Perpanjangan layanan untuk {$serviceData->product}" . ($serviceData->domain ? " ({$serviceData->domain})" : ""),
+                'subtotal' => $serviceData->price,
+                'amount' => $serviceData->price,
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'discount_amount' => 0,
-                'total_amount' => $service->price,
+                'total_amount' => $serviceData->price,
                 'status' => 'pending',
                 'issue_date' => $issueDate,
                 'due_date' => $dueDate,
-                'notes' => "Perpanjangan untuk periode {$this->translateBillingCycle($service->billing_cycle)}",
+                'notes' => "Perpanjangan untuk periode {$this->translateBillingCycle($serviceData->billing_cycle)}",
             ]);
+
+            \Log::info('Invoice created with ID: ' . $invoice->id);
 
             DB::commit();
 
@@ -247,13 +273,16 @@ class ServiceManagementController extends Controller
                 'message' => 'Invoice perpanjangan berhasil dibuat!',
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoiceNumber,
-                'amount' => $service->price,
+                'amount' => $serviceData->price,
                 'due_date' => $dueDate->format('M d, Y'),
                 'payment_url' => route('client.invoices.pay', $invoice->id)
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Renewal invoice creation failed: ' . $e->getMessage());
+            \Log::error('Exception trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,

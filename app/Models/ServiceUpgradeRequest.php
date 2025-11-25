@@ -176,7 +176,7 @@ class ServiceUpgradeRequest extends Model
             'requested_plan' => 'CANCELLED',
             'current_price' => $service->price,
             'requested_price' => 0,
-            'upgrade_reason' => 'Cancellation Request',
+            'upgrade_reason' => 'Cancellation',
             'additional_notes' => $reason,
             'status' => 'pending',
             'request_type' => 'cancellation',

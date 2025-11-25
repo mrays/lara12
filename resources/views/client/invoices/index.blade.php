@@ -95,26 +95,42 @@
 <!-- Invoice Filters -->
 <div class="card mb-4">
     <div class="card-body">
+        @if(request()->hasAny(['status', 'date_from', 'date_to', 'search']))
+            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <i class="bx bx-filter me-2"></i>
+                    Filters are applied
+                    @if(request('status'))<span class="badge bg-warning ms-2">Status: {{ request('status') }}</span>@endif
+                    @if(request('date_from'))<span class="badge bg-info ms-2">From: {{ request('date_from') }}</span>@endif
+                    @if(request('date_to'))<span class="badge bg-info ms-2">To: {{ request('date_to') }}</span>@endif
+                    @if(request('search'))<span class="badge bg-primary ms-2">Search: {{ request('search') }}</span>@endif
+                </div>
+                <a href="{{ route('client.invoices.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bx bx-x me-1"></i>Clear All
+                </a>
+            </div>
+        @endif
+        
         <form method="GET" action="{{ route('client.invoices.index') }}" class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Status</label>
-                <select name="status" class="form-select">
+                <select name="status" class="form-select" onchange="this.form.submit()">
                     <option value="">All Status</option>
-                    <option value="Unpaid" {{ request('status') == 'Unpaid' ? 'selected' : '' }}>Unpaid</option>
+                    <option value="unpaid" {{ request('status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
                     <option value="gagal" {{ request('status') == 'gagal' ? 'selected' : '' }}>gagal</option>
-                    <option value="Paid" {{ request('status') == 'Paid' ? 'selected' : '' }}>Paid</option>
-                    <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                    <option value="Overdue" {{ request('status') == 'Overdue' ? 'selected' : '' }}>Overdue</option>
-                    <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+                    <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label">From Date</label>
-                <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}" onchange="this.form.submit()">
             </div>
             <div class="col-md-3">
                 <label class="form-label">To Date</label>
-                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}" onchange="this.form.submit()">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Search</label>
@@ -123,6 +139,11 @@
                     <button class="btn btn-outline-primary" type="submit">
                         <i class="bx bx-search"></i>
                     </button>
+                    @if(request()->hasAny(['status', 'date_from', 'date_to', 'search']))
+                        <a href="{{ route('client.invoices.index') }}" class="btn btn-outline-secondary" title="Clear Filters">
+                            <i class="bx bx-x"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
         </form>
