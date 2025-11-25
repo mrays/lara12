@@ -36,6 +36,11 @@ class Service extends Model
         return $this->belongsTo(User::class, 'client_id');
     }
 
+    public function package()
+    {
+        return $this->belongsTo(ServicePackage::class, 'package_id');
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
