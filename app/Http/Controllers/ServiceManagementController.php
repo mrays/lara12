@@ -14,7 +14,7 @@ class ServiceManagementController extends Controller
     /**
      * Translate billing cycle abbreviations to Indonesian
      */
-    private function translateBillingCycle($billingCycle)
+    public function translateBillingCycle($billingCycle)
     {
         $cycleMap = [
             '1D' => '1 Hari',
