@@ -318,14 +318,8 @@
 @push('scripts')
 <script>
 function payInvoice(invoiceId) {
-    // Redirect to payment page or show payment modal
-    if (confirm('Proceed to payment for this invoice?')) {
-        // Option 1: Redirect to payment gateway
-        window.location.href = `/client/invoices/${invoiceId}/pay`;
-        
-        // Option 2: Open payment in new window
-        // window.open(`/client/invoices/${invoiceId}/pay`, '_blank');
-    }
+    // Direct redirect to payment page without confirmation
+    window.location.href = `/client/invoices/${invoiceId}/pay`;
 }
 
 function downloadInvoice(invoiceId) {
