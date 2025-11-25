@@ -439,7 +439,7 @@
                                             <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
                                         </a>
                                         <a href="#" class="list-group-item list-group-item-action" onclick="changePassword()">
-                                            <i class="bx bx-key me-2"></i>Perpanjang Website
+                                            <i class="bx bx-calendar-plus me-2"></i>Perpanjang Layanan
                                         </a>
                                     </div>
                                 </div>
@@ -736,7 +736,51 @@ function contactSupport() {
 }
 
 function changePassword() {
-    alert('Change password feature coming soon!');
+    // Confirm renewal
+    if (!confirm('Apakah Anda ingin membuat invoice perpanjangan untuk layanan ini?')) {
+        return;
+    }
+    
+    // Show loading
+    showToast('Membuat invoice perpanjangan...', 'info');
+    
+    // Create renewal invoice
+    fetch(`/services/{{ $service->id }}/renewal`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Invoice perpanjangan berhasil dibuat!', 'success');
+            
+            // Show confirmation dialog with payment option
+            const confirmPayment = confirm(
+                `Invoice #${data.invoice_number} telah dibuat.\n\n` +
+                `Jumlah: Rp ${Number(data.amount).toLocaleString('id-ID')}\n` +
+                `Jatuh Tempo: ${data.due_date}\n\n` +
+                `Apakah Anda ingin langsung melakukan pembayaran sekarang?`
+            );
+            
+            if (confirmPayment) {
+                window.location.href = data.payment_url;
+            } else {
+                // Redirect to invoices page after a delay
+                setTimeout(() => {
+                    window.location.href = '/client/invoices';
+                }, 2000);
+            }
+        } else {
+            showToast(data.message || 'Gagal membuat invoice perpanjangan', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Terjadi kesalahan saat membuat invoice perpanjangan', 'danger');
+    });
 }
 
 function upgradePlan() {

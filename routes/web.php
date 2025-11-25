@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
         // Client service management routes
         Route::get('/services', [App\Http\Controllers\ServiceManagementController::class, 'index'])->name('services.index');
         Route::get('/services/{service}/manage', [App\Http\Controllers\ServiceManagementController::class, 'show'])->name('services.manage');
+        Route::post('/services/{service}/renewal', [App\Http\Controllers\ServiceManagementController::class, 'createRenewalInvoice'])->name('services.renewal');
         Route::post('/services/{service}/update', [App\Http\Controllers\ServiceManagementController::class, 'update'])->name('services.update');
         Route::post('/services/{service}/support', [App\Http\Controllers\ServiceManagementController::class, 'contactSupport'])->name('services.support');
         

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use App\Models\ServicePackage;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ServiceManagementController extends Controller
 {
@@ -192,5 +194,109 @@ class ServiceManagementController extends Controller
         // Redirect to support or show support form
         return redirect()->route('support.create', ['service_id' => $service->id])
             ->with('info', 'Please describe your issue with this service');
+    }
+
+    /**
+     * Create renewal invoice for service
+     */
+    public function createRenewalInvoice(Request $request, Service $service)
+    {
+        // Check if user can access this service
+        if (Auth::user()->role !== 'admin' && $service->client_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this service.'
+            ], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Generate invoice number
+            $lastInvoice = Invoice::orderBy('id', 'desc')->first();
+            $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(($lastInvoice ? $lastInvoice->id + 1 : 1), 4, '0', STR_PAD_LEFT);
+
+            // Calculate due date based on service billing cycle
+            $issueDate = now();
+            $dueDate = $this->calculateDueDate($service->billing_cycle, $issueDate);
+
+            // Create renewal invoice
+            $invoice = Invoice::create([
+                'client_id' => $service->client_id,
+                'service_id' => $service->id,
+                'number' => $invoiceNumber,
+                'invoice_number' => $invoiceNumber,
+                'title' => "Perpanjang Layanan - {$service->product}",
+                'description' => "Perpanjangan layanan untuk {$service->product}" . ($service->domain ? " ({$service->domain})" : ""),
+                'subtotal' => $service->price,
+                'amount' => $service->price,
+                'tax_rate' => 0,
+                'tax_amount' => 0,
+                'discount_amount' => 0,
+                'total_amount' => $service->price,
+                'status' => 'pending',
+                'issue_date' => $issueDate,
+                'due_date' => $dueDate,
+                'notes' => "Perpanjangan untuk periode {$this->translateBillingCycle($service->billing_cycle)}",
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice perpanjangan berhasil dibuat!',
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoiceNumber,
+                'amount' => $service->price,
+                'due_date' => $dueDate->format('M d, Y'),
+                'payment_url' => route('client.invoices.pay', $invoice->id)
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat invoice perpanjangan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate due date based on billing cycle
+     */
+    private function calculateDueDate($billingCycle, $issueDate)
+    {
+        switch (strtoupper($billingCycle)) {
+            case '1D':
+                return $issueDate->copy()->addDay();
+            case '1W':
+                return $issueDate->copy()->addWeek();
+            case '2W':
+                return $issueDate->copy()->addWeeks(2);
+            case '3W':
+                return $issueDate->copy()->addWeeks(3);
+            case '1M':
+            case 'MONTHLY':
+                return $issueDate->copy()->addMonth();
+            case '2M':
+                return $issueDate->copy()->addMonths(2);
+            case '3M':
+            case 'QUARTERLY':
+                return $issueDate->copy()->addMonths(3);
+            case '6M':
+            case 'SEMI-ANNUALLY':
+                return $issueDate->copy()->addMonths(6);
+            case '1Y':
+            case 'ANNUALLY':
+                return $issueDate->copy()->addYear();
+            case '2Y':
+            case 'BIENNIALLY':
+                return $issueDate->copy()->addYears(2);
+            case '3Y':
+                return $issueDate->copy()->addYears(3);
+            default:
+                return $issueDate->copy()->addMonth(); // Default to 1 month
+        }
     }
 }
