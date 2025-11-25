@@ -150,14 +150,18 @@
                                 <input type="text" class="form-control @error('domain') is-invalid @enderror" 
                                        id="domain" name="domain" 
                                        value="{{ old('domain') }}"
-                                       placeholder="contoh: websiteanda.com" required>
+                                       placeholder="contoh: websiteanda.com" required
+                                       oninput="checkDomainAvailability()">
+                                <span class="input-group-text" id="domainStatus">
+                                    <i class="bx bx-time"></i>
+                                </span>
                             </div>
                             @error('domain')
                                 <div class="text-danger small mt-1">
                                     <i class="bx bx-error-circle me-1"></i>{{ $message }}
                                 </div>
                             @enderror
-                            <div class="form-text">
+                            <div class="form-text" id="domainMessage">
                                 <i class="bx bx-info-circle me-1"></i>
                                 Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.
                             </div>
@@ -326,6 +330,51 @@ function updatePrice() {
 
 function formatNumber(num) {
     return new Intl.NumberFormat('id-ID').format(Math.round(num));
+}
+
+// Domain availability checking
+let domainCheckTimeout;
+function checkDomainAvailability() {
+    const domain = document.getElementById('domain').value.trim();
+    const statusElement = document.getElementById('domainStatus');
+    const messageElement = document.getElementById('domainMessage');
+    
+    // Clear timeout
+    clearTimeout(domainCheckTimeout);
+    
+    // Reset status
+    statusElement.innerHTML = '<i class="bx bx-time"></i>';
+    messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Mengecek ketersediaan domain...';
+    messageElement.className = 'form-text text-muted';
+    
+    if (domain.length < 3) {
+        statusElement.innerHTML = '<i class="bx bx-time"></i>';
+        messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain yang ingin Anda gunakan. Jika belum punya domain, kami bisa bantu daftarkan.';
+        messageElement.className = 'form-text text-muted';
+        return;
+    }
+    
+    // Debounce check
+    domainCheckTimeout = setTimeout(() => {
+        fetch(`/api/check-domain?domain=${encodeURIComponent(domain)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    statusElement.innerHTML = '<i class="bx bx-check text-success"></i>';
+                    messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>Domain tersedia!';
+                    messageElement.className = 'form-text text-success';
+                } else {
+                    statusElement.innerHTML = '<i class="bx bx-x text-danger"></i>';
+                    messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>Domain sudah digunakan. Silakan pilih domain lain.';
+                    messageElement.className = 'form-text text-danger';
+                }
+            })
+            .catch(error => {
+                statusElement.innerHTML = '<i class="bx bx-error text-warning"></i>';
+                messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Gagal mengecek domain. Silakan coba lagi.';
+                messageElement.className = 'form-text text-warning';
+            });
+    }, 500);
 }
 
 // Auto-select first package if only one exists

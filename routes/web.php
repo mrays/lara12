@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders', [App\Http\Controllers\Client\OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{invoice}/success', [App\Http\Controllers\Client\OrderController::class, 'success'])->name('orders.success');
         Route::get('/api/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('api.packages.show');
+        Route::get('/api/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('api.check-domain');
     });
 
     // Admin only
