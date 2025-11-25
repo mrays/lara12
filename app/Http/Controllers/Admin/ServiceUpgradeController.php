@@ -80,12 +80,12 @@ class ServiceUpgradeController extends Controller
                 // Approve the request
                 $upgradeRequest->approve(Auth::id(), $validated['admin_notes']);
 
-                // Update the service (optional - you might want to do this manually)
-                // $service = $upgradeRequest->service;
-                // $service->update([
-                //     'product' => $upgradeRequest->requested_plan,
-                //     'price' => $upgradeRequest->requested_price,
-                // ]);
+                // Update the service with new plan details
+                $service = $upgradeRequest->service;
+                $service->update([
+                    'product' => $upgradeRequest->requested_plan,
+                    'price' => $upgradeRequest->requested_price,
+                ]);
 
                 // TODO: Generate invoice for the upgrade
                 // TODO: Send notification to client
