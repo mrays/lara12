@@ -222,23 +222,33 @@
 <script>
 function cancelRequest(requestId) {
     if (confirm('Are you sure you want to cancel this upgrade request?')) {
-        fetch(`/upgrade-requests/${requestId}/cancel`, {
+        fetch(`/client/upgrade-requests/${requestId}/cancel`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 showToast(data.message, 'success');
                 setTimeout(() => location.reload(), 1000);
             } else {
-                showToast(data.message, 'danger');
+                showToast(data.message || 'Failed to cancel request', 'danger');
             }
         })
         .catch(error => {
-            showToast('An error occurred', 'danger');
+            console.error('Error:', error);
+            showToast('Error cancelling request: ' + error.message, 'danger');
         });
     }
 }
