@@ -258,7 +258,6 @@ class ServiceManagementController extends Controller
                 'client_id' => $serviceData->client_id,
                 'service_id' => $serviceData->id,
                 'number' => $invoiceNumber,
-                'invoice_number' => $invoiceNumber,
                 'title' => "Perpanjang Layanan - {$serviceData->product}",
                 'description' => "Perpanjangan layanan untuk {$serviceData->product}" . ($serviceData->domain ? " ({$serviceData->domain})" : ""),
                 'subtotal' => $serviceData->price,

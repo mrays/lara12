@@ -14,7 +14,6 @@ class Invoice extends Model
         'client_id',
         'service_id', 
         'number',
-        'invoice_number',
         'title',
         'description',
         'subtotal',
