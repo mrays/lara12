@@ -380,7 +380,7 @@ function redirectToWhatsApp(method) {
     
     // URL encode the message
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = "https://wa.me/" + whatsappNumber + "?text=" + encodedMessage;
+    const whatsappUrl = "https://api.whatsapp.com/send?phone=" + whatsappNumber + "&text=" + encodedMessage;
     
     // Create form to submit payment method update
     const form = document.createElement('form');
