@@ -137,4 +137,15 @@ class DomainRegisterController extends Controller
             'new_status' => $newStatus
         ]);
     }
+
+    /**
+     * Get register password (decrypted)
+     */
+    public function getPassword(DomainRegister $register)
+    {
+        return response()->json([
+            'success' => true,
+            'password' => $register->decrypted_password
+        ]);
+    }
 }

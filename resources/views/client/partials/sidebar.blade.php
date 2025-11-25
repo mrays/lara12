@@ -24,7 +24,7 @@
 
         <!-- My Services -->
         <li class="menu-item {{ request()->routeIs('client.services.*') ? 'active' : '' }}">
-            <a href="/client/services" class="menu-link">
+            <a href="{{ route('client.services.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-package"></i>
                 <span>My Services</span>
             </a>

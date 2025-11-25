@@ -43,12 +43,6 @@
                 padding: 0.625rem 1rem !important;
                 font-size: 0.9rem !important;
             }
-            
-            .menu-icon {
-                font-size: 1.1rem !important;
-                margin-right: 0.75rem !important;
-            }
-            
             .badge {
                 font-size: 0.7rem !important;
                 min-width: 1.2rem !important;
@@ -64,7 +58,30 @@
             }
         }
         
-        /* Sidebar Toggle Fix */
+        /* Admin vs Client Visual Distinction */
+        @if(auth()->check() && auth()->user()->role === 'admin')
+        .layout-wrapper {
+            --bs-primary: #696cff;
+            --bs-primary-rgb: 105, 108, 255;
+        }
+        .layout-navbar {
+            border-bottom: 3px solid #696cff !important;
+        }
+        .app-brand-text {
+            color: #696cff !important;
+        }
+        @else
+        .layout-wrapper {
+            --bs-primary: #00bcd4;
+            --bs-primary-rgb: 0, 188, 212;
+        }
+        .layout-navbar {
+            border-bottom: 3px solid #00bcd4 !important;
+        }
+        .app-brand-text {
+            color: #00bcd4 !important;
+        }
+        @endif
         .layout-menu-toggle {
             cursor: pointer;
             transition: all 0.2s ease;
@@ -168,7 +185,11 @@
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
-            @include('client.partials.sidebar')
+            @if(auth()->check() && auth()->user()->role === 'admin')
+                @include('admin.partials.sidebar')
+            @else
+                @include('client.partials.sidebar')
+            @endif
             <!-- / Menu -->
 
             <!-- Layout container -->
@@ -190,6 +211,17 @@
                         </div>
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Role Indicator -->
+                            @if(auth()->check())
+                            <li class="nav-item d-none d-md-block">
+                                <span class="navbar-text me-3">
+                                    <span class="badge {{ auth()->user()->role === 'admin' ? 'bg-danger' : 'bg-info' }} rounded-pill">
+                                        <i class="bx {{ auth()->user()->role === 'admin' ? 'bx-shield' : 'bx-user' }} me-1"></i>
+                                        {{ ucfirst(auth()->user()->role) }}
+                                    </span>
+                                </span>
+                            </li>
+                            
                             <!-- Management Panel -->
                             @if(auth()->user()->role === 'admin')
                             <li class="nav-item navbar-dropdown dropdown-management dropdown">
@@ -309,6 +341,7 @@
                                     @endif
                                 </ul>
                             </li>
+                            @endif
                             @endif
                             
                             <!-- User -->

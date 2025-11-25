@@ -32,10 +32,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // Client routes
-    Route::get('/client', [ClientDashboardController::class, 'index'])->name('client.dashboard');
-    
-    // Client invoice routes
-    Route::prefix('client')->name('client.')->group(function () {
+    Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->group(function () {
+        Route::get('/', [ClientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/invoices', [App\Http\Controllers\InvoiceController::class, 'clientInvoices'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [App\Http\Controllers\InvoiceController::class, 'clientShow'])->name('invoices.show');
         Route::get('/invoices/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPDF'])->name('invoices.pdf');
@@ -52,12 +50,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/orders/create', [App\Http\Controllers\Client\OrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [App\Http\Controllers\Client\OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{invoice}/success', [App\Http\Controllers\Client\OrderController::class, 'success'])->name('orders.success');
+        
+        // Client upgrade requests
+        Route::get('/upgrade-requests', [App\Http\Controllers\ServiceUpgradeController::class, 'clientRequests'])->name('upgrade-requests.index');
+        Route::get('/upgrade-requests/{request}', [App\Http\Controllers\ServiceUpgradeController::class, 'clientShow'])->name('upgrade-requests.show');
+        Route::post('/upgrade-requests/{upgradeRequest}/cancel', [App\Http\Controllers\ServiceUpgradeController::class, 'cancel'])->name('upgrade-requests.cancel');
     });
 
-    // API routes (outside client prefix for easier access)
-    Route::prefix('api')->name('api.')->group(function () {
+    // API routes for client (outside client prefix for easier access)
+    Route::middleware(['auth', 'role:client'])->prefix('api')->name('api.')->group(function () {
         Route::get('/packages/{id}', [App\Http\Controllers\Client\OrderController::class, 'getPackageDetails'])->name('packages.show');
         Route::get('/check-domain', [App\Http\Controllers\Client\OrderController::class, 'checkDomain'])->name('check-domain')->middleware('throttle:10,1'); // 10 requests per minute
+        Route::get('/clients/{client}/services', [App\Http\Controllers\InvoiceController::class, 'getClientServices']);
     });
 
     // Admin only
@@ -112,6 +116,8 @@ Route::middleware(['auth'])->group(function () {
             ->names('admin.domain-registers');
         Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
             ->name('admin.domain-registers.toggle-status');
+        Route::get('domain-registers/{register}/password', [App\Http\Controllers\Admin\DomainRegisterController::class, 'getPassword'])
+            ->name('admin.domain-registers.password');
             
         // Client Data management
         Route::resource('client-data', App\Http\Controllers\Admin\ClientDataController::class)
@@ -172,9 +178,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/services/{service}/upgrade-request', [App\Http\Controllers\ServiceUpgradeController::class, 'submitRequest'])->name('services.upgrade.request');
     Route::post('/services/{service}/cancellation-request', [App\Http\Controllers\ServiceUpgradeController::class, 'submitCancellationRequest'])->name('services.cancellation.request');
     Route::get('/services/{service}/upgrade-status', [App\Http\Controllers\ServiceUpgradeController::class, 'checkUpgradeStatus'])->name('services.upgrade.status');
-    Route::get('/upgrade-requests', [App\Http\Controllers\ServiceUpgradeController::class, 'clientRequests'])->name('client.upgrade-requests.index');
-    Route::get('/upgrade-requests/{request}', [App\Http\Controllers\ServiceUpgradeController::class, 'clientShow'])->name('client.upgrade-requests.show');
-    Route::post('/upgrade-requests/{upgradeRequest}/cancel', [App\Http\Controllers\ServiceUpgradeController::class, 'cancel'])->name('client.upgrade-requests.cancel');
 });
 
 // Public payment routes (no auth required for callbacks)
