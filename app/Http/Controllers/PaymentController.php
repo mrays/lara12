@@ -28,7 +28,7 @@ class PaymentController extends Controller
         }
 
         // Check if invoice can be paid
-        if (!in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue'])) {
+        if (!in_array($invoice->status, ['Unpaid', 'gagal', 'Overdue'])) {
             return redirect()->back()->with('error', 'This invoice cannot be paid');
         }
 
@@ -88,7 +88,7 @@ class PaymentController extends Controller
             }
 
             // Check if invoice can be paid
-            if (!in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue'])) {
+            if (!in_array($invoice->status, ['Unpaid', 'gagal', 'Overdue'])) {
                 return redirect()->back()->with('error', 'This invoice cannot be paid');
             }
 
@@ -288,7 +288,7 @@ class PaymentController extends Controller
                 'duitku_merchant_code' => null,
                 'duitku_reference' => null,
                 'duitku_payment_url' => null,
-                'status' => 'Sent'
+                'status' => 'gagal'
             ]);
 
             return redirect()->back()->with('success', 'Payment cancelled successfully');

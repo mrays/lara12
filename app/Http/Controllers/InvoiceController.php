@@ -50,7 +50,7 @@ class InvoiceController extends Controller
             'invoice_no' => 'required|string|max:255|unique:invoices,number',
             'due_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
+            'status' => 'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas',
             'description' => 'nullable|string'
         ]);
 
@@ -166,7 +166,7 @@ class InvoiceController extends Controller
             return redirect()->back()->with('error', 'Only draft invoices can be sent.');
         }
 
-        $invoice->update(['status' => 'Sent']);
+        $invoice->update(['status' => 'gagal']);
         
         // Here you would typically send an email to the client
         // Mail::to($invoice->client->email)->send(new InvoiceSent($invoice));
@@ -297,7 +297,7 @@ class InvoiceController extends Controller
             'due_date' => 'required|date',
             'invoice_no' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas',
+            'status' => 'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas',
             'description' => 'nullable|string'
         ]);
 
@@ -330,7 +330,7 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, $invoiceId)
     {
         $request->validate([
-            'status' => 'required|in:Unpaid,Sent,Paid,Overdue,Cancelled,Lunas'
+            'status' => 'required|in:Unpaid,gagal,Paid,Overdue,Cancelled,Lunas'
         ]);
 
         $updated = \DB::table('invoices')
@@ -393,7 +393,7 @@ class InvoiceController extends Controller
     {
         return match($status) {
             'Unpaid' => 'warning',
-            'Sent' => 'info', 
+            'gagal' => 'info', 
             'Paid' => 'success',
             'Lunas' => 'success',
             'Overdue' => 'danger',
@@ -409,7 +409,7 @@ class InvoiceController extends Controller
     {
         return match($status) {
             'Unpaid' => 'badge bg-warning',
-            'Sent' => 'badge bg-info',
+            'gagal' => 'badge bg-info',
             'Paid' => 'badge bg-success', 
             'Lunas' => 'badge bg-success',
             'Overdue' => 'badge bg-danger',

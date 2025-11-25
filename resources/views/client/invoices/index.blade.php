@@ -93,7 +93,7 @@
                 <select name="status" class="form-select">
                     <option value="">All Status</option>
                     <option value="Unpaid" {{ request('status') == 'Unpaid' ? 'selected' : '' }}>Unpaid</option>
-                    <option value="Sent" {{ request('status') == 'Sent' ? 'selected' : '' }}>Sent</option>
+                    <option value="gagal" {{ request('status') == 'gagal' ? 'selected' : '' }}>gagal</option>
                     <option value="Paid" {{ request('status') == 'Paid' ? 'selected' : '' }}>Paid</option>
                     <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                     <option value="Overdue" {{ request('status') == 'Overdue' ? 'selected' : '' }}>Overdue</option>
@@ -201,7 +201,7 @@
                                     <a class="dropdown-item" href="{{ route('client.invoices.show', $invoice->id) }}">
                                         <i class="bx bx-show me-1"></i> View Details
                                     </a>
-                                    @if(in_array($invoice->status, ['Unpaid', 'Sent', 'Overdue']) && !in_array($invoice->status, ['Paid', 'Lunas', 'Cancelled']))
+                                    @if(in_array($invoice->status, ['Unpaid', 'gagal', 'Overdue']) && !in_array($invoice->status, ['Paid', 'Lunas', 'Cancelled']))
                                         <a class="dropdown-item text-success" href="#" onclick="payInvoice({{ $invoice->id }})">
                                             <i class="bx bx-credit-card me-1"></i> Pay Now
                                         </a>

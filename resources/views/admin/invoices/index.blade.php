@@ -118,8 +118,8 @@
                                             @case('Unpaid')
                                                 <span class="badge bg-warning">Unpaid</span>
                                                 @break
-                                            @case('Sent')
-                                                <span class="badge bg-info">Sent</span>
+                                            @case('gagal')
+                                                <span class="badge bg-info">gagal</span>
                                                 @break
                                             @case('Overdue')
                                                 <span class="badge bg-danger">Overdue</span>
@@ -155,8 +155,8 @@
                                                     <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Unpaid')">
                                                         <i class="bx bx-time me-1 text-warning"></i> Mark as Unpaid
                                                     </button>
-                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Sent')">
-                                                        <i class="bx bx-send me-1 text-info"></i> Mark as Sent
+                                                    <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'gagal')">
+                                                        <i class="bx bx-send me-1 text-info"></i> Mark as gagal
                                                     </button>
                                                     <button class="dropdown-item" onclick="updateInvoiceStatus({{ $invoice->id }}, 'Paid')">
                                                         <i class="bx bx-check me-1 text-success"></i> Mark as Paid
@@ -249,7 +249,7 @@
                             <label for="edit_status" class="form-label">Status</label>
                             <select class="form-select" id="edit_status" name="status" required>
                                 <option value="Unpaid">Unpaid</option>
-                                <option value="Sent">Sent</option>
+                                <option value="gagal">gagal</option>
                                 <option value="Paid">Paid</option>
                                 <option value="Overdue">Overdue</option>
                                 <option value="Cancelled">Cancelled</option>
