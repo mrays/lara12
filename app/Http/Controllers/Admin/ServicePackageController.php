@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ServicePackage;
 use App\Models\DomainExtension;
+use App\Models\ServicePackageFreeDomain;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ServicePackageController extends Controller
 {
@@ -74,7 +76,7 @@ class ServicePackageController extends Controller
      */
     public function edit($id)
     {
-        $package = ServicePackage::findOrFail($id);
+        $package = ServicePackage::with('freeDomains.domainExtension')->findOrFail($id);
         $domainExtensions = DomainExtension::active()->orderBy('extension')->orderBy('duration_years')->get();
         
         // Group domain extensions by extension for better organization
@@ -95,22 +97,53 @@ class ServicePackageController extends Controller
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
             'is_active' => 'boolean',
-            'domain_extension_id' => 'nullable|exists:domain_extensions,id',
-            'domain_duration_years' => 'nullable|integer|min:1|max:10',
-            'is_domain_free' => 'boolean',
-            'domain_discount_percent' => 'numeric|min:0|max:100'
+            'free_domains' => 'nullable|array',
+            'free_domains.*.domain_extension_id' => 'required|exists:domain_extensions,id',
+            'free_domains.*.duration_years' => 'required|integer|min:1|max:10',
+            'free_domains.*.discount_percent' => 'required|numeric|min:0|max:100',
+            'free_domains.*.is_free' => 'boolean'
         ]);
 
-        $package->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'],
-            'base_price' => $validated['base_price'],
-            'is_active' => $request->has('is_active') ? 1 : 0,
-            'domain_extension_id' => $validated['domain_extension_id'],
-            'domain_duration_years' => $validated['domain_duration_years'],
-            'is_domain_free' => $request->has('is_domain_free') ? 1 : 0,
-            'domain_discount_percent' => $validated['domain_discount_percent']
-        ]);
+        // Check for duplicate domain extensions within the same package
+        if (!empty($validated['free_domains'])) {
+            $domainIds = array_column($validated['free_domains'], 'domain_extension_id');
+            if (count($domainIds) !== count(array_unique($domainIds))) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['free_domains' => 'Tidak dapat menambahkan domain yang sama lebih dari satu kali dalam satu paket.']);
+            }
+        }
+
+        DB::transaction(function () use ($request, $package, $validated) {
+            // Update package basic info
+            $package->update([
+                'name' => $validated['name'],
+                'description' => $validated['description'],
+                'base_price' => $validated['base_price'],
+                'is_active' => $request->has('is_active') ? 1 : 0,
+            ]);
+
+            // Remove existing free domains
+            $package->freeDomains()->delete();
+
+            // Add new free domains if provided
+            if (!empty($validated['free_domains'])) {
+                $freeDomains = [];
+                foreach ($validated['free_domains'] as $index => $domain) {
+                    $freeDomains[] = [
+                        'service_package_id' => $package->id,
+                        'domain_extension_id' => $domain['domain_extension_id'],
+                        'duration_years' => $domain['duration_years'],
+                        'discount_percent' => $domain['discount_percent'],
+                        'is_free' => isset($domain['is_free']) ? 1 : 0,
+                        'sort_order' => $index,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                ServicePackageFreeDomain::insert($freeDomains);
+            }
+        });
 
         return redirect()->route('admin.service-packages.index')
             ->with('success', 'Service package updated successfully!');

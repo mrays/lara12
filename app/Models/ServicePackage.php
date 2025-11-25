@@ -46,6 +46,14 @@ class ServicePackage extends Model
     }
 
     /**
+     * Get the free domains associated with this package
+     */
+    public function freeDomains()
+    {
+        return $this->hasMany(ServicePackageFreeDomain::class)->orderBy('sort_order');
+    }
+
+    /**
      * Scope for active packages
      */
     public function scopeActive($query)

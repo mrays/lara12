@@ -42,13 +42,28 @@ class OrderController extends Controller
      */
     private function calculateDomainPrice($package, $domainExtension, $selectedDomainId)
     {
-        // Check if package has domain promo and selected domain matches
+        // Check if package has free domains and selected domain matches any of them
+        if ($package->freeDomains && $package->freeDomains->isNotEmpty()) {
+            $freeDomain = $package->freeDomains
+                ->where('domain_extension_id', $selectedDomainId)
+                ->first();
+                
+            if ($freeDomain) {
+                // Domain is included in package promo
+                if ($freeDomain->is_free) {
+                    return 0; // Free domain
+                } else {
+                    // Apply package discount
+                    return $domainExtension->price * (1 - $freeDomain->discount_percent / 100);
+                }
+            }
+        }
+        
+        // Fallback to old single domain logic for backward compatibility
         if ($package->domain_extension_id && $package->domain_extension_id == $selectedDomainId) {
-            // Domain is included in package promo
             if ($package->is_domain_free) {
                 return 0; // Free domain
             } else {
-                // Apply package discount
                 return $domainExtension->price * (1 - $package->domain_discount_percent / 100);
             }
         }
@@ -72,7 +87,7 @@ class OrderController extends Controller
         ]);
 
         $user = auth()->user();
-        $package = ServicePackage::with('domainExtension')->findOrFail($request->package_id);
+        $package = ServicePackage::with(['domainExtension', 'freeDomains'])->findOrFail($request->package_id);
         $domainExtension = DomainExtension::findOrFail($request->domain_extension);
         
         // Calculate package price
@@ -120,6 +135,7 @@ class OrderController extends Controller
                 'client_id' => $user->id,
                 'service_id' => $service->id,
                 'subtotal' => $totalPrice,
+                'amount' => $totalPrice, // Add amount field for backward compatibility
                 'total_amount' => $totalPrice,
                 'status' => 'Unpaid',
                 'issue_date' => now()->toDateString(),
