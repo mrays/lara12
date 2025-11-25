@@ -88,8 +88,8 @@
 
                                         <!-- Price -->
                                         <div class="mb-3">
-                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price }}">
-                                                Rp {{ number_format($package->base_price, 0, ',', '.') }}
+                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price * 12 * 0.9 }}">
+                                                Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}
                                             </h3>
                                             <small class="text-muted">/tahun</small>
                                         </div>
@@ -427,34 +427,59 @@ function updateFullDomain() {
 function updatePrice() {
     if (!selectedPackage) return;
     
-    const basePrice = selectedPackage.basePrice;
+    // Get billing cycle (defaults to annually)
+    const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'annually';
+    
+    // Calculate package price based on billing cycle
+    let packagePrice = selectedPackage.basePrice;
+    if (billingCycle === 'annually') {
+        packagePrice = selectedPackage.basePrice * 12 * 0.9; // 10% discount for annual
+    }
+    
     let domainPrice = 0;
     let domainLabel = 'Domain:';
     
-    // Calculate domain price
+    // Calculate domain price using the same logic as backend
     if (selectedDomainExtension) {
-        if (selectedPackage.hasDomainPromo && selectedPackage.domainExtensionId == selectedDomainExtension.id) {
+        // Check if domain is in free domains list (new multiple domain system)
+        let freeDomain = null;
+        if (selectedPackage.freeDomains && selectedPackage.freeDomains.length > 0) {
+            freeDomain = selectedPackage.freeDomains.find(fd => fd.domain_extension_id == selectedDomainExtension.id);
+        }
+        
+        if (freeDomain) {
             // Domain is included in package promo
-            if (selectedPackage.isDomainFree) {
+            if (freeDomain.is_free) {
                 domainPrice = 0;
                 domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
             } else {
                 // Apply package discount
-                domainPrice = selectedDomainExtension.price * (1 - selectedPackage.domainDiscount / 100);
+                domainPrice = selectedDomainExtension.price * (1 - freeDomain.discount_percent / 100);
                 domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
             }
         } else {
-            // Domain not included in package, charge full price
-            domainPrice = selectedDomainExtension.price;
-            domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+            // Fallback to old single domain logic
+            if (selectedPackage.hasDomainPromo && selectedPackage.domainExtensionId == selectedDomainExtension.id) {
+                if (selectedPackage.isDomainFree) {
+                    domainPrice = 0;
+                    domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+                } else {
+                    domainPrice = selectedDomainExtension.price * (1 - selectedPackage.domainDiscount / 100);
+                    domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+                }
+            } else {
+                // Domain not included in package, charge full price
+                domainPrice = selectedDomainExtension.price;
+                domainLabel = `Domain .${selectedDomainExtension.extension} (${selectedDomainExtension.duration} tahun):`;
+            }
         }
     }
     
     // Calculate total
-    const totalPrice = basePrice + domainPrice;
+    const totalPrice = packagePrice + domainPrice;
     
     // Update price display
-    document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(basePrice);
+    document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(packagePrice);
     
     // Show/hide domain pricing section
     const domainPricingSection = document.getElementById('domainPricingSection');
