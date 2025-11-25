@@ -77,6 +77,7 @@ class OrderController extends Controller
                 'subtotal' => $price,
                 'total_amount' => $price,
                 'status' => 'Unpaid',
+                'issue_date' => now()->toDateString(),
                 'due_date' => now()->addDays(7),
                 'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
                 'notes' => $request->notes,
