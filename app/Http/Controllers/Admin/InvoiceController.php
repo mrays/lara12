@@ -16,7 +16,9 @@ class InvoiceController extends Controller
         $q = $request->query('q');
         $invoices = \DB::table('invoices')
             ->leftJoin('users', 'invoices.client_id', '=', 'users.id')
-            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email')
+            ->leftJoin('services', 'invoices.service_id', '=', 'services.id')
+            ->select('invoices.*', 'users.name as client_name', 'users.email as client_email', 
+                     'services.product as service_name', 'services.domain as service_domain')
             ->when($q, fn($b) => $b->where('invoices.number','like',"%$q%"))
             ->orderBy('invoices.due_date','desc')
             ->paginate(15)

@@ -45,6 +45,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Client</th>
+                                    <th>Service</th>
                                     <th>Due Date</th>
                                     <th>No Invoice</th>
                                     <th>Amount</th>
@@ -65,6 +66,36 @@
                                                 <h6 class="mb-0">{{ $invoice->client_name ?? 'N/A' }}</h6>
                                                 <small class="text-muted">{{ $invoice->client_email ?? 'N/A' }}</small>
                                             </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <select class="form-select form-select-sm me-2" 
+                                                    onchange="updateServiceLink({{ $invoice->id }}, this.value)"
+                                                    style="min-width: 150px;">
+                                                <option value="">No service</option>
+                                                @php
+                                                    $services = \DB::table('services')
+                                                        ->where('client_id', $invoice->client_id)
+                                                        ->select('id', 'product', 'domain')
+                                                        ->orderBy('product')
+                                                        ->get();
+                                                @endphp
+                                                @foreach($services as $service)
+                                                    <option value="{{ $service->id }}" 
+                                                            {{ $invoice->service_id == $service->id ? 'selected' : '' }}>
+                                                        {{ $service->product }}
+                                                        @if($service->domain)
+                                                            ({{ $service->domain }})
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @if($invoice->service_id)
+                                                <i class="bx bx-link text-success"></i>
+                                            @else
+                                                <i class="bx bx-unlink text-muted"></i>
+                                            @endif
                                         </div>
                                     </td>
                                     <td>
@@ -265,6 +296,20 @@ function updateInvoiceStatus(invoiceId, status) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+// Update service link function
+function updateServiceLink(invoiceId, serviceId) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/admin/invoices/${invoiceId}/service-link`;
+    form.innerHTML = `
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="service_id" value="${serviceId}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // Delete invoice function
