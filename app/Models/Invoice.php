@@ -75,8 +75,10 @@ class Invoice extends Model
             'Draft' => 'secondary',
             'Sent' => 'info',
             'Paid' => 'success',
+            'Unpaid' => 'warning',
             'Overdue' => 'danger',
             'Cancelled' => 'dark',
+            'gagal' => 'danger',
             default => 'secondary'
         };
     }

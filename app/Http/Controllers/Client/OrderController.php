@@ -90,8 +90,8 @@ class OrderController extends Controller
         $package = ServicePackage::with(['domainExtension', 'freeDomains'])->findOrFail($request->package_id);
         $domainExtension = DomainExtension::findOrFail($request->domain_extension);
         
-        // Calculate package price
-        $packagePrice = $package->getPrice($request->billing_cycle);
+        // Use base price directly (no calculation for annual)
+        $packagePrice = $package->base_price;
         
         // Calculate domain price with promo validation
         $domainPrice = $this->calculateDomainPrice($package, $domainExtension, $request->domain_extension);

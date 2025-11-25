@@ -88,8 +88,8 @@
 
                                         <!-- Price -->
                                         <div class="mb-3">
-                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price * 12 * 0.9 }}">
-                                                Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}
+                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price }}">
+                                                Rp {{ number_format($package->base_price, 0, ',', '.') }}
                                             </h3>
                                             <small class="text-muted">/tahun</small>
                                         </div>
@@ -430,11 +430,8 @@ function updatePrice() {
     // Get billing cycle (defaults to annually)
     const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'annually';
     
-    // Calculate package price based on billing cycle
+    // Use base price directly for both monthly and annual (no calculation)
     let packagePrice = selectedPackage.basePrice;
-    if (billingCycle === 'annually') {
-        packagePrice = selectedPackage.basePrice * 12 * 0.9; // 10% discount for annual
-    }
     
     let domainPrice = 0;
     let domainLabel = 'Domain:';
