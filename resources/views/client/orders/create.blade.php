@@ -83,8 +83,8 @@
 
                                         <!-- Price -->
                                         <div class="mb-3">
-                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price * 12 }}">
-                                                Rp {{ number_format($package->base_price * 12, 0, ',', '.') }}
+                                            <h3 class="text-primary mb-0 package-price" data-monthly="{{ $package->base_price }}" data-annual="{{ $package->base_price }}">
+                                                Rp {{ number_format($package->base_price, 0, ',', '.') }}
                                             </h3>
                                             <small class="text-muted">/tahun</small>
                                         </div>
@@ -317,8 +317,8 @@ function updatePrice() {
     
     const basePrice = selectedPackage.basePrice;
     
-    // Harga tahunan = base_price * 12 (sama persis dengan /admin/service-packages)
-    const totalPrice = basePrice * 12;
+    // Harga = base_price langsung (tanpa dikali 12)
+    const totalPrice = basePrice;
     
     document.getElementById('summaryBasePrice').textContent = 'Rp ' + formatNumber(basePrice);
     document.getElementById('summaryTotal').textContent = 'Rp ' + formatNumber(totalPrice);
