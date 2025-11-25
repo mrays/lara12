@@ -119,7 +119,7 @@
                                                 <span class="badge bg-warning">Unpaid</span>
                                                 @break
                                             @case('gagal')
-                                                <span class="badge bg-info">gagal</span>
+                                                <span class="badge bg-danger">gagal</span>
                                                 @break
                                             @case('Overdue')
                                                 <span class="badge bg-danger">Overdue</span>
