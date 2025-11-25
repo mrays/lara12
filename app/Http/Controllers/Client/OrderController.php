@@ -32,7 +32,7 @@ class OrderController extends Controller
     {
         $request->validate([
             'package_id' => 'required|exists:service_packages,id',
-            'domain' => 'required|string|max:255',
+            'domain' => 'required|string|max:255|unique:services,domain',
             'billing_cycle' => 'required|in:monthly,annually',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -66,9 +66,10 @@ class OrderController extends Controller
             // Create invoice
             $invoice = Invoice::create([
                 'number' => $invoiceNumber,
+                'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
-                'amount' => $price,
+                'total_amount' => $price,
                 'status' => 'Unpaid',
                 'due_date' => now()->addDays(7),
                 'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
@@ -116,6 +117,26 @@ class OrderController extends Controller
             'monthly_price' => $package->base_price,
             'annual_price' => $package->base_price * 12 * 0.9,
             'features' => $package->features,
+        ]);
+    }
+
+    /**
+     * Check domain availability via AJAX
+     */
+    public function checkDomain(Request $request)
+    {
+        $domain = $request->query('domain');
+        
+        if (!$domain || strlen($domain) < 3) {
+            return response()->json(['available' => false, 'message' => 'Domain terlalu pendek']);
+        }
+        
+        // Check if domain exists in services table
+        $exists = Service::where('domain', $domain)->exists();
+        
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'Domain sudah digunakan' : 'Domain tersedia'
         ]);
     }
 }
