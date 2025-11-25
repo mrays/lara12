@@ -68,24 +68,19 @@ class OrderController extends Controller
             // Generate invoice number
             $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
             
-            // Create invoice using DB::table to bypass model issues
-            $invoiceId = DB::table('invoices')->insertGetId([
+            // Create invoice using the model (column already exists)
+            $invoice = Invoice::create([
                 'number' => $invoiceNumber,
                 'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
-                'subtotal' => (float) $price,
-                'total_amount' => (float) $price,
+                'subtotal' => $price,
+                'total_amount' => $price,
                 'status' => 'Unpaid',
                 'due_date' => now()->addDays(7),
                 'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
                 'notes' => $request->notes,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
-            
-            // Get the invoice for redirect
-            $invoice = Invoice::find($invoiceId);
 
             DB::commit();
 
