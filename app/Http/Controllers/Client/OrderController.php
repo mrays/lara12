@@ -42,6 +42,11 @@ class OrderController extends Controller
         
         // Calculate price (gunakan base_price langsung, tanpa dikali 12)
         $price = $package->base_price;
+        
+        // Ensure price is not null
+        if (is_null($price)) {
+            $price = 0;
+        }
 
         try {
             DB::beginTransaction();
@@ -63,7 +68,7 @@ class OrderController extends Controller
             // Generate invoice number
             $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
             
-            // Create invoice
+            // Create invoice using the model (column already exists)
             $invoice = Invoice::create([
                 'number' => $invoiceNumber,
                 'title' => "Order: {$package->name}",
@@ -72,6 +77,7 @@ class OrderController extends Controller
                 'subtotal' => $price,
                 'total_amount' => $price,
                 'status' => 'Unpaid',
+                'issue_date' => now()->toDateString(),
                 'due_date' => now()->addDays(7),
                 'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
                 'notes' => $request->notes,
