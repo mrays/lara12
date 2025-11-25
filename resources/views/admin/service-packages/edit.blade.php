@@ -109,6 +109,115 @@
                             </div>
                         </div>
 
+                        <!-- Domain Include Promo -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="tf-icons bx bx-globe me-2"></i>Domain Include Promo
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="domain_extension_id" class="form-label">
+                                            Domain Extension
+                                        </label>
+                                        <select class="form-select @error('domain_extension_id') is-invalid @enderror" 
+                                                id="domain_extension_id" 
+                                                name="domain_extension_id">
+                                            <option value="">Tidak ada domain</option>
+                                            @foreach($groupedDomains as $extension => $domains)
+                                                <optgroup label=".{{ $extension }}">
+                                                    @foreach($domains as $domain)
+                                                        <option value="{{ $domain->id }}" 
+                                                                {{ old('domain_extension_id', $package->domain_extension_id) == $domain->id ? 'selected' : '' }}
+                                                                data-price="{{ $domain->price }}"
+                                                                data-duration="{{ $domain->duration_years }}">
+                                                            .{{ $domain->extension }} ({{ $domain->duration_years }} tahun) - {{ $domain->formatted_price }}
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+                                        @error('domain_extension_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted">Pilih domain yang termasuk dalam paket promo</small>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label for="domain_duration_years" class="form-label">
+                                            Durasi Domain
+                                        </label>
+                                        <select class="form-select @error('domain_duration_years') is-invalid @enderror" 
+                                                id="domain_duration_years" 
+                                                name="domain_duration_years">
+                                            <option value="">Pilih durasi</option>
+                                            @for($i = 1; $i <= 10; $i++)
+                                                <option value="{{ $i }}" {{ old('domain_duration_years', $package->domain_duration_years) == $i ? 'selected' : '' }}>
+                                                    {{ $i }} Tahun
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        @error('domain_duration_years')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label for="domain_discount_percent" class="form-label">
+                                            Diskon Domain (%)
+                                        </label>
+                                        <input type="number" 
+                                               class="form-control @error('domain_discount_percent') is-invalid @enderror" 
+                                               id="domain_discount_percent" 
+                                               name="domain_discount_percent" 
+                                               value="{{ old('domain_discount_percent', $package->domain_discount_percent) }}" 
+                                               min="0" 
+                                               max="100" 
+                                               step="0.01">
+                                        @error('domain_discount_percent')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted">100% = Gratis domain</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   id="is_domain_free" 
+                                                   name="is_domain_free" 
+                                                   value="1" 
+                                                   {{ old('is_domain_free', $package->is_domain_free) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="is_domain_free">
+                                                <i class="tf-icons bx bx-gift me-1"></i>Domain Gratis
+                                            </label>
+                                            <small class="form-text text-muted d-block">Centang jika domain termasuk gratis dalam paket</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Domain Preview -->
+                                <div class="mt-3" id="domainPreview" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <h6 class="alert-heading">
+                                            <i class="tf-icons bx bx-check-circle me-2"></i>Domain Promo Preview
+                                        </h6>
+                                        <p class="mb-0">
+                                            <strong>Domain:</strong> <span id="previewDomain">-</span><br>
+                                            <strong>Durasi:</strong> <span id="previewDuration">-</span><br>
+                                            <strong>Harga Normal:</strong> <span id="previewNormalPrice">-</span><br>
+                                            <strong>Diskon:</strong> <span id="previewDiscount">-</span><br>
+                                            <strong>Harga Promo:</strong> <span id="previewPromoPrice">-</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Package Info -->
                         <div class="alert alert-info">
                             <h6 class="alert-heading">
@@ -156,11 +265,77 @@ document.getElementById('description').addEventListener('input', function() {
     this.style.height = (this.scrollHeight) + 'px';
 });
 
+// Domain preview functionality
+function updateDomainPreview() {
+    const domainSelect = document.getElementById('domain_extension_id');
+    const durationSelect = document.getElementById('domain_duration_years');
+    const discountInput = document.getElementById('domain_discount_percent');
+    const isFreeCheckbox = document.getElementById('is_domain_free');
+    const previewDiv = document.getElementById('domainPreview');
+    
+    if (domainSelect.value && durationSelect.value) {
+        const selectedOption = domainSelect.options[domainSelect.selectedIndex];
+        const domainText = selectedOption.text;
+        const normalPrice = parseFloat(selectedOption.dataset.price);
+        const duration = durationSelect.value;
+        let discount = parseFloat(discountInput.value) || 0;
+        
+        // Auto-set discount to 100% if free checkbox is checked
+        if (isFreeCheckbox.checked) {
+            discount = 100;
+            discountInput.value = 100;
+        }
+        
+        // Calculate promo price
+        let promoPrice = normalPrice;
+        if (discount > 0) {
+            promoPrice = normalPrice * (1 - discount / 100);
+        }
+        
+        // Update preview
+        document.getElementById('previewDomain').textContent = domainText.split(' - ')[0];
+        document.getElementById('previewDuration').textContent = duration + ' Tahun';
+        document.getElementById('previewNormalPrice').textContent = 'Rp ' + normalPrice.toLocaleString('id-ID');
+        document.getElementById('previewDiscount').textContent = discount + '%';
+        document.getElementById('previewPromoPrice').textContent = promoPrice === 0 ? 'FREE' : 'Rp ' + promoPrice.toLocaleString('id-ID');
+        
+        previewDiv.style.display = 'block';
+    } else {
+        previewDiv.style.display = 'none';
+    }
+}
+
+// Event listeners for domain fields
+document.getElementById('domain_extension_id').addEventListener('change', updateDomainPreview);
+document.getElementById('domain_duration_years').addEventListener('change', updateDomainPreview);
+document.getElementById('domain_discount_percent').addEventListener('input', updateDomainPreview);
+
+// Handle free domain checkbox
+document.getElementById('is_domain_free').addEventListener('change', function() {
+    const discountInput = document.getElementById('domain_discount_percent');
+    if (this.checked) {
+        discountInput.value = 100;
+        discountInput.disabled = true;
+    } else {
+        discountInput.disabled = false;
+        discountInput.value = 0;
+    }
+    updateDomainPreview();
+});
+
 // Initialize textarea height
 document.addEventListener('DOMContentLoaded', function() {
     const textarea = document.getElementById('description');
     textarea.style.height = 'auto';
     textarea.style.height = (textarea.scrollHeight) + 'px';
+    
+    // Initialize domain preview if values exist
+    updateDomainPreview();
+    
+    // Disable discount input if domain is free
+    if (document.getElementById('is_domain_free').checked) {
+        document.getElementById('domain_discount_percent').disabled = true;
+    }
 });
 </script>
 @endsection
