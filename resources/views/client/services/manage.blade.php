@@ -477,7 +477,7 @@
                     
                     <!-- Billing Info -->
                     <div class="d-flex align-items-center justify-content-center mb-4">
-                        <span class="text-primary fw-semibold">Annually</span>
+                        <span class="text-primary fw-semibold">Tahunan</span>
                         <span class="badge bg-label-success ms-2">Best Value</span>
                         <input type="hidden" id="billingToggle" value="annually">
                     </div>

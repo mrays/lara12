@@ -85,7 +85,7 @@
                                     <td>
                                         <strong>{{ $invoice->service->product ?? 'Service' }}</strong>
                                         <br>
-                                        <small class="text-muted">{{ $invoice->service->package->name ?? 'Package' }} ({{ $invoice->service->billing_cycle ?? 'annually' }})</small>
+                                        <small class="text-muted">{{ $invoice->service->package->name ?? 'Package' }} ({{ $invoice->service->billing_cycle ? \App\Http\Controllers\ServiceManagementController::translateBillingCycle($invoice->service->billing_cycle) : 'Tahunan' }})</small>
                                     </td>
                                     <td class="text-end">Rp {{ number_format($invoice->service->package->base_price ?? $invoice->total_amount, 0, ',', '.') }}</td>
                                 </tr>

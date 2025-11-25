@@ -138,7 +138,7 @@
                                     <option value="Monthly" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
                                     <option value="Quarterly" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Quarterly' ? 'selected' : '' }}>Quarterly</option>
                                     <option value="Semi-Annually" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Semi-Annually' ? 'selected' : '' }}>Semi-Annually</option>
-                                    <option value="Annually" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Annually' ? 'selected' : '' }}>Annually</option>
+                                    <option value="Annually" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Annually' ? 'selected' : '' }}>Tahunan</option>
                                     <option value="Biennially" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'Biennially' ? 'selected' : '' }}>Biennially</option>
                                     <option value="One Time" {{ old('billing_cycle', $service->billing_cycle ?? '') == 'One Time' ? 'selected' : '' }}>One Time</option>
                                 </select>
