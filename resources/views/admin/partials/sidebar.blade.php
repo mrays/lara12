@@ -141,6 +141,31 @@
             </a>
         </li>
 
+        <!-- Domain Registers -->
+        <li class="menu-item {{ request()->routeIs('admin.domain-registers.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.domain-registers.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-globe"></i>
+                <div data-i18n="Domain Registers">Domain Registers</div>
+            </a>
+        </li>
+
+        <!-- Domains -->
+        <li class="menu-item {{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.domains.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-link"></i>
+                <div data-i18n="Domains">Domains</div>
+                @php
+                    // Use MySQL queries for better performance
+                    $expiringCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domains WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addDays(30)])[0]->count;
+                    $expiredCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domains WHERE expired_date < ?', [now()])[0]->count;
+                    $totalAlerts = $expiringCount + $expiredCount;
+                @endphp
+                @if($totalAlerts > 0)
+                    <span class="badge {{ $expiredCount > 0 ? 'bg-danger' : 'bg-warning' }} rounded-pill ms-auto">{{ $totalAlerts }}</span>
+                @endif
+            </a>
+        </li>
+
         <!-- Domain Expiration -->
         <li class="menu-item {{ request()->routeIs('admin.domain-expiration.*') ? 'active' : '' }}">
             <a href="{{ route('admin.domain-expiration.index') }}" class="menu-link">
@@ -148,8 +173,8 @@
                 <div data-i18n="Domain Expiration">Domain Expiration</div>
                 @php
                     // Use MySQL queries for better performance
-                    $expiringCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count;
-                    $expiredCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count;
+                    $expiringCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count;
+                    $expiredCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count;
                     $totalAlerts = $expiringCount + $expiredCount;
                 @endphp
                 @if($totalAlerts > 0)

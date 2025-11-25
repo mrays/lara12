@@ -125,9 +125,27 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('servers/{server}', [App\Http\Controllers\Admin\ServerController::class, 'destroy'])
             ->name('admin.servers.destroy');
             
-        // Domain Register management
-        Route::get('domain-registers/{register}/password', [App\Http\Controllers\Admin\DomainRegisterController::class, 'getPassword'])
-            ->name('admin.domain-registers.password');
+        // Domain Registers management
+        Route::get('domain-registers/{register}/send-reminder', [App\Http\Controllers\Admin\DomainRegisterController::class, 'sendReminder'])
+            ->name('admin.domain-registers.send-reminder');
+        
+        // Domain management
+        Route::get('domains', [App\Http\Controllers\Admin\DomainController::class, 'index'])
+            ->name('admin.domains.index');
+        Route::get('domains/create', [App\Http\Controllers\Admin\DomainController::class, 'create'])
+            ->name('admin.domains.create');
+        Route::post('domains', [App\Http\Controllers\Admin\DomainController::class, 'store'])
+            ->name('admin.domains.store');
+        Route::get('domains/{domainId}/edit', [App\Http\Controllers\Admin\DomainController::class, 'edit'])
+            ->name('admin.domains.edit');
+        Route::put('domains/{domainId}', [App\Http\Controllers\Admin\DomainController::class, 'update'])
+            ->name('admin.domains.update');
+        Route::delete('domains/{domainId}', [App\Http\Controllers\Admin\DomainController::class, 'destroy'])
+            ->name('admin.domains.destroy');
+        Route::post('domains/{domainId}/send-reminder', [App\Http\Controllers\Admin\DomainController::class, 'sendReminder'])
+            ->name('admin.domains.send-reminder');
+        Route::post('domains/export', [App\Http\Controllers\Admin\DomainController::class, 'export'])
+            ->name('admin.domains.export');
         Route::put('domain-registers/{register}/toggle-status', [App\Http\Controllers\Admin\DomainRegisterController::class, 'toggleStatus'])
             ->name('admin.domain-registers.toggle-status');
         
@@ -187,7 +205,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.domain-expiration.index');
         Route::get('domain-expiration/guide', [App\Http\Controllers\Admin\DomainExpirationController::class, 'guide'])
             ->name('admin.domain-expiration.guide');
-        Route::post('domain-expiration/{clientId}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
+        Route::post('domain-expiration/{domainRegisterId}/send-reminder', [App\Http\Controllers\Admin\DomainExpirationController::class, 'sendReminder'])
             ->name('admin.domain-expiration.send-reminder');
         Route::post('domain-expiration/export', [App\Http\Controllers\Admin\DomainExpirationController::class, 'export'])
             ->name('admin.domain-expiration.export');

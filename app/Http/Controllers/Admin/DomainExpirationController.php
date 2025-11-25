@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClientData;
 use App\Models\DomainRegister;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -12,80 +11,86 @@ use Illuminate\Support\Facades\DB;
 class DomainExpirationController extends Controller
 {
     /**
-     * Display client domain expiration monitoring dashboard
+     * Display all domain registers listing
      */
     public function index(Request $request)
     {
         $filter = $request->get('filter', 'all'); // all, expired, expiring, safe
         
-        // Build base query with MySQL
-        $baseQuery = 'SELECT cd.*, dr.name as domain_register_name, dr.login_link 
-                     FROM client_data cd 
-                     LEFT JOIN domain_registers dr ON cd.domain_register_id = dr.id';
+        // Build base query with MySQL for domain registers
+        $baseQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+                     FROM domain_registers dr 
+                     LEFT JOIN client_data cd ON dr.id = cd.domain_register_id';
         
+        $groupBy = ' GROUP BY dr.id';
         $whereClause = '';
         $bindings = [];
         
         switch ($filter) {
             case 'expired':
-                $whereClause = ' WHERE cd.domain_expired < ?';
+                $whereClause = ' WHERE dr.expired_date < ?';
                 $bindings[] = now();
                 break;
             case 'expiring':
-                $whereClause = ' WHERE cd.domain_expired >= ? AND cd.domain_expired <= ?';
+                $whereClause = ' WHERE dr.expired_date >= ? AND dr.expired_date <= ?';
                 $bindings[] = now();
                 $bindings[] = now()->addMonths(3);
                 break;
             case 'safe':
-                $whereClause = ' WHERE cd.domain_expired > ?';
+                $whereClause = ' WHERE dr.expired_date > ?';
                 $bindings[] = now()->addMonths(3);
                 break;
-            // 'all' shows all client domains
+            // 'all' shows all domain registers
         }
         
-        $fullQuery = $baseQuery . $whereClause . ' ORDER BY cd.domain_expired ASC';
-        $clientDomains = DB::select($fullQuery, $bindings);
+        $orderBy = ' ORDER BY dr.expired_date ASC';
+        $fullQuery = $baseQuery . $whereClause . $groupBy . $orderBy;
+        $domainRegisters = DB::select($fullQuery, $bindings);
         
         // Calculate statistics using MySQL queries
         $stats = [
-            'total' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
-            'expired' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count,
-            'expiring' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count,
-            'safe' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired > ?', [now()->addMonths(3)])[0]->count,
+            'total' => DB::select('SELECT COUNT(*) as count FROM domain_registers')[0]->count,
+            'expired' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count,
+            'expiring' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count,
+            'safe' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date > ?', [now()->addMonths(3)])[0]->count,
+            'total_clients' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
         ];
         
         // Get upcoming expirations (next 30 days) using MySQL
-        $upcomingQuery = 'SELECT cd.*, dr.name as domain_register_name, dr.login_link 
-                          FROM client_data cd 
-                          LEFT JOIN domain_registers dr ON cd.domain_register_id = dr.id
-                          WHERE cd.domain_expired >= ? AND cd.domain_expired <= ? 
-                          ORDER BY cd.domain_expired ASC LIMIT 10';
+        $upcomingQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+                          FROM domain_registers dr 
+                          LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                          WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
+                          GROUP BY dr.id
+                          ORDER BY dr.expired_date ASC LIMIT 10';
         $upcomingExpirations = DB::select($upcomingQuery, [now(), now()->addDays(30)]);
         
         // Critical expirations (next 7 days) using MySQL
-        $criticalQuery = 'SELECT cd.*, dr.name as domain_register_name, dr.login_link 
-                         FROM client_data cd 
-                         LEFT JOIN domain_registers dr ON cd.domain_register_id = dr.id
-                         WHERE cd.domain_expired >= ? AND cd.domain_expired <= ? 
-                         ORDER BY cd.domain_expired ASC';
+        $criticalQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+                         FROM domain_registers dr 
+                         LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                         WHERE dr.expired_date >= ? AND dr.expired_date <= ? 
+                         GROUP BY dr.id
+                         ORDER BY dr.expired_date ASC';
         $criticalExpirations = DB::select($criticalQuery, [now(), now()->addDays(7)]);
         
         // Recently expired (last 30 days) using MySQL
-        $recentQuery = 'SELECT cd.*, dr.name as domain_register_name, dr.login_link 
-                       FROM client_data cd 
-                       LEFT JOIN domain_registers dr ON cd.domain_register_id = dr.id
-                       WHERE cd.domain_expired < ? AND cd.domain_expired >= ? 
-                       ORDER BY cd.domain_expired DESC';
+        $recentQuery = 'SELECT dr.*, COUNT(cd.id) as client_count 
+                       FROM domain_registers dr 
+                       LEFT JOIN client_data cd ON dr.id = cd.domain_register_id
+                       WHERE dr.expired_date < ? AND dr.expired_date >= ? 
+                       GROUP BY dr.id
+                       ORDER BY dr.expired_date DESC';
         $recentlyExpired = DB::select($recentQuery, [now(), now()->subDays(30)]);
         
         // Convert stdClass objects to arrays for view compatibility
-        $clientDomains = $this->convertStdClassToArray($clientDomains);
+        $domainRegisters = $this->convertStdClassToArray($domainRegisters);
         $upcomingExpirations = $this->convertStdClassToArray($upcomingExpirations);
         $criticalExpirations = $this->convertStdClassToArray($criticalExpirations);
         $recentlyExpired = $this->convertStdClassToArray($recentlyExpired);
         
         return view('admin.domain-expiration.index', compact(
-            'clientDomains', 
+            'domainRegisters', // Changed from clientDomains
             'stats', 
             'filter',
             'upcomingExpirations',
@@ -107,20 +112,11 @@ class DomainExpirationController extends Controller
             $itemArray = (array) $item;
             
             // Convert date strings to Carbon objects
-            $dateFields = ['domain_expired', 'website_service_expired', 'hosting_expired', 'created_at', 'updated_at'];
+            $dateFields = ['expired_date', 'created_at', 'updated_at'];
             foreach ($dateFields as $field) {
                 if (isset($itemArray[$field]) && $itemArray[$field]) {
                     $itemArray[$field] = new Carbon($itemArray[$field]);
                 }
-            }
-            
-            // Create domain_register relationship
-            if (isset($itemArray['domain_register_name'])) {
-                $itemArray['domainRegister'] = (object) [
-                    'name' => $itemArray['domain_register_name'] ?? null,
-                    'login_link' => $itemArray['login_link'] ?? null
-                ];
-                unset($itemArray['domain_register_name'], $itemArray['login_link']);
             }
             
             return (object) $itemArray;
@@ -128,93 +124,97 @@ class DomainExpirationController extends Controller
     }
     
     /**
-     * Send renewal reminder for client domain
+     * Send renewal reminder for domain register
      */
-    public function sendReminder($clientId)
+    public function sendReminder($domainRegisterId)
     {
-        // Get client data using MySQL query
-        $client = DB::select('SELECT * FROM client_data WHERE id = ?', [$clientId]);
+        // Get domain register data using MySQL query
+        $domainRegister = DB::select('SELECT * FROM domain_registers WHERE id = ?', [$domainRegisterId]);
         
-        if (empty($client)) {
+        if (empty($domainRegister)) {
             return redirect()->route('admin.domain-expiration.index')
-                ->with('error', 'Client not found');
+                ->with('error', 'Domain register not found');
         }
         
-        $client = $client[0]; // Get first result
+        $domainRegister = $domainRegister[0]; // Get first result
         
         // Convert date strings to Carbon objects
-        $domainExpired = new Carbon($client->domain_expired);
+        $expiredDate = new Carbon($domainRegister->expired_date);
         
         // Create WhatsApp message for renewal reminder
-        $message = "Halo {$client->name},\n\n" .
-                  "Ini adalah pengingat bahwa domain Anda akan segera expired:\n" .
-                  "📅 Tanggal Expired: {$domainExpired->format('d F Y')}\n" .
-                  "⏰ {$domainExpired->diffInDays(now())} hari lagi\n\n" .
-                  "Silakan lakukan perpanjangan sebelum tanggal kadaluarsa untuk menghindari downtime.\n\n" .
+        $message = "Halo Admin,\n\n" .
+                  "Ini adalah pengingat bahwa domain register akan segera expired:\n" .
+                  "� Nama Register: {$domainRegister->name}\n" .
+                  "�📅 Tanggal Expired: {$expiredDate->format('d F Y')}\n" .
+                  "⏰ {$expiredDate->diffInDays(now())} hari lagi\n" .
+                  "🔗 Login: {$domainRegister->login_link}\n\n" .
+                  "Silakan lakukan perpanjangan sebelum tanggal kadaluarsa.\n\n" .
                   "Terima kasih.";
         
-        $whatsappUrl = "https://wa.me/" . preg_replace('/[^0-9]/', '', $client->whatsapp) . "?text=" . urlencode($message);
+        // Send to admin WhatsApp (you might want to configure this)
+        $adminWhatsApp = '+6281234567890'; // Replace with actual admin WhatsApp
+        $whatsappUrl = "https://wa.me/" . preg_replace('/[^0-9]/', '', $adminWhatsApp) . "?text=" . urlencode($message);
         
         return redirect()->away($whatsappUrl);
     }
     
     /**
-     * Export client domain expiration report using MySQL
+     * Export domain registers report using MySQL
      */
     public function export(Request $request)
     {
         $filter = $request->get('filter', 'all');
         
         // Build MySQL query for export
-        $baseQuery = 'SELECT cd.name, dr.name as domain_register_name, cd.domain_expired, 
-                      cd.website_service_expired, cd.hosting_expired, cd.whatsapp, cd.status
-                      FROM client_data cd 
-                      LEFT JOIN domain_registers dr ON cd.domain_register_id = dr.id';
+        $baseQuery = 'SELECT dr.name, dr.login_link, dr.expired_date, dr.username, dr.notes, COUNT(cd.id) as client_count
+                      FROM domain_registers dr 
+                      LEFT JOIN client_data cd ON dr.id = cd.domain_register_id';
         
+        $groupBy = ' GROUP BY dr.id';
         $whereClause = '';
         $bindings = [];
         
         switch ($filter) {
             case 'expired':
-                $whereClause = ' WHERE cd.domain_expired < ?';
+                $whereClause = ' WHERE dr.expired_date < ?';
                 $bindings[] = now();
                 break;
             case 'expiring':
-                $whereClause = ' WHERE cd.domain_expired >= ? AND cd.domain_expired <= ?';
+                $whereClause = ' WHERE dr.expired_date >= ? AND dr.expired_date <= ?';
                 $bindings[] = now();
                 $bindings[] = now()->addMonths(3);
                 break;
             case 'safe':
-                $whereClause = ' WHERE cd.domain_expired > ?';
+                $whereClause = ' WHERE dr.expired_date > ?';
                 $bindings[] = now()->addMonths(3);
                 break;
         }
         
-        $fullQuery = $baseQuery . $whereClause . ' ORDER BY cd.domain_expired ASC';
+        $fullQuery = $baseQuery . $whereClause . $groupBy . ' ORDER BY dr.expired_date ASC';
         $domains = DB::select($fullQuery, $bindings);
         
         $csvData = [];
-        $csvData[] = ['Client Name', 'Domain Register', 'Domain Expired', 'Days Until Expiry', 'Status', 'WhatsApp', 'Website Expired', 'Hosting Expired'];
+        $csvData[] = ['Domain Register', 'Login Link', 'Expired Date', 'Days Until Expiry', 'Status', 'Username', 'Client Count', 'Notes'];
         
         foreach ($domains as $domain) {
-            $domainExpired = new Carbon($domain->domain_expired);
-            $daysUntil = $domainExpired->diffInDays(now(), false);
-            $status = $domainExpired->isPast() ? 'Expired' : 
-                     ($domainExpired->lte(now()->addMonths(3)) ? 'Expiring Soon' : 'Safe');
+            $expiredDate = new Carbon($domain->expired_date);
+            $daysUntil = $expiredDate->diffInDays(now(), false);
+            $status = $expiredDate->isPast() ? 'Expired' : 
+                     ($expiredDate->lte(now()->addMonths(3)) ? 'Expiring Soon' : 'Safe');
             
             $csvData[] = [
                 $domain->name,
-                $domain->domain_register_name ?? 'N/A',
-                $domainExpired->format('Y-m-d'),
+                $domain->login_link,
+                $expiredDate->format('Y-m-d'),
                 $daysUntil,
                 $status,
-                $domain->whatsapp,
-                (new Carbon($domain->website_service_expired))->format('Y-m-d'),
-                (new Carbon($domain->hosting_expired))->format('Y-m-d')
+                $domain->username,
+                $domain->client_count,
+                $domain->notes
             ];
         }
         
-        $filename = "client_domain_expiration_report_" . now()->format('Y-m-d') . ".csv";
+        $filename = "domain_registers_report_" . now()->format('Y-m-d') . ".csv";
         
         $headers = [
             'Content-Type' => 'text/csv',
@@ -233,13 +233,13 @@ class DomainExpirationController extends Controller
     }
     
     /**
-     * Load sample client data using SQL file
+     * Load sample domain register data using SQL file
      */
     public function loadSampleData()
     {
         try {
             // Read SQL file
-            $sqlFile = database_path('sql/simple_sample_data.sql');
+            $sqlFile = database_path('sql/sample_domain_registers.sql');
             if (!file_exists($sqlFile)) {
                 return response()->json([
                     'success' => false,
@@ -264,15 +264,15 @@ class DomainExpirationController extends Controller
             
             // Get statistics after insertion
             $stats = [
-                'total' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
-                'expired' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count,
-                'expiring' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count,
-                'safe' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired > ?', [now()->addMonths(3)])[0]->count,
+                'total' => DB::select('SELECT COUNT(*) as count FROM domain_registers')[0]->count,
+                'expired' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count,
+                'expiring' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count,
+                'safe' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date > ?', [now()->addMonths(3)])[0]->count,
             ];
             
             return response()->json([
                 'success' => true,
-                'message' => 'Sample client data loaded successfully!',
+                'message' => 'Sample domain register data loaded successfully!',
                 'stats' => $stats
             ]);
             
@@ -292,10 +292,10 @@ class DomainExpirationController extends Controller
     {
         // Get statistics using MySQL queries for the guide
         $stats = [
-            'total' => DB::select('SELECT COUNT(*) as count FROM client_data')[0]->count,
-            'expired' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired < ?', [now()])[0]->count,
-            'expiring' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired >= ? AND domain_expired <= ?', [now(), now()->addMonths(3)])[0]->count,
-            'safe' => DB::select('SELECT COUNT(*) as count FROM client_data WHERE domain_expired > ?', [now()->addMonths(3)])[0]->count,
+            'total' => DB::select('SELECT COUNT(*) as count FROM domain_registers')[0]->count,
+            'expired' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count,
+            'expiring' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count,
+            'safe' => DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date > ?', [now()->addMonths(3)])[0]->count,
         ];
         
         return view('admin.domain-expiration.guide', compact('stats'));
