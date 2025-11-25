@@ -198,9 +198,6 @@
                                                             @case('SP')
                                                                 <i class="bx bx-mobile" style="font-size: 2rem; color: #ee4d2d;"></i>
                                                                 @break
-                                                            @case('DA')
-                                                                <i class="bx bx-wallet" style="font-size: 2rem; color: #009cff;"></i>
-                                                                @break
                                                             @case('M2')
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #004CAD;"></i>
                                                                 @break
@@ -213,15 +210,26 @@
                                                             @case('I1')
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066CC;"></i>
                                                                 @break
-                                                            @case('B1')
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #FF8B00;"></i>
+                                                            @case('MANUAL')
+                                                                <i class="bx bx-bank" style="font-size: 2rem; color: #28a745;"></i>
                                                                 @break
                                                             @default
                                                                 <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d;"></i>
                                                         @endswitch
                                                     </div>
                                                     <h6 class="mb-0">{{ $method['name'] }}</h6>
-                                                    <small class="text-muted">{{ $method['type'] == 'ewallet' ? 'E-Wallet' : 'Virtual Account' }}</small>
+                                                    <small class="text-muted">
+                                                    @switch($method['type'])
+                                                        @case('ewallet')
+                                                            E-Wallet
+                                                            @break
+                                                        @case('manual_transfer')
+                                                            Manual Transfer → WhatsApp
+                                                            @break
+                                                        @default
+                                                            Virtual Account
+                                                    @endswitch
+                                                </small>
                                                 </div>
                                             </div>
                                         </div>

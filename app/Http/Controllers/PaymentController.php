@@ -118,7 +118,36 @@ class PaymentController extends Controller
                 'customer_email' => $customerData['email']
             ]);
 
-            // Create payment with Duitku
+            // Handle manual bank transfer differently
+            if ($paymentMethod === 'MANUAL') {
+                // Update invoice status to indicate manual transfer request
+                $invoice->update([
+                    'status' => 'gagal',
+                    'payment_method' => 'Manual Transfer',
+                    'notes' => 'Manual bank transfer requested via WhatsApp'
+                ]);
+
+                // Create WhatsApp message with client and invoice details
+                $whatsappNumber = '6281234567890'; // Replace with your actual WhatsApp number
+                $message = "Halo, saya ingin melakukan pembayaran manual transfer untuk invoice:\n\n";
+                $message .= "📄 *Invoice Details:*\n";
+                $message .= "Nomor: {$invoice->number}\n";
+                $message .= "Judul: {$invoice->title}\n";
+                $message .= "Jumlah: Rp " . number_format($invoice->total_amount, 0, ',', '.') . "\n";
+                $message .= "Tanggal Jatuh Tempo: " . $invoice->due_date->format('d M Y') . "\n\n";
+                $message .= "👤 *Client Information:*\n";
+                $message .= "Nama: " . $customerData['name'] . "\n";
+                $message .= "Email: " . $customerData['email'] . "\n\n";
+                $message .= "Mohon informasikan rekening bank tujuan untuk pembayaran.";
+
+                // URL encode the message
+                $encodedMessage = urlencode($message);
+                $whatsappUrl = "https://wa.me/{$whatsappNumber}?text={$encodedMessage}";
+
+                return redirect($whatsappUrl);
+            }
+
+            // Create payment with Duitku for other methods
             $result = $this->duitkuService->createPayment($invoice, $paymentMethod, $customerData);
 
             if ($result['success']) {

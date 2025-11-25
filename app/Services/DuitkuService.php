@@ -339,19 +339,19 @@ class DuitkuService
                 'min_amount' => 10000,
                 'max_amount' => 50000000
             ],
-            'DA' => [
-                'name' => 'DANA E-Wallet',
-                'type' => 'ewallet',
-                'icon' => 'dana.png',
-                'min_amount' => 10000,
-                'max_amount' => 10000000
-            ],
             'SP' => [
                 'name' => 'ShopeePay E-Wallet',
                 'type' => 'ewallet',
                 'icon' => 'shopee.png',
                 'min_amount' => 10000,
                 'max_amount' => 10000000
+            ],
+            'MANUAL' => [
+                'name' => 'Manual Bank Transfer',
+                'type' => 'manual_transfer',
+                'icon' => 'bank.png',
+                'min_amount' => 10000,
+                'max_amount' => 100000000
             ]
         ];
     }
