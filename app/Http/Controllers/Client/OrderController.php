@@ -135,7 +135,6 @@ class OrderController extends Controller
                 'client_id' => $user->id,
                 'service_id' => $service->id,
                 'subtotal' => $totalPrice,
-                'amount' => $totalPrice, // Add amount field for backward compatibility
                 'total_amount' => $totalPrice,
                 'status' => 'Unpaid',
                 'issue_date' => now()->toDateString(),

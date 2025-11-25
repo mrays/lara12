@@ -88,13 +88,13 @@
                                         <br>
                                         <small class="text-muted">{{ $invoice->description }}</small>
                                     </td>
-                                    <td class="text-end">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</td>
+                                    <td class="text-end">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <th>Total</th>
-                                    <th class="text-end text-primary fs-5">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</th>
+                                    <th class="text-end text-primary fs-5">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</th>
                                 </tr>
                             </tfoot>
                         </table>
