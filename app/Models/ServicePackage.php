@@ -14,13 +14,19 @@ class ServicePackage extends Model
         'description',
         'base_price',
         'features',
-        'is_active'
+        'is_active',
+        'domain_extension_id',
+        'domain_duration_years',
+        'is_domain_free',
+        'domain_discount_percent'
     ];
 
     protected $casts = [
         'features' => 'array',
         'base_price' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'is_domain_free' => 'boolean',
+        'domain_discount_percent' => 'decimal:2'
     ];
 
     /**
@@ -29,6 +35,14 @@ class ServicePackage extends Model
     public function services()
     {
         return $this->hasMany(Service::class, 'package_id');
+    }
+
+    /**
+     * Get the domain extension associated with this package
+     */
+    public function domainExtension()
+    {
+        return $this->belongsTo(DomainExtension::class, 'domain_extension_id');
     }
 
     /**
@@ -105,5 +119,78 @@ class ServicePackage extends Model
     public function getFormattedAnnualPriceAttribute()
     {
         return $this->getFormattedPrice('annually');
+    }
+
+    /**
+     * Get domain price with discount applied
+     */
+    public function getDomainPrice()
+    {
+        if (!$this->domainExtension || !$this->domain_duration_years) {
+            return 0;
+        }
+
+        $baseDomainPrice = $this->domainExtension->price;
+        
+        if ($this->is_domain_free) {
+            return 0;
+        }
+
+        if ($this->domain_discount_percent > 0) {
+            $discount = $baseDomainPrice * ($this->domain_discount_percent / 100);
+            return $baseDomainPrice - $discount;
+        }
+
+        return $baseDomainPrice;
+    }
+
+    /**
+     * Get formatted domain price
+     */
+    public function getFormattedDomainPriceAttribute()
+    {
+        $price = $this->getDomainPrice();
+        
+        if ($price == 0 && $this->domainExtension) {
+            return 'FREE';
+        }
+        
+        return 'Rp ' . number_format($price, 0, ',', '.');
+    }
+
+    /**
+     * Get domain display text
+     */
+    public function getDomainDisplayAttribute()
+    {
+        if (!$this->domainExtension || !$this->domain_duration_years) {
+            return 'Tidak ada domain';
+        }
+
+        $extension = '.' . $this->domainExtension->extension;
+        $duration = $this->domain_duration_years . ' tahun';
+        $price = $this->formatted_domain_price;
+
+        return "{$extension} ({$duration}) - {$price}";
+    }
+
+    /**
+     * Get total price including domain
+     */
+    public function getTotalPrice($billingCycle = 'monthly')
+    {
+        $packagePrice = $this->getPrice($billingCycle);
+        $domainPrice = $this->getDomainPrice();
+        
+        return $packagePrice + $domainPrice;
+    }
+
+    /**
+     * Get formatted total price including domain
+     */
+    public function getFormattedTotalPrice($billingCycle = 'monthly')
+    {
+        $price = $this->getTotalPrice($billingCycle);
+        return 'Rp ' . number_format($price, 0, ',', '.');
     }
 }
