@@ -40,8 +40,8 @@ class OrderController extends Controller
         $user = auth()->user();
         $package = ServicePackage::findOrFail($request->package_id);
         
-        // Calculate price (gunakan base_price langsung, tanpa dikali 12)
-        $price = $package->base_price;
+        // Calculate price based on billing cycle using the model method
+        $price = $package->getPrice($request->billing_cycle);
         
         // Ensure price is not null
         if (is_null($price)) {
