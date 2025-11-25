@@ -80,16 +80,50 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Package Item -->
                                 <tr>
                                     <td>
                                         <strong>{{ $invoice->service->product ?? 'Service' }}</strong>
                                         <br>
-                                        <small class="text-muted">{{ $invoice->service->domain ?? '-' }}</small>
-                                        <br>
-                                        <small class="text-muted">{{ $invoice->description }}</small>
+                                        <small class="text-muted">{{ $invoice->service->package->name ?? 'Package' }} ({{ $invoice->service->billing_cycle ?? 'annually' }})</small>
                                     </td>
-                                    <td class="text-end">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</td>
+                                    <td class="text-end">Rp {{ number_format($invoice->service->package->base_price ?? $invoice->total_amount, 0, ',', '.') }}</td>
                                 </tr>
+                                
+                                <!-- Domain Item -->
+                                @if($invoice->service->domain)
+                                <tr>
+                                    <td>
+                                        <strong>Domain</strong>
+                                        <br>
+                                        <small class="text-muted">{{ $invoice->service->domain }}</small>
+                                        @php
+                                            $isDomainFree = false;
+                                            // Check new multiple free domains system
+                                            if($invoice->service->package && $invoice->service->package->freeDomains) {
+                                                $domainExtension = $invoice->service->package->freeDomains
+                                                    ->where('domain_extension_id', $invoice->service->domain_extension_id)
+                                                    ->first();
+                                                $isDomainFree = $domainExtension && $domainExtension->is_free;
+                                            }
+                                            // Fallback to old single domain system
+                                            elseif($invoice->service->package && $invoice->service->package->domain_extension_id == $invoice->service->domain_extension_id) {
+                                                $isDomainFree = $invoice->service->package->is_domain_free;
+                                            }
+                                        @endphp
+                                        @if($isDomainFree)
+                                            <br><small class="text-success"><i class="bx bx-gift me-1"></i>Domain Gratis</small>
+                                        @endif
+                                    </td>
+                                    <td class="text-end">
+                                        @if($isDomainFree)
+                                            <span class="text-success fw-bold">GRATIS</span>
+                                        @else
+                                            Rp {{ number_format($invoice->service->domainExtension->price ?? 0, 0, ',', '.') }}
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endif
                             </tbody>
                             <tfoot>
                                 <tr>
