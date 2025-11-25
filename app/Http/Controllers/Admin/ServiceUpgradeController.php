@@ -35,7 +35,9 @@ class ServiceUpgradeController extends Controller
               ->orWhere('requested_plan', 'like', "%{$search}%");
         }
 
-        $upgradeRequests = $query->orderBy('created_at', 'desc')->paginate(15);
+        $upgradeRequests = $query->with(['service', 'client', 'processedBy'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         // Get counts for status badges
         $statusCounts = [

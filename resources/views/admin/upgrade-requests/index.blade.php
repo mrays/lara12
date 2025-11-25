@@ -190,6 +190,7 @@
                                 <th>Service</th>
                                 <th>Current → Requested</th>
                                 <th>Price Change</th>
+                                <th>Reason/Notes</th>
                                 <th>Status</th>
                                 <th>Date</th>
                                 <th>Actions</th>
@@ -250,15 +251,40 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <span class="badge bg-light text-dark">{{ $request->current_plan }}</span>
-                                        <i class="bx bx-right-arrow-alt mx-2"></i>
-                                        <span class="badge bg-primary">{{ $request->requested_plan }}</span>
+                                        @if($request->request_type === 'cancellation')
+                                            <span class="badge bg-light text-dark">{{ $request->current_plan }}</span>
+                                            <i class="bx bx-right-arrow-alt mx-2 text-danger"></i>
+                                            <span class="badge bg-danger">
+                                                <i class="bx bx-x-circle me-1"></i>CANCELLED
+                                            </span>
+                                        @else
+                                            <span class="badge bg-light text-dark">{{ $request->current_plan }}</span>
+                                            <i class="bx bx-right-arrow-alt mx-2"></i>
+                                            <span class="badge bg-primary">{{ $request->requested_plan }}</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="fw-bold {{ $request->price_difference >= 0 ? 'text-success' : 'text-danger' }}">
-                                        {{ $request->formatted_price_difference }}
-                                    </span>
+                                    @if($request->request_type === 'cancellation')
+                                        <span class="fw-bold text-danger">
+                                            <i class="bx bx-x-circle me-1"></i>Cancellation
+                                        </span>
+                                    @else
+                                        <span class="fw-bold {{ $request->price_difference >= 0 ? 'text-success' : 'text-danger' }}">
+                                            {{ $request->formatted_price_difference }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @if($request->request_type === 'cancellation' && $request->additional_notes)
+                                            {{ Str::limit($request->additional_notes, 50) }}
+                                        @elseif($request->upgrade_reason && $request->upgrade_reason !== 'Cancellation')
+                                            {{ $request->upgrade_reason }}
+                                        @else
+                                            -
+                                        @endif
+                                    </small>
                                 </td>
                                 <td>
                                     <span class="badge {{ $request->status_badge_class }}">
