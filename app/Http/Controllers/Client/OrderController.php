@@ -42,6 +42,11 @@ class OrderController extends Controller
         
         // Calculate price (gunakan base_price langsung, tanpa dikali 12)
         $price = $package->base_price;
+        
+        // Ensure price is not null
+        if (is_null($price)) {
+            $price = 0;
+        }
 
         try {
             DB::beginTransaction();
@@ -63,19 +68,24 @@ class OrderController extends Controller
             // Generate invoice number
             $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
             
-            // Create invoice
-            $invoice = Invoice::create([
+            // Create invoice using DB::table to bypass model issues
+            $invoiceId = DB::table('invoices')->insertGetId([
                 'number' => $invoiceNumber,
                 'title' => "Order: {$package->name}",
                 'client_id' => $user->id,
                 'service_id' => $service->id,
-                'subtotal' => $price,
-                'total_amount' => $price,
+                'subtotal' => (float) $price,
+                'total_amount' => (float) $price,
                 'status' => 'Unpaid',
                 'due_date' => now()->addDays(7),
                 'description' => "Order: {$package->name} - {$request->domain} ({$request->billing_cycle})",
                 'notes' => $request->notes,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+            
+            // Get the invoice for redirect
+            $invoice = Invoice::find($invoiceId);
 
             DB::commit();
 
