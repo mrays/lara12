@@ -108,15 +108,17 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">All Clients</h5>
                     <div class="d-flex gap-2">
-                        <div class="input-group" style="width: 250px;">
-                            <span class="input-group-text"><i class="bx bx-search"></i></span>
-                            <input type="text" class="form-control" placeholder="Search clients..." id="searchClients">
-                        </div>
-                        <select class="form-select" style="width: 150px;" id="filterStatus">
-                            <option value="">All Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
+                        <form action="{{ route('admin.clients.index') }}" method="GET" class="d-flex gap-2" id="searchForm">
+                            <div class="input-group" style="width: 300px;">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" class="form-control" name="q" placeholder="Cari nama, email, telepon, domain..." id="searchClients" value="{{ request('q') }}">
+                            </div>
+                            <select class="form-select" style="width: 150px;" id="filterStatus" name="status">
+                                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+                                <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                                <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
                 <div class="card-body">
@@ -720,16 +722,27 @@ function deleteClient(clientId, clientName) {
     }
 }
 
-// Search functionality
+// Search functionality - debounce untuk menghindari terlalu banyak request
+let searchTimeout;
 document.getElementById('searchClients').addEventListener('input', function() {
-    // Add search functionality here
-    console.log('Search:', this.value);
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        document.getElementById('searchForm').submit();
+    }, 500); // Submit setelah 500ms berhenti mengetik
 });
 
-// Filter functionality
+// Filter functionality - langsung submit saat filter berubah
 document.getElementById('filterStatus').addEventListener('change', function() {
-    // Add filter functionality here
-    console.log('Filter:', this.value);
+    document.getElementById('searchForm').submit();
+});
+
+// Submit on Enter key
+document.getElementById('searchClients').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchTimeout);
+        document.getElementById('searchForm').submit();
+    }
 });
 </script>
 @endsection

@@ -475,14 +475,11 @@
                 <div class="text-center mb-4">
                     <p class="text-muted">All plans include 40+ advanced tools and features to boost your product. Choose the best plan to fit your needs.</p>
                     
-                    <!-- Billing Toggle -->
+                    <!-- Billing Info -->
                     <div class="d-flex align-items-center justify-content-center mb-4">
-                        <span class="me-2">Monthly</span>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="billingToggle">
-                        </div>
-                        <span class="ms-2">Annually</span>
-                        <span class="badge bg-label-primary ms-2">Save up to 10%</span>
+                        <span class="text-primary fw-semibold">Annually</span>
+                        <span class="badge bg-label-success ms-2">Best Value</span>
+                        <input type="hidden" id="billingToggle" value="annually">
                     </div>
                 </div>
 
@@ -514,13 +511,9 @@
                                 <!-- Price -->
                                 <div class="mb-4">
                                     <h2 class="text-primary mb-0">
-                                        <span class="monthly-price">Rp {{ number_format($package->base_price, 0, ',', '.') }}</span>
-                                        <span class="annual-price d-none">Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}</span>
+                                        Rp {{ number_format($package->base_price * 12 * 0.9, 0, ',', '.') }}
                                     </h2>
-                                    <small class="text-muted">
-                                        <span class="monthly-text">/month</span>
-                                        <span class="annual-text d-none">/year</span>
-                                    </small>
+                                    <small class="text-muted">/year</small>
                                 </div>
 
                                 <!-- Features -->
@@ -761,31 +754,7 @@ function cancelSubscription() {
     }
 }
 
-// Billing toggle functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const billingToggle = document.getElementById('billingToggle');
-    if (billingToggle) {
-        billingToggle.addEventListener('change', function() {
-            const isAnnual = this.checked;
-            
-            // Toggle price display
-            document.querySelectorAll('.monthly-price').forEach(el => {
-                el.classList.toggle('d-none', isAnnual);
-            });
-            document.querySelectorAll('.annual-price').forEach(el => {
-                el.classList.toggle('d-none', !isAnnual);
-            });
-            
-            // Toggle text display
-            document.querySelectorAll('.monthly-text').forEach(el => {
-                el.classList.toggle('d-none', isAnnual);
-            });
-            document.querySelectorAll('.annual-text').forEach(el => {
-                el.classList.toggle('d-none', !isAnnual);
-            });
-        });
-    }
-});
+// Billing is now fixed to annually only
 
 function selectPlan(packageId, packageName, price) {
     // Close pricing modal and open upgrade request modal
@@ -796,14 +765,12 @@ function selectPlan(packageId, packageName, price) {
     document.getElementById('requested_plan').value = packageName;
     document.getElementById('requested_price').value = price;
     
-    // Get billing cycle
-    const billingToggle = document.getElementById('billingToggle');
-    const billingCycle = billingToggle.checked ? 'annually' : 'monthly';
-    document.getElementById('billing_cycle').value = billingCycle;
+    // Set billing cycle to annually (fixed)
+    document.getElementById('billing_cycle').value = 'annually';
     
-    // Update price comparison
+    // Update price comparison (annual price with 10% discount)
     const currentPrice = {{ $service->price }};
-    const newPrice = billingToggle.checked ? (price * 12 * 0.9) : price;
+    const newPrice = price * 12 * 0.9;
     const priceDifference = newPrice - currentPrice;
     
     document.getElementById('new_price_display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(newPrice);
