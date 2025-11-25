@@ -265,7 +265,7 @@ class ServiceManagementController extends Controller
                 'tax_rate' => 0,
                 'tax_amount' => 0,
                 'discount_amount' => 0,
-                'status' => 'pending',
+                'status' => 'Unpaid',
                 'issue_date' => $issueDate,
                 'due_date' => $dueDate,
                 'notes' => "Perpanjangan untuk periode {$this->translateBillingCycle($serviceData->billing_cycle)}",
