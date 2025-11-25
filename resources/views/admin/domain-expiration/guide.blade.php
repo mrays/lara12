@@ -148,19 +148,19 @@
                                                 </h6>
                                                 <div class="d-flex justify-content-between mb-2">
                                                     <span>Total Domains:</span>
-                                                    <span class="badge bg-primary">{{ \App\Models\ClientData::count() }}</span>
+                                                    <span class="badge bg-primary">{{ $stats['total'] ?? 0 }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-2">
                                                     <span>Expired:</span>
-                                                    <span class="badge bg-danger">{{ \App\Models\ClientData::where('domain_expired', '<', now())->count() }}</span>
+                                                    <span class="badge bg-danger">{{ $stats['expired'] ?? 0 }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-2">
                                                     <span>Expiring Soon:</span>
-                                                    <span class="badge bg-warning">{{ \App\Models\ClientData::where('domain_expired', '>=', now())->where('domain_expired', '<=', now()->addMonths(3))->count() }}</span>
+                                                    <span class="badge bg-warning">{{ $stats['expiring'] ?? 0 }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between">
                                                     <span>Safe:</span>
-                                                    <span class="badge bg-success">{{ \App\Models\ClientData::where('domain_expired', '>', now()->addMonths(3))->count() }}</span>
+                                                    <span class="badge bg-success">{{ $stats['safe'] ?? 0 }}</span>
                                                 </div>
                                             </div>
                                         </div>

@@ -118,7 +118,7 @@
     </div>
 
     <!-- Alert Sections -->
-    @if($criticalExpirations->count() > 0)
+    @if(count($criticalExpirations) > 0)
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-danger">
@@ -198,7 +198,7 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    @if($clientDomains->count() > 0)
+                    @if(count($clientDomains) > 0)
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>

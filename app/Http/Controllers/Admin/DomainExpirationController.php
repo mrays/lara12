@@ -99,6 +99,10 @@ class DomainExpirationController extends Controller
      */
     private function convertStdClassToArray($items)
     {
+        if (empty($items)) {
+            return [];
+        }
+        
         return collect($items)->map(function($item) {
             $itemArray = (array) $item;
             
@@ -120,7 +124,7 @@ class DomainExpirationController extends Controller
             }
             
             return (object) $itemArray;
-        })->all();
+        })->toArray();
     }
     
     /**
