@@ -379,8 +379,8 @@ function selectPackage(packageId) {
     // Update price
     updatePrice();
     
-    // Enable submit button
-    document.getElementById('submitBtn').disabled = false;
+    // Update order button state based on domain availability
+    updateOrderButtonState();
 }
 
 function updateDomainPricing() {
@@ -494,6 +494,27 @@ function resetDomainStatus() {
     
     messageElement.innerHTML = '<i class="bx bx-info-circle me-1"></i>Masukkan nama domain dan pilih extension yang Anda inginkan. Domain yang termasuk dalam paket promo akan ditandai GRATIS.<br><small class="text-muted">*Pengecekan domain termasuk duplikat di sistem kami dan ketersediaan global via DNS lookup.</small>';
     messageElement.className = 'form-text text-muted';
+    
+    // Reset order button state when domain status resets
+    updateOrderButtonState();
+}
+
+function updateOrderButtonState() {
+    const submitBtn = document.getElementById('submitBtn');
+    const domainName = document.getElementById('domain_name').value.trim();
+    const domainExtension = document.getElementById('domain_extension').value;
+    
+    // Enable order button only if package is selected and domain is filled
+    if (selectedPackage && domainName.length >= 3 && domainExtension) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+
+function disableOrderButton() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
 }
 
 function manualDomainCheck() {
@@ -512,6 +533,9 @@ function manualDomainCheck() {
     if (domainName.length < 3 || !domainExtension.value) {
         messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Masukkan nama domain minimal 3 karakter dan pilih extension terlebih dahulu.';
         messageElement.className = 'form-text text-warning';
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="bx bx-search"></i> Cek';
+        checkBtn.className = 'btn btn-outline-primary';
         return;
     }
     
@@ -546,11 +570,15 @@ function manualDomainCheck() {
                 checkBtn.className = 'btn btn-outline-warning';
                 messageElement.innerHTML = '<i class="bx bx-help-circle me-1 text-warning"></i>' + data.message;
                 messageElement.className = 'form-text text-warning';
+                // Enable order button for unknown status (user can proceed with caution)
+                updateOrderButtonState();
             } else if (data.available) {
                 checkBtn.innerHTML = '<i class="bx bx-check"></i> Tersedia';
                 checkBtn.className = 'btn btn-outline-success';
                 messageElement.innerHTML = '<i class="bx bx-check-circle me-1 text-success"></i>' + data.message;
                 messageElement.className = 'form-text text-success';
+                // Enable order button for available domains
+                updateOrderButtonState();
             } else {
                 checkBtn.innerHTML = '<i class="bx bx-x"></i> Tidak Tersedia';
                 checkBtn.className = 'btn btn-outline-danger';
@@ -565,6 +593,8 @@ function manualDomainCheck() {
                 
                 messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-danger"></i>' + errorMessage + '. Silakan pilih domain lain.';
                 messageElement.className = 'form-text text-danger';
+                // Disable order button for unavailable domains
+                disableOrderButton();
             }
             
             // Re-enable button for re-checking
@@ -577,6 +607,8 @@ function manualDomainCheck() {
             messageElement.innerHTML = '<i class="bx bx-error-circle me-1 text-warning"></i>Gagal mengecek domain. Silakan coba lagi.';
             messageElement.className = 'form-text text-warning';
             checkBtn.disabled = false;
+            // Enable order button for failed checks (user can retry)
+            updateOrderButtonState();
         });
 }
 
