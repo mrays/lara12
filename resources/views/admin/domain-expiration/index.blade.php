@@ -162,7 +162,18 @@
                                         <span class="badge bg-danger">{{ $domain->expired_date->format('M d, Y') }}</span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-danger">{{ $domain->expired_date->diffInDays(now()) }} days</span>
+                                        @php
+                                            $daysLeft = $domain->expired_date->diffInDays(now(), false);
+                                            $isExpired = $domain->expired_date->isPast();
+                                            $daysRounded = abs(round($daysLeft));
+                                        @endphp
+                                        <span class="badge bg-danger">
+                                            @if($isExpired)
+                                                -{{ $daysRounded }} hari
+                                            @else
+                                                {{ $daysRounded }} hari lagi
+                                            @endif
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="badge bg-info">{{ $domain->client_count }} clients</span>
@@ -242,8 +253,17 @@
                                                 <span class="badge {{ $domain->expired_date->isPast() ? 'bg-danger' : ($domain->expired_date->lte(now()->addMonths(3)) ? 'bg-warning' : 'bg-success') }}">
                                                     {{ $domain->expired_date->format('M d, Y') }}
                                                 </span>
+                                                @php
+                                                    $daysLeft = $domain->expired_date->diffInDays(now(), false);
+                                                    $isExpired = $domain->expired_date->isPast();
+                                                    $daysRounded = abs(round($daysLeft));
+                                                @endphp
                                                 <small class="text-muted">
-                                                    {{ $domain->expired_date->diffInDays(now(), false) }} days
+                                                    @if($isExpired)
+                                                        -{{ $daysRounded }} hari
+                                                    @else
+                                                        {{ $daysRounded }} hari lagi
+                                                    @endif
                                                 </small>
                                             </div>
                                         </td>

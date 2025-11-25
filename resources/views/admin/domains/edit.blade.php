@@ -277,8 +277,13 @@
                                 <span class="badge bg-{{ $domain->expired_date->isPast() ? 'danger' : ($domain->expired_date->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }}">
                                     {{ $domain->expired_date->format('M d, Y') }}
                                 </span>
+                                @php
+                                    $daysLeft = $domain->expired_date->diffInDays(now(), false);
+                                    $isExpired = $domain->expired_date->isPast();
+                                    $daysRounded = abs(round($daysLeft));
+                                @endphp
                                 <small class="text-muted">
-                                    ({{ $domain->expired_date->diffInDays(now(), false) }} days)
+                                    (@if($isExpired)-{{ $daysRounded }} hari@else{{ $daysRounded }} hari lagi@endif)
                                 </small>
                             @else
                                 <span class="badge bg-secondary">Not Set</span>

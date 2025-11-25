@@ -169,33 +169,53 @@ class ClientDataController extends Controller
             'registers_in_use' => $clients->whereNotNull('domain_register_id')->pluck('domain_register_id')->unique()->count(),
         ];
 
-        // Group by server
+        // Group by server with complete data
         $serverStats = $clients->whereNotNull('server_id')
             ->groupBy('server_id')
-            ->map(function($group) {
+            ->map(function($group, $serverId) {
                 $server = $group->first()->server;
                 return [
-                    'server_name' => $server->name,
+                    'server_id' => $serverId,
+                    'server' => $server,
+                    'server_name' => $server->name ?? 'Unknown',
+                    'ip_address' => $server->ip_address ?? 'N/A',
+                    'status' => $server->status ?? 'unknown',
+                    'status_badge_class' => $server->status_badge_class ?? 'bg-secondary',
                     'client_count' => $group->count(),
                     'expiring_soon' => $group->filter(fn($c) => $c->isAnyServiceExpiringSoon())->count(),
                     'expired' => $group->filter(fn($c) => $c->isAnyServiceExpired())->count(),
                 ];
             });
 
-        // Group by domain register
+        // Group by domain register with complete data
         $registerStats = $clients->whereNotNull('domain_register_id')
             ->groupBy('domain_register_id')
-            ->map(function($group) {
+            ->map(function($group, $registerId) {
                 $register = $group->first()->domainRegister;
                 return [
-                    'register_name' => $register->name,
+                    'register_id' => $registerId,
+                    'register' => $register,
+                    'register_name' => $register->name ?? 'Unknown',
+                    'login_link' => $register->login_link ?? '#',
+                    'status' => $register->status ?? 'unknown',
+                    'status_badge_class' => $register->status_badge_class ?? 'bg-secondary',
                     'client_count' => $group->count(),
                     'expiring_soon' => $group->filter(fn($c) => $c->isAnyServiceExpiringSoon())->count(),
                     'expired' => $group->filter(fn($c) => $c->isAnyServiceExpired())->count(),
                 ];
             });
 
-        return view('admin.client-data.service-status', compact('overview', 'serverStats', 'registerStats'));
+        // Upcoming expirations (next 30 days)
+        $upcomingExpirations = ClientData::with(['server', 'domainRegister'])
+            ->where(function($q) {
+                $q->where('website_service_expired', '<=', now()->addDays(30))
+                  ->orWhere('domain_expired', '<=', now()->addDays(30))
+                  ->orWhere('hosting_expired', '<=', now()->addDays(30));
+            })
+            ->orderBy('domain_expired')
+            ->get();
+
+        return view('admin.client-data.service-status', compact('overview', 'serverStats', 'registerStats', 'upcomingExpirations'));
     }
 
     /**

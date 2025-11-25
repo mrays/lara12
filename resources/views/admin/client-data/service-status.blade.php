@@ -132,15 +132,12 @@
                                 </thead>
                                 <tbody>
                                     @foreach($serverStats as $stat)
-                                        @php
-                                            $server = \App\Models\Server::find($stat['server_id']);
-                                        @endphp
                                         <tr>
                                             <td>
                                                 <strong>{{ $stat['server_name'] }}</strong>
                                             </td>
                                             <td>
-                                                <code>{{ $server->ip_address ?? 'N/A' }}</code>
+                                                <code>{{ $stat['ip_address'] }}</code>
                                             </td>
                                             <td>
                                                 <span class="badge bg-primary">{{ $stat['client_count'] }}</span>
@@ -160,8 +157,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="badge {{ $server->status_badge_class }}">
-                                                    {{ ucfirst($server->status) }}
+                                                <span class="badge {{ $stat['status_badge_class'] }}">
+                                                    {{ ucfirst($stat['status']) }}
                                                 </span>
                                             </td>
                                         </tr>
@@ -202,9 +199,6 @@
                                 </thead>
                                 <tbody>
                                     @foreach($registerStats as $stat)
-                                        @php
-                                            $register = \App\Models\DomainRegister::find($stat['register_id']);
-                                        @endphp
                                         <tr>
                                             <td>
                                                 <strong>{{ $stat['register_name'] }}</strong>
@@ -227,12 +221,12 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="badge {{ $register->status_badge_class }}">
-                                                    {{ ucfirst($register->status) }}
+                                                <span class="badge {{ $stat['status_badge_class'] }}">
+                                                    {{ ucfirst($stat['status']) }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="{{ $register->login_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <a href="{{ $stat['login_link'] }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                     <i class="bx bx-link"></i>
                                                 </a>
                                             </td>
@@ -259,24 +253,6 @@
             </h5>
         </div>
         <div class="card-body">
-            @php
-                $upcomingExpirations = \App\Models\ClientData::with(['server', 'domainRegister'])
-                    ->where(function($q) {
-                        $q->where('website_service_expired', '<=', now()->addDays(30))
-                          ->orWhere('domain_expired', '<=', now()->addDays(30))
-                          ->orWhere('hosting_expired', '<=', now()->addDays(30));
-                    })
-                    ->orderByRaw('
-                        CASE 
-                            WHEN website_service_expired <= CURDATE() THEN website_service_expired
-                            WHEN domain_expired <= CURDATE() THEN domain_expired
-                            WHEN hosting_expired <= CURDATE() THEN hosting_expired
-                            ELSE LEAST(website_service_expired, domain_expired, hosting_expired)
-                        END
-                    ')
-                    ->get();
-            @endphp
-            
             @if($upcomingExpirations->count() > 0)
                 <div class="table-responsive">
                     <table class="table">
@@ -348,15 +324,16 @@
                                         <td>
                                             @php
                                                 $daysRemaining = $expiration['date']->diffInDays(now(), false);
+                                                $daysRounded = abs(round($daysRemaining));
                                             @endphp
                                             @if($daysRemaining < 0)
-                                                <span class="badge bg-danger">Expired {{ abs($daysRemaining) }} days ago</span>
-                                            @elseif($daysRemaining <= 7)
-                                                <span class="badge bg-danger">{{ $daysRemaining }} days</span>
-                                            @elseif($daysRemaining <= 30)
-                                                <span class="badge bg-warning">{{ $daysRemaining }} days</span>
+                                                <span class="badge bg-danger">-{{ $daysRounded }} hari</span>
+                                            @elseif($daysRounded <= 7)
+                                                <span class="badge bg-danger">{{ $daysRounded }} hari lagi</span>
+                                            @elseif($daysRounded <= 30)
+                                                <span class="badge bg-warning">{{ $daysRounded }} hari lagi</span>
                                             @else
-                                                <span class="badge bg-info">{{ $daysRemaining }} days</span>
+                                                <span class="badge bg-info">{{ $daysRounded }} hari lagi</span>
                                             @endif
                                         </td>
                                         <td>
