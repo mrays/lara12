@@ -144,18 +144,22 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.client-data.service-status');
         Route::post('client-data/export', [App\Http\Controllers\Admin\ClientDataController::class, 'export'])
             ->name('admin.client-data.export');
-        Route::resource('client-data', App\Http\Controllers\Admin\ClientDataController::class, [
-            'names' => [
-                'index' => 'admin.client-data.index',
-                'create' => 'admin.client-data.create',
-                'store' => 'admin.client-data.store',
-                'show' => 'admin.client-data.show',
-                'edit' => 'admin.client-data.edit',
-                'update' => 'admin.client-data.update',
-                'destroy' => 'admin.client-data.destroy'
-            ],
-            'parameters' => ['client_data' => 'client']
-        ]);
+        
+        // Explicit client-data routes to fix parameter issue
+        Route::get('client-data', [App\Http\Controllers\Admin\ClientDataController::class, 'index'])
+            ->name('admin.client-data.index');
+        Route::get('client-data/create', [App\Http\Controllers\Admin\ClientDataController::class, 'create'])
+            ->name('admin.client-data.create');
+        Route::post('client-data', [App\Http\Controllers\Admin\ClientDataController::class, 'store'])
+            ->name('admin.client-data.store');
+        Route::get('client-data/{client}', [App\Http\Controllers\Admin\ClientDataController::class, 'show'])
+            ->name('admin.client-data.show');
+        Route::get('client-data/{client}/edit', [App\Http\Controllers\Admin\ClientDataController::class, 'edit'])
+            ->name('admin.client-data.edit');
+        Route::put('client-data/{client}', [App\Http\Controllers\Admin\ClientDataController::class, 'update'])
+            ->name('admin.client-data.update');
+        Route::delete('client-data/{client}', [App\Http\Controllers\Admin\ClientDataController::class, 'destroy'])
+            ->name('admin.client-data.destroy');
             
         // Invoice edit routes
         Route::put('invoices/{invoice}/quick-update', [App\Http\Controllers\InvoiceController::class, 'updateInvoice'])
