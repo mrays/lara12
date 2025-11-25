@@ -14,6 +14,14 @@
             </a>
         </li>
 
+        <!-- Order New Service -->
+        <li class="menu-item {{ request()->routeIs('client.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('client.orders.create') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cart-add"></i>
+                <span>Order Service</span>
+            </a>
+        </li>
+
         <!-- My Services -->
         <li class="menu-item {{ request()->routeIs('client.services.*') ? 'active' : '' }}">
             <a href="/client/services" class="menu-link">

@@ -243,7 +243,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 col-6 mb-3">
-                        <a href="#" class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 flex-column">
+                        <a href="{{ route('client.orders.create') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 flex-column">
                             <i class="bx bx-plus fs-1 mb-2"></i>
                             <span>Order New Service</span>
                         </a>
