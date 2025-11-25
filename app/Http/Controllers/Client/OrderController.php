@@ -159,7 +159,7 @@ class OrderController extends Controller
      */
     public function success($invoiceId)
     {
-        $invoice = Invoice::with(['service', 'service.package.freeDomains.domainExtension', 'service.domainExtension'])->findOrFail($invoiceId);
+        $invoice = Invoice::with(['service', 'service.package.freeDomains.domainExtension'])->findOrFail($invoiceId);
         
         // Ensure this invoice belongs to current user
         if ($invoice->client_id !== auth()->id()) {

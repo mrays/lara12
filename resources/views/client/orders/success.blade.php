@@ -119,7 +119,7 @@
                                         @if($isDomainFree)
                                             <span class="text-success fw-bold">GRATIS</span>
                                         @else
-                                            Rp {{ number_format($invoice->service->domainExtension->price ?? 0, 0, ',', '.') }}
+                                            Rp {{ number_format($invoice->total_amount - ($invoice->service->package->base_price ?? 0), 0, ',', '.') }}
                                         @endif
                                     </td>
                                 </tr>
