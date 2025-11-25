@@ -385,7 +385,7 @@
                                 <div class="col-md-6">
                                     <h6>Service Management</h6>
                                     <div class="list-group">
-                                        <a href="#" class="list-group-item list-group-item-action" onclick="upgradeService()">
+                                        <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
                                             <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
                                         </a>
                                         <a href="#" class="list-group-item list-group-item-action" onclick="changePassword()">
@@ -692,10 +692,6 @@ function contactSupport() {
     window.open(`{{ config('company.whatsapp_url') }}?text=${message}`, '_blank');
 }
 
-function upgradeService() {
-    alert('Upgrade service feature coming soon!');
-}
-
 function changePassword() {
     alert('Change password feature coming soon!');
 }
@@ -782,7 +778,7 @@ function submitUpgradeRequest() {
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
     submitBtn.disabled = true;
     
-    fetch(`/client/services/{{ $service->id }}/upgrade-request`, {
+    fetch(`/services/{{ $service->id }}/upgrade-request`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
