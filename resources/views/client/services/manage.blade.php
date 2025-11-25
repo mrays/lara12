@@ -320,19 +320,9 @@
                                             </p>
                                             
                                             <div class="d-flex gap-2">
-                                                @if($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'pending')
-                                                    <button class="btn btn-warning" disabled>
-                                                        <i class="bx bx-time me-1"></i>Upgrade Pending
-                                                    </button>
-                                                @elseif($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'approved')
-                                                    <button class="btn btn-success" disabled>
-                                                        <i class="bx bx-check me-1"></i>Upgrade Approved
-                                                    </button>
-                                                @else
-                                                    <button class="btn btn-primary" onclick="upgradePlan()">
-                                                        <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
-                                                    </button>
-                                                @endif
+                                                <button class="btn btn-primary" onclick="upgradePlan()">
+                                                    <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
+                                                </button>
                                                 <button class="btn btn-outline-danger" onclick="cancelSubscription()">
                                                     Cancel Subscription
                                                 </button>
@@ -342,24 +332,14 @@
                                         <div class="col-md-4">
                                             <div class="d-flex align-items-center justify-content-center h-100">
                                                 <div class="text-center">
-                                                    <div class="alert alert-warning d-flex align-items-center mb-3">
-                                                        <i class="bx bx-error-circle me-2"></i>
-                                                        <span>We need your attention!</span>
-                                                    </div>
-                                                    <p class="text-muted mb-2">Your plan requires update</p>
+                                                    <p class="text-muted mb-3">Manage your subscription and upgrade anytime</p>
                                                     
                                                     <div class="mb-3">
-                                                        <h6 class="mb-1">Days</h6>
-                                                        @php
-                                                            $daysRemaining = $service->due_date ? $service->due_date->diffInDays(now()) : 0;
-                                                            $totalDays = ($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually') ? 365 : 30;
-                                                            $progressPercentage = $totalDays > 0 ? min(100, max(0, ($daysRemaining / $totalDays) * 100)) : 0;
-                                                        @endphp
+                                                        <h6 class="mb-1">Service Status</h6>
                                                         <div class="progress mb-2" style="height: 8px;">
-                                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $progressPercentage }}%"></div>
+                                                            <div class="progress-bar bg-{{ $service->status == 'Active' ? 'success' : 'warning' }}" role="progressbar" style="width: 100%"></div>
                                                         </div>
-                                                        <small class="text-muted">{{ $daysRemaining }} of {{ $totalDays }} Days</small><br>
-                                                        <small class="text-muted">{{ $daysRemaining }} days remaining until your plan requires update</small>
+                                                        <small class="text-muted">Your service is {{ $service->status }}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -455,21 +435,9 @@
                                 <div class="col-md-6">
                                     <h6>Service Management</h6>
                                     <div class="list-group">
-                                        @if($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'pending')
-                                            <a href="#" class="list-group-item list-group-item-action disabled" style="pointer-events: none;">
-                                                <i class="bx bx-time me-2"></i>Upgrade Pending
-                                                <small class="text-muted d-block">Request #{{ $pendingUpgradeRequest->id }} is being processed</small>
-                                            </a>
-                                        @elseif($pendingUpgradeRequest && $pendingUpgradeRequest->status === 'approved')
-                                            <a href="#" class="list-group-item list-group-item-action disabled" style="pointer-events: none;">
-                                                <i class="bx bx-check me-2"></i>Upgrade Approved
-                                                <small class="text-muted d-block">Request #{{ $pendingUpgradeRequest->id }} has been approved</small>
-                                            </a>
-                                        @else
-                                            <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
-                                                <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
-                                            </a>
-                                        @endif
+                                        <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
+                                            <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
+                                        </a>
                                         <a href="#" class="list-group-item list-group-item-action" onclick="changePassword()">
                                             <i class="bx bx-key me-2"></i>Perpanjang Website
                                         </a>
