@@ -147,7 +147,7 @@
                             <tr>
                                 <td class="text-nowrap">{{ $invoice->title ?? 'Invoice Layanan' }}</td>
                                 <td class="text-nowrap">
-                                    @if($invoice->service && $invoice->service->billing_cycle)
+                                    @if($invoice->service && isset($invoice->service->billing_cycle) && $invoice->service->billing_cycle)
                                         {{ translateBillingCycle($invoice->service->billing_cycle) }}
                                     @else
                                         {{ $invoice->description ?? 'Pembayaran layanan' }}
