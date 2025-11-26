@@ -114,6 +114,41 @@
             }
         }
         
+        /* Desktop sidebar toggle */
+        @media (min-width: 1200px) {
+            .layout-menu-toggle.menu-link {
+                display: block !important;
+            }
+        }
+        
+        /* Sidebar collapsed state */
+        .layout-menu.collapsed {
+            width: 78px !important;
+        }
+        
+        .layout-menu.collapsed .menu-text,
+        .layout-menu.collapsed .app-brand-text {
+            display: none !important;
+        }
+        
+        .layout-menu.collapsed .menu-link {
+            justify-content: center;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        .layout-menu.collapsed .menu-icon {
+            margin-right: 0 !important;
+        }
+        
+        .layout-menu.collapsed .app-brand-link {
+            justify-content: center;
+        }
+        
+        .layout-menu.collapsed .layout-menu-toggle i {
+            transform: rotate(180deg);
+        }
+        
         /* Management Panel Dropdown Styling */
         .dropdown-management .dropdown-menu {
             border: 1px solid rgba(67, 89, 113, 0.15);
@@ -457,14 +492,22 @@
         // Toggle sidebar function
         function toggleSidebar() {
             const layoutMenu = document.getElementById('layout-menu');
-            const layoutContainer = document.querySelector('.layout-container');
+            const layoutPage = document.querySelector('.layout-page');
             
-            if (layoutMenu && layoutContainer) {
-                layoutMenu.classList.toggle('menu-collapsed');
-                layoutContainer.classList.toggle('layout-menu-collapsed');
+            if (layoutMenu) {
+                layoutMenu.classList.toggle('collapsed');
+                
+                // Adjust layout page margin
+                if (layoutPage) {
+                    if (layoutMenu.classList.contains('collapsed')) {
+                        layoutPage.style.paddingLeft = '78px';
+                    } else {
+                        layoutPage.style.paddingLeft = '';
+                    }
+                }
                 
                 // Save state to localStorage
-                const isCollapsed = layoutMenu.classList.contains('menu-collapsed');
+                const isCollapsed = layoutMenu.classList.contains('collapsed');
                 localStorage.setItem('sidebarCollapsed', isCollapsed);
             }
         }
@@ -473,11 +516,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             const layoutMenu = document.getElementById('layout-menu');
-            const layoutContainer = document.querySelector('.layout-container');
+            const layoutPage = document.querySelector('.layout-page');
             
-            if (isCollapsed && layoutMenu && layoutContainer) {
-                layoutMenu.classList.add('menu-collapsed');
-                layoutContainer.classList.add('layout-menu-collapsed');
+            if (isCollapsed && layoutMenu) {
+                layoutMenu.classList.add('collapsed');
+                if (layoutPage) {
+                    layoutPage.style.paddingLeft = '78px';
+                }
+            }
+            
+            // Add click event to sidebar toggle button
+            const toggleBtn = document.querySelector('.layout-menu-toggle.menu-link');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
             }
             
             // Initialize tooltips
