@@ -17,21 +17,11 @@ class ClientDataController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ClientData::with(['server', 'domainRegister', 'user', 'domain']);
+        $query = ClientData::with(['user', 'domains']);
 
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-
-        // Filter by server
-        if ($request->filled('server_id')) {
-            $query->where('server_id', $request->server_id);
-        }
-
-        // Filter by domain register
-        if ($request->filled('domain_register_id')) {
-            $query->where('domain_register_id', $request->domain_register_id);
         }
 
         // Search
@@ -47,21 +37,15 @@ class ClientDataController extends Controller
 
         $clients = $query->orderBy('name')->get();
 
-        // Get counts for status badges using domain expiration
-        $allClients = ClientData::with('domain')->get();
-        
+        // Get counts for status badges
         $statusCounts = [
-            'all' => $allClients->count(),
-            'active' => $allClients->where('status', 'active')->count(),
-            'expired' => $allClients->where('status', 'expired')->count(),
-            'warning' => $allClients->where('status', 'warning')->count(),
+            'all' => ClientData::count(),
+            'active' => ClientData::where('status', 'active')->count(),
+            'expired' => ClientData::where('status', 'expired')->count(),
+            'warning' => ClientData::where('status', 'warning')->count(),
         ];
 
-        // Get related data for filters
-        $servers = Server::orderBy('name')->get();
-        $domainRegisters = DomainRegister::orderBy('name')->get();
-
-        return view('admin.client-data.index', compact('clients', 'statusCounts', 'servers', 'domainRegisters'));
+        return view('admin.client-data.index', compact('clients', 'statusCounts'));
     }
 
     /**
@@ -146,18 +130,23 @@ class ClientDataController extends Controller
      */
     public function serviceStatus()
     {
-        $clients = ClientData::with(['server', 'domainRegister', 'domain'])->get();
+        $clients = ClientData::with(['domains'])->get();
         
         $overview = [
             'total_clients' => $clients->count(),
             'expiring_soon' => $clients->filter(fn($c) => $c->isAnyServiceExpiringSoon())->count(),
             'expired_services' => $clients->filter(fn($c) => $c->isAnyServiceExpired())->count(),
-            'servers_in_use' => $clients->whereNotNull('server_id')->pluck('server_id')->unique()->count(),
-            'registers_in_use' => $clients->whereNotNull('domain_register_id')->pluck('domain_register_id')->unique()->count(),
+            'total_domains' => Domain::count(),
+            'domains_expiring' => Domain::whereNotNull('expired_date')
+                ->where('expired_date', '<=', now()->addDays(60))
+                ->where('expired_date', '>', now())
+                ->count(),
         ];
 
-        // Group by server with complete data
-        $serverStats = $clients->whereNotNull('server_id')
+        // Server statistics from domains
+        $serverStats = Domain::whereNotNull('server_id')
+            ->with('server')
+            ->get()
             ->groupBy('server_id')
             ->map(function($group, $serverId) {
                 $server = $group->first()->server;
@@ -168,14 +157,16 @@ class ClientDataController extends Controller
                     'ip_address' => $server->ip_address ?? 'N/A',
                     'status' => $server->status ?? 'unknown',
                     'status_badge_class' => $server->status_badge_class ?? 'bg-secondary',
-                    'client_count' => $group->count(),
-                    'expiring_soon' => $group->filter(fn($c) => $c->isAnyServiceExpiringSoon())->count(),
-                    'expired' => $group->filter(fn($c) => $c->isAnyServiceExpired())->count(),
+                    'domain_count' => $group->count(),
+                    'expiring_soon' => $group->filter(fn($d) => $d->expired_date && $d->expired_date->lte(now()->addDays(60)) && $d->expired_date->gt(now()))->count(),
+                    'expired' => $group->filter(fn($d) => $d->expired_date && $d->expired_date->isPast())->count(),
                 ];
             });
 
-        // Group by domain register with complete data
-        $registerStats = $clients->whereNotNull('domain_register_id')
+        // Domain Register statistics from domains
+        $registerStats = Domain::whereNotNull('domain_register_id')
+            ->with('domainRegister')
+            ->get()
             ->groupBy('domain_register_id')
             ->map(function($group, $registerId) {
                 $register = $group->first()->domainRegister;
@@ -186,21 +177,21 @@ class ClientDataController extends Controller
                     'login_link' => $register->login_link ?? '#',
                     'status' => $register->status ?? 'unknown',
                     'status_badge_class' => $register->status_badge_class ?? 'bg-secondary',
-                    'client_count' => $group->count(),
-                    'expiring_soon' => $group->filter(fn($c) => $c->isAnyServiceExpiringSoon())->count(),
-                    'expired' => $group->filter(fn($c) => $c->isAnyServiceExpired())->count(),
+                    'domain_count' => $group->count(),
+                    'expiring_soon' => $group->filter(fn($d) => $d->expired_date && $d->expired_date->lte(now()->addDays(60)) && $d->expired_date->gt(now()))->count(),
+                    'expired' => $group->filter(fn($d) => $d->expired_date && $d->expired_date->isPast())->count(),
                 ];
             });
 
-        // Upcoming expirations (next 60 days / 2 months) - using domain expiration
-        $upcomingExpirations = ClientData::with(['server', 'domainRegister', 'domain'])
-            ->whereHas('domain', function($q) {
+        // Upcoming expirations (next 60 days / 2 months) - using domains
+        $upcomingExpirations = ClientData::with(['domains'])
+            ->whereHas('domains', function($q) {
                 $q->where('expired_date', '<=', now()->addDays(60))
                   ->where('expired_date', '>', now()->subDays(1)); // Include recent expired
             })
             ->get()
             ->sortBy(function($client) {
-                return $client->domain ? $client->domain->expired_date : null;
+                return $client->earliest_expiration;
             });
 
         return view('admin.client-data.service-status', compact('overview', 'serverStats', 'registerStats', 'upcomingExpirations'));

@@ -109,7 +109,7 @@
         <div class="card-body">
             <form method="GET" action="{{ route('admin.client-data.index') }}">
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
@@ -118,29 +118,11 @@
                             <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Server</label>
-                        <select name="server_id" class="form-select">
-                            <option value="">Semua Server</option>
-                            @foreach($servers as $server)
-                                <option value="{{ $server->id }}" {{ request('server_id') == $server->id ? 'selected' : '' }}>{{ $server->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Domain Register</label>
-                        <select name="domain_register_id" class="form-select">
-                            <option value="">Semua Register</option>
-                            @foreach($domainRegisters as $register)
-                                <option value="{{ $register->id }}" {{ request('domain_register_id') == $register->id ? 'selected' : '' }}>{{ $register->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Search</label>
                         <input type="text" name="search" class="form-control" placeholder="Cari nama client, alamat, whatsapp..." value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Filter</button>
@@ -166,9 +148,7 @@
                                 <th>Nama Client</th>
                                 <th>Alamat</th>
                                 <th>WhatsApp</th>
-                                <th>Server</th>
-                                <th>Domain Register</th>
-                                <th>Expired Dates</th>
+                                <th>Domains</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -200,40 +180,25 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if($client->server)
-                                            <div>
-                                                <strong>{{ $client->server->name }}</strong>
-                                                <br>
-                                                <small class="text-muted">{{ $client->server->ip_address }}</small>
-                                            </div>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($client->domainRegister)
-                                            <strong>{{ $client->domainRegister->name }}</strong>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="small">
-                                            <div>
-                                                <strong>Domain:</strong> 
-                                                @if($client->domain && $client->domain->expired_date)
-                                                    <span class="{{ $client->domain->expired_date->isPast() ? 'text-danger' : ($client->domain->expired_date->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
-                                                        {{ $client->domain->expired_date->format('M d, Y') }}
-                                                    </span>
-                                                    <small class="text-muted">({{ $client->domain->domain_name }})</small>
-                                                @else
-                                                    <span class="text-muted">No domain assigned</span>
+                                        @if($client->domains->count() > 0)
+                                            <div class="small">
+                                                @foreach($client->domains->take(3) as $domain)
+                                                    <div class="mb-1">
+                                                        <strong>{{ $domain->domain_name }}</strong>
+                                                        @if($domain->expired_date)
+                                                            <span class="{{ $domain->expired_date->isPast() ? 'text-danger' : ($domain->expired_date->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
+                                                                ({{ $domain->expired_date->format('M d, Y') }})
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                                @if($client->domains->count() > 3)
+                                                    <small class="text-muted">+{{ $client->domains->count() - 3 }} domain lainnya</small>
                                                 @endif
                                             </div>
-                                            <div class="text-muted mt-1">
-                                                <small>All services follow domain expiration</small>
-                                            </div>
-                                        </div>
+                                        @else
+                                            <span class="text-muted">Belum ada domain</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge {{ $client->status_badge_class }}">

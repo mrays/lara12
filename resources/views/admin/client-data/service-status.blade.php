@@ -260,8 +260,7 @@
                             <tr>
                                 <th>Client Name</th>
                                 <th>WhatsApp</th>
-                                <th>Server</th>
-                                <th>Service Type</th>
+                                <th>Domain</th>
                                 <th>Expiration Date</th>
                                 <th>Days Remaining</th>
                                 <th>Status</th>
@@ -272,8 +271,10 @@
                             @foreach($upcomingExpirations as $client)
                                 @php
                                     $expirations = [];
-                                    if ($client->domain && $client->domain->expired_date && $client->domain->expired_date->lte(now()->addDays(60))) {
-                                        $expirations[] = ['type' => 'Domain', 'date' => $client->domain->expired_date, 'domain_name' => $client->domain->domain_name];
+                                    foreach($client->domains as $domain) {
+                                        if ($domain->expired_date && $domain->expired_date->lte(now()->addDays(60))) {
+                                            $expirations[] = ['type' => 'Domain', 'date' => $domain->expired_date, 'domain_name' => $domain->domain_name];
+                                        }
                                     }
                                 @endphp
                                 
@@ -292,17 +293,6 @@
                                                     <i class="bx bxl-whatsapp text-success me-1"></i>
                                                     {{ $client->whatsapp }}
                                                 </a>
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($loop->first && $client->server)
-                                                <div>
-                                                    <strong>{{ $client->server->name }}</strong>
-                                                    <br>
-                                                    <small class="text-muted">{{ $client->server->ip_address }}</small>
-                                                </div>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif

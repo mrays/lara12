@@ -230,7 +230,7 @@
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         @php
                                             // Count clients with expiring domains (within 30 days)
-                                            $expiringCount = \App\Models\ClientData::whereHas('domain', function($q) {
+                                            $expiringCount = \App\Models\ClientData::whereHas('domains', function($q) {
                                                 $q->where('expired_date', '<=', now()->addDays(30))
                                                   ->where('expired_date', '>=', now());
                                             })->count();
