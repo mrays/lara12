@@ -65,6 +65,7 @@
         </li>
 
         <!-- Upgrade Requests -->
+        @if(Route::has('admin.upgrade-requests.index'))
         <li class="menu-item {{ request()->routeIs('admin.upgrade-requests.*') ? 'active' : '' }}">
             <a href="{{ route('admin.upgrade-requests.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-credit-card"></i>
@@ -77,6 +78,7 @@
                 @endif
             </a>
         </li>
+        @endif
 
         <!-- Server Management -->
         <li class="menu-item {{ request()->routeIs('admin.servers.*') ? 'active' : '' }}">
