@@ -243,26 +243,26 @@
                     <!-- Expiration Status -->
                     <div class="mb-3">
                         <label class="form-label">Status Expiration:</label>
-                        <div class="d-flex flex-column gap-1">
-                            <div>
-                                <small>Website:</small>
-                                <span class="badge {{ $client->website_service_expired->isPast() ? 'bg-danger' : ($client->website_service_expired->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }} ms-2">
-                                    {{ $client->website_service_expired->format('M d, Y') }}
-                                </span>
+                        @if($client->domain && $client->domain->expired_date)
+                            <div class="d-flex flex-column gap-1">
+                                <div>
+                                    <small>Domain:</small>
+                                    <span class="badge {{ $client->domain->expired_date->isPast() ? 'bg-danger' : ($client->domain->expired_date->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }} ms-2">
+                                        {{ $client->domain->expired_date->format('M d, Y') }}
+                                    </span>
+                                </div>
+                                <div class="text-muted">
+                                    <small>({{ $client->domain->domain_name }})</small>
+                                </div>
+                                <div class="text-muted mt-1">
+                                    <small><i class="bx bx-info-circle"></i> All services follow domain expiration</small>
+                                </div>
                             </div>
-                            <div>
-                                <small>Domain:</small>
-                                <span class="badge {{ $client->domain_expired->isPast() ? 'bg-danger' : ($client->domain_expired->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }} ms-2">
-                                    {{ $client->domain_expired->format('M d, Y') }}
-                                </span>
+                        @else
+                            <div class="text-muted">
+                                <small>No domain assigned</small>
                             </div>
-                            <div>
-                                <small>Hosting:</small>
-                                <span class="badge {{ $client->hosting_expired->isPast() ? 'bg-danger' : ($client->hosting_expired->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }} ms-2">
-                                    {{ $client->hosting_expired->format('M d, Y') }}
-                                </span>
-                            </div>
-                        </div>
+                        @endif
                     </div>
 
                     <div class="d-flex gap-2">
@@ -323,9 +323,13 @@ function openWhatsApp() {
 
 // Send email
 function sendEmail() {
-    const subject = encodeURIComponent('Informasi Layanan - {{ $client->name }}');
-    const body = encodeURIComponent('Halo {{ $client->name }},\n\nBerikut informasi layanan Anda:\n\n- Website Service: {{ $client->website_service_expired->format('M d, Y') }}\n- Domain: {{ $client->domain_expired->format('M d, Y') }}\n- Hosting: {{ $client->hosting_expired->format('M d, Y') }}\n\nTerima kasih.');
-    window.open(`mailto:?subject=${subject}&body=${body}`);
+    @if($client->domain && $client->domain->expired_date)
+        const subject = encodeURIComponent('Informasi Layanan - {{ $client->name }}');
+        const body = encodeURIComponent('Halo {{ $client->name }},\n\nBerikut informasi layanan Anda:\n\n- Domain ({{ $client->domain->domain_name }}): {{ $client->domain->expired_date->format('M d, Y') }}\n- Website Service: Mengikuti expired domain\n- Hosting: Mengikuti expired domain\n\nTerima kasih.');
+        window.open(`mailto:?subject=${subject}&body=${body}`);
+    @else
+        showToast('No domain assigned to this client', 'warning');
+    @endif
 }
 
 // View server

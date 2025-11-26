@@ -229,11 +229,12 @@
                                     <i class="bx bx-cog fs-4 lh-0"></i>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         @php
-                                            $expiringCount = \App\Models\ClientData::where(function($q) {
-                                                $q->where('website_service_expired', '<=', now()->addDays(30))
-                                                  ->orWhere('domain_expired', '<=', now()->addDays(30))
-                                                  ->orWhere('hosting_expired', '<=', now()->addDays(30));
+                                            // Count clients with expiring domains (within 30 days)
+                                            $expiringCount = \App\Models\ClientData::whereHas('domain', function($q) {
+                                                $q->where('expired_date', '<=', now()->addDays(30))
+                                                  ->where('expired_date', '>=', now());
                                             })->count();
+                                            
                                             $serverIssues = \App\Models\Server::where('status', 'expired')->orWhere('expired_date', '<=', now()->addDays(7))->count();
                                             $registerIssues = \App\Models\DomainRegister::where('status', 'expired')->orWhere('expired_date', '<=', now()->addDays(7))->count();
                                             $totalAlerts = $expiringCount + $serverIssues + $registerIssues;
