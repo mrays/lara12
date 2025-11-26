@@ -3,9 +3,13 @@
 @section('title', 'Choose Domain - Order')
 
 @section('content')
-<div class="container-xxl py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+<!-- Order Domain Card -->
+<div class="card">
+    <div class="card-body p-4">
+        <div class="mb-4 text-center">
+            <h4 class="mb-2">Choose Your Domain</h4>
+            <p class="mb-4">Start building your online presence with the perfect domain name</p>
+        </div>
             <!-- Progress Steps -->
             <div class="mb-5">
                 <div class="d-flex justify-content-between align-items-center">
@@ -167,11 +171,10 @@
                     <p class="text-muted small">Get help from our support team anytime you need assistance.</p>
                 </div>
             </div>
-        </div>
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
 function selectExtension(extensionId) {
     // Update select dropdown
@@ -238,4 +241,4 @@ document.querySelector('select[name="extension_id"]').addEventListener('change',
     });
 })();
 </script>
-@endsection
+@endpush
