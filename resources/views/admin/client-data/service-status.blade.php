@@ -50,11 +50,26 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar bg-label-success me-3">
-                            <i class="bx bx-check-circle fs-4"></i>
+                            <i class="bx bx-user fs-4"></i>
                         </div>
                         <div>
                             <h4 class="mb-0">{{ $overview['total_clients'] }}</h4>
                             <small class="text-muted">Total Clients</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary bg-lighten">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-label-primary me-3">
+                            <i class="bx bx-globe fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">{{ $overview['total_domains'] }}</h4>
+                            <small class="text-muted">Total Domains</small>
                         </div>
                     </div>
                 </div>
@@ -68,8 +83,8 @@
                             <i class="bx bx-time fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="mb-0">{{ $overview['expiring_soon'] }}</h4>
-                            <small class="text-muted">Expiring Soon (60 days)</small>
+                            <h4 class="mb-0">{{ $overview['domains_expiring'] }}</h4>
+                            <small class="text-muted">Domains Expiring (60 days)</small>
                         </div>
                     </div>
                 </div>
@@ -85,21 +100,6 @@
                         <div>
                             <h4 class="mb-0">{{ $overview['expired_services'] }}</h4>
                             <small class="text-muted">Expired Services</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-info me-3">
-                            <i class="bx bx-server fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $overview['servers_in_use'] }}</h4>
-                            <small class="text-muted">Servers in Use</small>
                         </div>
                     </div>
                 </div>
@@ -124,8 +124,8 @@
                                     <tr>
                                         <th>Server Name</th>
                                         <th>IP Address</th>
-                                        <th>Total Clients</th>
-                                        <th>Expiring Soon</th>
+                                        <th>Domains</th>
+                                        <th>Expiring</th>
                                         <th>Expired</th>
                                         <th>Status</th>
                                     </tr>
@@ -140,7 +140,7 @@
                                                 <code>{{ $stat['ip_address'] }}</code>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $stat['client_count'] }}</span>
+                                                <span class="badge bg-primary">{{ $stat['domain_count'] }}</span>
                                             </td>
                                             <td>
                                                 @if($stat['expiring_soon'] > 0)
@@ -168,7 +168,7 @@
                         </div>
                     @else
                         <div class="text-center py-3">
-                            <p class="text-muted mb-0">No servers with clients found</p>
+                            <p class="text-muted mb-0">No servers with domains found</p>
                         </div>
                     @endif
                 </div>
@@ -190,8 +190,8 @@
                                 <thead>
                                     <tr>
                                         <th>Register Name</th>
-                                        <th>Total Clients</th>
-                                        <th>Expiring Soon</th>
+                                        <th>Domains</th>
+                                        <th>Expiring</th>
                                         <th>Expired</th>
                                         <th>Status</th>
                                         <th>Actions</th>
@@ -204,7 +204,7 @@
                                                 <strong>{{ $stat['register_name'] }}</strong>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info">{{ $stat['client_count'] }}</span>
+                                                <span class="badge bg-info">{{ $stat['domain_count'] }}</span>
                                             </td>
                                             <td>
                                                 @if($stat['expiring_soon'] > 0)
@@ -237,7 +237,7 @@
                         </div>
                     @else
                         <div class="text-center py-3">
-                            <p class="text-muted mb-0">No domain registers with clients found</p>
+                            <p class="text-muted mb-0">No domain registers with domains found</p>
                         </div>
                     @endif
                 </div>
