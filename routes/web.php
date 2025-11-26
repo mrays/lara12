@@ -272,6 +272,18 @@ Route::middleware(['auth'])->group(function () {
 Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'return'])->name('payment.return');
 
+// Guest ordering routes (no auth required)
+Route::prefix('order')->name('order.')->middleware(['throttle:5,1'])->group(function () {
+    Route::get('/choose-domain', [App\Http\Controllers\OrderController::class, 'chooseDomain'])->name('choose-domain');
+    Route::post('/select-domain', [App\Http\Controllers\OrderController::class, 'selectDomain'])->name('select-domain');
+    Route::get('/select-template', [App\Http\Controllers\OrderController::class, 'selectTemplate'])->name('select-template');
+    Route::post('/select-template', [App\Http\Controllers\OrderController::class, 'postSelectTemplate'])->name('post-select-template');
+    Route::get('/customer-details', [App\Http\Controllers\OrderController::class, 'customerDetails'])->name('customer-details');
+    Route::post('/customer-details', [App\Http\Controllers\OrderController::class, 'registerCustomer'])->name('register-customer');
+    Route::get('/select-package', [App\Http\Controllers\OrderController::class, 'selectPackage'])->name('select-package');
+    Route::post('/submit-order', [App\Http\Controllers\OrderController::class, 'submitOrder'])->name('submit-order');
+});
+
 // Google OAuth2 routes
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.auth');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
