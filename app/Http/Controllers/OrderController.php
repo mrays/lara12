@@ -1,41 +1,6 @@
 <?php
-
-namespace App\Http\Controllers;
-
-use App\Models\ServicePackage;
-use App\Models\DomainExtension;
-use App\Models\Client;
-use App\Models\User;
-use App\Models\Service;
-use App\Models\Invoice;
-use App\Models\Domain;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-
-class OrderController extends Controller
-{
-    /**
-     * Show domain selection page
-     */
-    public function chooseDomain()
-    {
-        // Get available domain extensions
-        $extensions = DomainExtension::where('is_active', true)->get();
-        
-        return view('order.choose-domain', compact('extensions'));
-    }
-
-    /**
-     * Process domain selection
-     */
-    public function selectDomain(Request $request)
-    {
-        $request->validate([
-            'domain_name' => 'required|string|min:3|max:63|regex:/^[a-zA-Z0-9-]+$/',
-            'extension_id' => 'required|exists:domain_extensions,id'
+// OrderController - DELETED
+// This file has been removed as per user request
         ]);
 
         // Get extension
