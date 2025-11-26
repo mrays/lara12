@@ -121,7 +121,7 @@ class OrderController extends Controller
                 'billing_cycle' => $request->billing_cycle,
                 'registration_date' => now(),
                 'status' => 'Pending',
-                'due_date' => now()->addDays(7), // Due in 7 days for first payment
+                'due_date' => $request->billing_cycle === 'monthly' ? now()->addMonth() : now()->addYear(), // Due based on billing cycle
                 'notes' => $request->notes,
             ]);
 
@@ -138,7 +138,7 @@ class OrderController extends Controller
                 'total_amount' => $totalPrice,
                 'status' => 'Unpaid',
                 'issue_date' => now()->toDateString(),
-                'due_date' => now()->addDays(7),
+                'due_date' => now()->addDays(7), // Payment due in 7 days
                 'description' => "Order: {$package->name} - {$request->domain_full} ({$request->billing_cycle})",
                 'notes' => $request->notes,
             ]);
