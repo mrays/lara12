@@ -35,6 +35,30 @@
                     </div>
                 @endif
 
+                <!-- Token Status -->
+                @php
+                    $gmailService = app(\App\Services\GmailService::class);
+                    $tokenInfo = $gmailService->getTokenInfo();
+                    $isAuthenticated = $gmailService->isAuthenticated();
+                @endphp
+                
+                <div class="mb-6 p-4 rounded-lg {{ $isAuthenticated ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }}">
+                    <h3 class="font-semibold {{ $isAuthenticated ? 'text-green-800' : 'text-red-800' }} mb-2">
+                        {{ $isAuthenticated ? '✅ Status: Authenticated' : '❌ Status: Not Authenticated' }}
+                    </h3>
+                    @if($tokenInfo)
+                        <div class="text-sm {{ $isAuthenticated ? 'text-green-700' : 'text-red-700' }}">
+                            <p><strong>Refresh Token:</strong> {{ $tokenInfo['has_refresh_token'] ? '✅ Available (Auto-refresh enabled)' : '❌ Not available' }}</p>
+                            <p><strong>Can Auto-Refresh:</strong> {{ $tokenInfo['can_auto_refresh'] ? '✅ Yes - Token will never expire!' : '❌ No - Need to re-authenticate' }}</p>
+                            @if($tokenInfo['has_refresh_token'])
+                                <p class="mt-2 text-green-600 font-semibold">🎉 Token akan otomatis di-refresh! Tidak perlu re-authenticate.</p>
+                            @endif
+                        </div>
+                    @else
+                        <p class="text-sm text-red-700">No token found. Please authenticate first.</p>
+                    @endif
+                </div>
+
                 <!-- OAuth2 Configuration Info -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                     <h2 class="text-xl font-semibold text-blue-800 mb-4">🔐 Konfigurasi OAuth2</h2>
@@ -62,7 +86,7 @@
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                             </svg>
-                            Authenticate dengan Google
+                            {{ $isAuthenticated ? 'Re-authenticate dengan Google' : 'Authenticate dengan Google' }}
                         </a>
                         
                         <div class="mt-4 text-sm text-gray-500">
@@ -71,6 +95,7 @@
                                 <li>Anda akan diarahkan ke Google untuk login</li>
                                 <li>Berikan izin akses Gmail untuk aplikasi</li>
                                 <li>Setelah berhasil, Anda akan kembali ke aplikasi</li>
+                                <li class="text-green-600 font-semibold">Token akan otomatis refresh - tidak perlu re-auth!</li>
                             </ul>
                         </div>
                     </div>
@@ -93,48 +118,18 @@
                             </div>
                             
                             <button type="submit" 
-                                    class="w-full inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200">
+                                    class="w-full inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 {{ !$isAuthenticated ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    {{ !$isAuthenticated ? 'disabled' : '' }}>
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                                 </svg>
                                 Kirim Test Email
                             </button>
                         </form>
-                    </div>
-                </div>
-
-                <!-- Instructions -->
-                <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                    <h2 class="text-xl font-semibold text-yellow-800 mb-4">📋 Petunjuk Penggunaan</h2>
-                    <div class="space-y-4 text-sm text-yellow-700">
-                        <div>
-                            <h3 class="font-semibold">1. Setup Google Cloud Console:</h3>
-                            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                                <li>Buat project di <a href="https://console.cloud.google.com/" target="_blank" class="underline">Google Cloud Console</a></li>
-                                <li>Aktifkan Gmail API</li>
-                                <li>Buat OAuth 2.0 Client ID di Credentials</li>
-                                <li>Tambahkan redirect URI: <code class="bg-yellow-100 px-1 rounded">{{ config('services.google.redirect_uri') }}</code></li>
-                            </ul>
-                        </div>
                         
-                        <div>
-                            <h3 class="font-semibold">2. Konfigurasi .env:</h3>
-                            <pre class="bg-yellow-100 p-3 rounded text-xs overflow-x-auto mt-2"><code>GOOGLE_CLIENT_ID={{ config('services.google.client_id') }}
-GOOGLE_CLIENT_SECRET={{ config('services.google.client_secret') }}
-GOOGLE_REDIRECT_URI={{ config('services.google.redirect_uri') }}</code></pre>
-                        </div>
-                        
-                        <div>
-                            <h3 class="font-semibold">3. Command Line Usage:</h3>
-                            <pre class="bg-yellow-100 p-3 rounded text-xs overflow-x-auto mt-2"><code># Generate auth URL
-php artisan gmail:auth url
-
-# Check auth status  
-php artisan gmail:auth status
-
-# Send test email
-php artisan gmail:auth test</code></pre>
-                        </div>
+                        @if(!$isAuthenticated)
+                            <p class="mt-2 text-sm text-red-500">⚠️ Authenticate dulu sebelum mengirim email</p>
+                        @endif
                     </div>
                 </div>
 

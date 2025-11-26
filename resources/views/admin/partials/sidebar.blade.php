@@ -128,5 +128,25 @@
             </a>
         </li>
 
+        <!-- Settings Header -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Settings</span>
+        </li>
+
+        <!-- Gmail Settings -->
+        <li class="menu-item {{ request()->routeIs('admin.settings.gmail*') ? 'active' : '' }}">
+            <a href="{{ route('admin.settings.gmail') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div data-i18n="Gmail API">Gmail API</div>
+                @php
+                    $gmailService = app(\App\Services\GmailService::class);
+                    $isGmailAuth = $gmailService->isAuthenticated();
+                @endphp
+                @if(!$isGmailAuth)
+                    <span class="badge bg-danger rounded-pill ms-auto">!</span>
+                @endif
+            </a>
+        </li>
+
     </ul>
 </aside>

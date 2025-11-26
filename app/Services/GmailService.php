@@ -6,6 +6,7 @@ use Google\Client;
 use Google\Service\Gmail;
 use Google\Service\Gmail\Message;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class GmailService
 {
@@ -20,15 +21,10 @@ class GmailService
         $this->client->setRedirectUri(config('services.google.redirect_uri'));
         $this->client->addScope(Gmail::GMAIL_SEND);
         
-        // Konfigurasi untuk token yang lebih tahan lama (1-2 bulan)
+        // IMPORTANT: These settings ensure we get a refresh token
         $this->client->setAccessType('offline');
-        $this->client->setPrompt('consent');
-        $this->client->setApprovalPrompt('force'); // Force refresh token
-        
-        // Set token expiry yang lebih lama
-        $this->client->setConfig('token_request_options', [
-            'expires_in' => 5184000, // 60 hari dalam detik (60 * 24 * 60 * 60)
-        ]);
+        $this->client->setPrompt('consent'); // Force consent to get refresh token
+        $this->client->setIncludeGrantedScopes(true);
     }
 
     public function getAuthUrl()
@@ -44,7 +40,13 @@ class GmailService
             throw new \Exception('Error fetching access token: ' . $token['error']);
         }
 
-        // Simpan token ke storage
+        // Log token info for debugging
+        Log::info('Gmail OAuth Token received', [
+            'has_refresh_token' => isset($token['refresh_token']),
+            'expires_in' => $token['expires_in'] ?? 'N/A',
+        ]);
+
+        // Save token to storage
         Storage::put('gmail_token.json', json_encode($token));
         
         return $token;
@@ -53,7 +55,7 @@ class GmailService
     public function setAccessToken($token = null)
     {
         if (!$token) {
-            // Load token dari storage
+            // Load token from storage
             if (Storage::exists('gmail_token.json')) {
                 $token = json_decode(Storage::get('gmail_token.json'), true);
             } else {
@@ -63,14 +65,31 @@ class GmailService
 
         $this->client->setAccessToken($token);
 
-        // Refresh token jika expired
+        // Auto-refresh token if expired
         if ($this->client->isAccessTokenExpired()) {
-            if ($this->client->getRefreshToken()) {
-                $newToken = $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
-                Storage::put('gmail_token.json', json_encode($newToken));
-                $this->client->setAccessToken($newToken);
+            Log::info('Gmail token expired, attempting refresh...');
+            
+            $refreshToken = $this->client->getRefreshToken();
+            
+            if ($refreshToken) {
+                try {
+                    $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+                    
+                    // Preserve the refresh token (Google doesn't always return it)
+                    if (!isset($newToken['refresh_token']) && $refreshToken) {
+                        $newToken['refresh_token'] = $refreshToken;
+                    }
+                    
+                    Storage::put('gmail_token.json', json_encode($newToken));
+                    $this->client->setAccessToken($newToken);
+                    
+                    Log::info('Gmail token refreshed successfully');
+                } catch (\Exception $e) {
+                    Log::error('Failed to refresh Gmail token: ' . $e->getMessage());
+                    throw new \Exception('Access token expired and refresh failed. Please re-authenticate at /gmail-test');
+                }
             } else {
-                throw new \Exception('Access token expired and no refresh token available. Please re-authenticate.');
+                throw new \Exception('Access token expired and no refresh token available. Please re-authenticate at /gmail-test');
             }
         }
 
@@ -91,8 +110,10 @@ class GmailService
 
         try {
             $result = $this->gmail->users_messages->send('me', $message);
+            Log::info('Email sent via Gmail API', ['to' => $to, 'subject' => $subject]);
             return $result;
         } catch (\Exception $e) {
+            Log::error('Failed to send email via Gmail API: ' . $e->getMessage());
             throw new \Exception('Failed to send email: ' . $e->getMessage());
         }
     }
@@ -118,9 +139,34 @@ class GmailService
             return false;
         }
     }
+
+    /**
+     * Get token info for display
+     */
+    public function getTokenInfo()
+    {
+        if (!Storage::exists('gmail_token.json')) {
+            return null;
+        }
+
+        $token = json_decode(Storage::get('gmail_token.json'), true);
+        
+        $expiresAt = isset($token['created']) && isset($token['expires_in']) 
+            ? $token['created'] + $token['expires_in'] 
+            : null;
+        
+        $hasRefreshToken = isset($token['refresh_token']) && !empty($token['refresh_token']);
+        
+        return [
+            'has_refresh_token' => $hasRefreshToken,
+            'expires_at' => $expiresAt ? date('Y-m-d H:i:s', $expiresAt) : 'Unknown',
+            'is_expired' => $expiresAt ? (time() > $expiresAt) : true,
+            'can_auto_refresh' => $hasRefreshToken,
+        ];
+    }
 }
 
-// Helper function untuk base64url encoding
+// Helper function for base64url encoding
 if (!function_exists('base64url_encode')) {
     function base64url_encode($data) {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
