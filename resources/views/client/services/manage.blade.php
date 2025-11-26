@@ -42,23 +42,31 @@
                             @else
                                 @php
                                     $progressValue = match($service->status) {
-                                        'Pending' => 25,
-                                        'Processing' => 50,
-                                        'Setup' => 75,
-                                        'Suspended' => 60,
+                                        'Active' => 100,
+                                        'Pending' => 30,
+                                        'Suspended' => 0,
+                                        'Terminated' => 0,
+                                        'Dibatalkan' => 0,
+                                        'Disuspen' => 0,
+                                        'Sedang Dibuat' => 75,
+                                        'Ditutup' => 0,
                                         default => 10
                                     };
                                     $progressColor = match($service->status) {
+                                        'Active' => 'success',
                                         'Pending' => 'warning',
-                                        'Processing' => 'info', 
-                                        'Setup' => 'primary',
-                                        'Suspended' => 'danger',
+                                        'Suspended' => 'secondary',
+                                        'Terminated' => 'secondary',
+                                        'Dibatalkan' => 'secondary',
+                                        'Disuspen' => 'secondary',
+                                        'Sedang Dibuat' => 'primary',
+                                        'Ditutup' => 'secondary',
                                         default => 'secondary'
                                     };
                                 @endphp
                                 <span class="badge bg-label-{{ $progressColor }} fs-6 mb-2">{{ strtoupper($service->status) }}</span>
                                 <div class="progress mt-2" style="height: 6px; width: 150px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-{{ $progressColor }}" 
+                                    <div class="progress-bar {{ $progressValue > 0 ? 'progress-bar-striped progress-bar-animated' : '' }} bg-{{ $progressColor }}" 
                                          role="progressbar" 
                                          style="width: {{ $progressValue }}%"
                                          aria-valuenow="{{ $progressValue }}" 
@@ -279,8 +287,8 @@
                                                     $steps = [
                                                         ['name' => 'Order Received', 'status' => 'completed'],
                                                         ['name' => 'Payment Verification', 'status' => $service->status === 'Pending' ? 'current' : 'completed'],
-                                                        ['name' => 'Server Setup', 'status' => in_array($service->status, ['Processing', 'Setup']) ? 'current' : ($service->status === 'Pending' ? 'pending' : 'completed')],
-                                                        ['name' => 'Service Activation', 'status' => $service->status === 'Setup' ? 'current' : 'pending']
+                                                        ['name' => 'Server Setup', 'status' => $service->status === 'Sedang Dibuat' ? 'current' : ($service->status === 'Pending' ? 'pending' : 'completed')],
+                                                        ['name' => 'Service Activation', 'status' => $service->status === 'Active' ? 'completed' : ($service->status === 'Sedang Dibuat' ? 'pending' : 'pending')]
                                                     ];
                                                 @endphp
                                                 
@@ -323,11 +331,23 @@
                                                             @case('Pending')
                                                                 Waiting for payment confirmation. This usually takes 1-24 hours.
                                                                 @break
-                                                            @case('Processing')
+                                                            @case('Sedang Dibuat')
                                                                 Setting up your server environment. This may take 2-4 hours.
                                                                 @break
-                                                            @case('Setup')
-                                                                Finalizing service configuration. Almost ready!
+                                                            @case('Suspended')
+                                                                Service has been suspended. Please contact support.
+                                                                @break
+                                                            @case('Terminated')
+                                                                Service has been terminated.
+                                                                @break
+                                                            @case('Dibatalkan')
+                                                                Service has been cancelled.
+                                                                @break
+                                                            @case('Disuspen')
+                                                                Service has been suspended by admin.
+                                                                @break
+                                                            @case('Ditutup')
+                                                                Service has been closed.
                                                                 @break
                                                             @default
                                                                 Service setup in progress. Please wait...
@@ -439,21 +459,29 @@
                                                             <div class="progress mb-2" style="height: 12px;">
                                                                 @php
                                                                     $progressValue = match($service->status) {
-                                                                        'Pending' => 25,
-                                                                        'Processing' => 50,
-                                                                        'Setup' => 75,
-                                                                        'Suspended' => 60,
+                                                                        'Active' => 100,
+                                                                        'Pending' => 30,
+                                                                        'Suspended' => 0,
+                                                                        'Terminated' => 0,
+                                                                        'Dibatalkan' => 0,
+                                                                        'Disuspen' => 0,
+                                                                        'Sedang Dibuat' => 75,
+                                                                        'Ditutup' => 0,
                                                                         default => 10
                                                                     };
                                                                     $progressColor = match($service->status) {
+                                                                        'Active' => 'success',
                                                                         'Pending' => 'warning',
-                                                                        'Processing' => 'info', 
-                                                                        'Setup' => 'primary',
-                                                                        'Suspended' => 'danger',
+                                                                        'Suspended' => 'secondary',
+                                                                        'Terminated' => 'secondary',
+                                                                        'Dibatalkan' => 'secondary',
+                                                                        'Disuspen' => 'secondary',
+                                                                        'Sedang Dibuat' => 'primary',
+                                                                        'Ditutup' => 'secondary',
                                                                         default => 'secondary'
                                                                     };
                                                                 @endphp
-                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-{{ $progressColor }}" 
+                                                                <div class="progress-bar {{ $progressValue > 0 ? 'progress-bar-striped progress-bar-animated' : '' }} bg-{{ $progressColor }}" 
                                                                      role="progressbar" 
                                                                      style="width: {{ $progressValue }}%"
                                                                      aria-valuenow="{{ $progressValue }}" 
