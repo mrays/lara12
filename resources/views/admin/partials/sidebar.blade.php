@@ -159,21 +159,5 @@
             </a>
         </li>
 
-        <!-- Domain Expiration -->
-        <li class="menu-item {{ request()->routeIs('admin.domain-expiration.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.domain-expiration.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-time-five"></i>
-                <div data-i18n="Domain Expiration">Domain Expiration</div>
-                @php
-                    // Use MySQL queries for better performance
-                    $expiringCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date >= ? AND expired_date <= ?', [now(), now()->addMonths(3)])[0]->count;
-                    $expiredCount = \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as count FROM domain_registers WHERE expired_date < ?', [now()])[0]->count;
-                    $totalAlerts = $expiringCount + $expiredCount;
-                @endphp
-                @if($totalAlerts > 0)
-                    <span class="badge {{ $expiredCount > 0 ? 'bg-danger' : 'bg-warning' }} rounded-pill ms-auto">{{ $totalAlerts }}</span>
-                @endif
-            </a>
-        </li>
     </ul>
 </aside>
