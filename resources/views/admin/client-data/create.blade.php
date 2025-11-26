@@ -76,37 +76,27 @@
                             @enderror
                         </div>
 
-                        <!-- Service Information -->
+                        <!-- Domain Selection -->
                         <h6 class="fw-semibold mb-3 mt-4">Informasi Layanan</h6>
 
-                        <!-- Website Service Expired -->
+                        <!-- Domain -->
                         <div class="mb-3">
-                            <label for="website_service_expired" class="form-label">Expired Website Service <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('website_service_expired') is-invalid @enderror" 
-                                   id="website_service_expired" name="website_service_expired" value="{{ old('website_service_expired') }}" required>
-                            @error('website_service_expired')
+                            <label for="domain_id" class="form-label">Domain <span class="text-danger">*</span></label>
+                            <select class="form-select @error('domain_id') is-invalid @enderror" id="domain_id" name="domain_id" required>
+                                <option value="">Pilih Domain</option>
+                                @foreach($domains as $domain)
+                                    <option value="{{ $domain->id }}" {{ old('domain_id') == $domain->id ? 'selected' : '' }}>
+                                        {{ $domain->domain_name }}
+                                        @if($domain->expired_date)
+                                            (Expired: {{ $domain->expired_date->format('M d, Y') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('domain_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-
-                        <!-- Domain Expired -->
-                        <div class="mb-3">
-                            <label for="domain_expired" class="form-label">Expired Domain <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('domain_expired') is-invalid @enderror" 
-                                   id="domain_expired" name="domain_expired" value="{{ old('domain_expired') }}" required>
-                            @error('domain_expired')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Hosting Expired -->
-                        <div class="mb-3">
-                            <label for="hosting_expired" class="form-label">Expired Hosting <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('hosting_expired') is-invalid @enderror" 
-                                   id="hosting_expired" name="hosting_expired" value="{{ old('hosting_expired') }}" required>
-                            @error('hosting_expired')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="form-text">Tanggal expired layanan akan mengikuti expired date domain yang dipilih</div>
                         </div>
 
                         <!-- Assignments -->
@@ -215,13 +205,14 @@
 
                     <h6 class="fw-semibold">Tanggal Expired:</h6>
                     <ul class="mb-3">
-                        <li><strong>Website Service:</strong> Maintenance website/service</li>
-                        <li><strong>Domain:</strong> Registrasi domain</li>
-                        <li><strong>Hosting:</strong> Layanan hosting server</li>
+                        <li><strong>Domain:</strong> Semua layanan mengikuti tanggal expired domain yang dipilih</li>
+                        <li><strong>Website Service:</strong> Mengikuti expired domain</li>
+                        <li><strong>Hosting:</strong> Mengikuti expired domain</li>
                     </ul>
 
                     <h6 class="fw-semibold">Penugasan:</h6>
                     <ul class="mb-3">
+                        <li><strong>Domain:</strong> Domain yang digunakan client (menentukan expired layanan)</li>
                         <li><strong>Server:</strong> Server hosting yang digunakan</li>
                         <li><strong>Domain Register:</strong> Tempat registrasi domain</li>
                         <li><strong>User:</strong> Link ke user di sistem (opsional)</li>
@@ -245,17 +236,13 @@
 </div>
 
 <script>
-// Set minimum date to today
+// Form validation
 document.addEventListener('DOMContentLoaded', function() {
-    const dateInputs = ['website_service_expired', 'domain_expired', 'hosting_expired'];
-    const today = new Date().toISOString().split('T')[0];
-    
-    dateInputs.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.setAttribute('min', today);
-        }
-    });
+    // Set minimum date for domain selection if needed
+    const domainSelect = document.getElementById('domain_id');
+    if (domainSelect) {
+        domainSelect.focus();
+    }
 });
 </script>
 @endsection

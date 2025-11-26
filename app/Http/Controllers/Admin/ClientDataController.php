@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClientData;
+use App\Models\Domain;
 use App\Models\Server;
 use App\Models\DomainRegister;
 use App\Models\User;
@@ -68,9 +69,10 @@ class ClientDataController extends Controller
     {
         $servers = Server::orderBy('name')->get();
         $domainRegisters = DomainRegister::orderBy('name')->get();
+        $domains = Domain::with('client')->orderBy('domain_name')->get();
         $users = User::where('role', 'client')->orderBy('name')->get();
 
-        return view('admin.client-data.create', compact('servers', 'domainRegisters', 'users'));
+        return view('admin.client-data.create', compact('servers', 'domainRegisters', 'domains', 'users'));
     }
 
     /**
@@ -82,19 +84,13 @@ class ClientDataController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string',
             'whatsapp' => 'required|string|max:20',
-            'website_service_expired' => 'required|date',
-            'domain_expired' => 'required|date',
-            'hosting_expired' => 'required|date',
+            'domain_id' => 'required|exists:domains,id',
             'server_id' => 'nullable|exists:servers,id',
             'domain_register_id' => 'nullable|exists:domain_registers,id',
             'user_id' => 'nullable|exists:users,id',
             'status' => 'required|in:active,expired,warning',
             'notes' => 'nullable|string',
         ]);
-
-        // Auto-sync website service expiration with domain expiration
-        // Website service should follow domain expiration
-        $validated['website_service_expired'] = $validated['domain_expired'];
 
         ClientData::create($validated);
 

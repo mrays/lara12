@@ -13,9 +13,7 @@ class ClientData extends Model
         'name',
         'address',
         'whatsapp',
-        'website_service_expired',
-        'domain_expired',
-        'hosting_expired',
+        'domain_id',
         'server_id',
         'domain_register_id',
         'user_id',
@@ -24,10 +22,17 @@ class ClientData extends Model
     ];
 
     protected $casts = [
-        'website_service_expired' => 'date',
-        'domain_expired' => 'date',
-        'hosting_expired' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
+
+    /**
+     * Get the domain that owns the client data
+     */
+    public function domain()
+    {
+        return $this->belongsTo(Domain::class);
+    }
 
     /**
      * Get the server that owns the client data
@@ -58,19 +63,11 @@ class ClientData extends Model
      */
     public function isAnyServiceExpiringSoon()
     {
-        $dates = [
-            $this->website_service_expired,
-            $this->domain_expired,
-            $this->hosting_expired
-        ];
-
-        foreach ($dates as $date) {
-            if ($date && $date->lte(now()->addDays(60)) && !$date->isPast()) {
-                return true;
-            }
+        if (!$this->domain || !$this->domain->expired_date) {
+            return false;
         }
 
-        return false;
+        return $this->domain->expired_date->lte(now()->addDays(60)) && !$this->domain->expired_date->isPast();
     }
 
     /**
@@ -78,19 +75,11 @@ class ClientData extends Model
      */
     public function isAnyServiceExpired()
     {
-        $dates = [
-            $this->website_service_expired,
-            $this->domain_expired,
-            $this->hosting_expired
-        ];
-
-        foreach ($dates as $date) {
-            if ($date && $date->isPast()) {
-                return true;
-            }
+        if (!$this->domain || !$this->domain->expired_date) {
+            return false;
         }
 
-        return false;
+        return $this->domain->expired_date->isPast();
     }
 
     /**
@@ -98,13 +87,7 @@ class ClientData extends Model
      */
     public function getEarliestExpirationAttribute()
     {
-        $dates = array_filter([
-            $this->website_service_expired,
-            $this->domain_expired,
-            $this->hosting_expired
-        ]);
-
-        return empty($dates) ? null : min($dates);
+        return $this->domain ? $this->domain->expired_date : null;
     }
 
     /**
