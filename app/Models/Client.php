@@ -15,7 +15,8 @@ class Client extends Model
         'phone',
         'address',
         'company',
-        'status'
+        'status',
+        'user_id'
     ];
 
     // Relationships

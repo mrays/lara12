@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ServicePackage;
 use App\Models\DomainExtension;
 use App\Models\Client;
+use App\Models\User;
 use App\Models\Service;
 use App\Models\Invoice;
 use App\Models\Domain;
@@ -187,25 +188,33 @@ class OrderController extends Controller
         ]);
 
         try {
-            // Create client account
+            // Create user account (for authentication)
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'role' => 'client',
+                'email_verified_at' => now(),
+            ]);
+
+            // Create client record (for business data)
             $client = Client::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'address' => $request->address,
-                'password' => bcrypt($request->password),
-                'role' => 'client',
                 'status' => 'Active',
-                'email_verified_at' => now(),
+                'user_id' => $user->id,
             ]);
 
             // Store client ID in session
             Session::put('order.client_id', $client->id);
+            Session::put('order.user_id', $user->id);
             Session::put('order.client_name', $client->name);
             Session::put('order.client_email', $client->email);
 
-            // Log in the new client
-            auth()->login($client);
+            // Log in the new user
+            auth()->login($user);
 
             // Redirect to package selection
             return redirect()->route('order.select-package');
@@ -277,7 +286,8 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $client = auth()->user();
+            $user = auth()->user();
+            $clientId = Session::get('order.client_id');
 
             // Re-check if domain is still available
             if (Domain::where('domain_name', Session::get('order.full_domain'))->exists()) {
@@ -290,7 +300,7 @@ class OrderController extends Controller
             // Create domain record
             $domain = Domain::create([
                 'domain_name' => Session::get('order.full_domain'),
-                'client_id' => $client->id,
+                'client_id' => $clientId,
                 'domain_register_id' => DB::table('domain_registers')->first()->id ?? null,
                 'server_id' => DB::table('servers')->first()->id ?? null,
                 'expired_date' => Carbon::now()->addYear(),
@@ -300,7 +310,7 @@ class OrderController extends Controller
 
             // Create service record
             $service = Service::create([
-                'client_id' => $client->id,
+                'client_id' => $clientId,
                 'package_id' => Session::get('order.package_id'),
                 'domain_id' => $domain->id,
                 'product' => Session::get('order.package_name'),
@@ -311,7 +321,7 @@ class OrderController extends Controller
 
             // Create invoice
             $invoice = Invoice::create([
-                'client_id' => $client->id,
+                'client_id' => $clientId,
                 'service_id' => $service->id,
                 'invoice_number' => 'INV-' . date('Y') . '-' . str_pad(Invoice::count() + 1, 5, '0', STR_PAD_LEFT),
                 'due_date' => Carbon::now()->addDays(7),
