@@ -1,6 +1,6 @@
 @extends('layouts.sneat-auth')
 
-@section('title', 'Login')
+@section('title', 'Exputra Billing - Login')
 
 @section('content')
 <!-- Login -->
@@ -12,11 +12,11 @@
                 <span class="app-brand-logo demo">
                     <img src="{{ asset('images/exputra-logo.png') }}" alt="Exputra" style="height: 25px;">
                 </span>
-                <span class="app-brand-text demo text-body fw-bolder">{{ config('company.name', config('app.name')) }}</span>
+                <span class="app-brand-text demo text-body fw-bolder">Exputra Billing</span>
             </a>
         </div>
         <!-- /Logo -->
-        <h4 class="mb-2">Welcome to {{ config('company.name', config('app.name')) }}! 👋</h4>
+        <h4 class="mb-2">Welcome to Exputra Billing! 👋</h4>
         <p class="mb-4">Please sign in to your account and start the adventure</p>
 
         <!-- Session Status -->

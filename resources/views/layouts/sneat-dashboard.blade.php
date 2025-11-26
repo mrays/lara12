@@ -117,8 +117,36 @@
         /* Desktop sidebar toggle */
         @media (min-width: 1200px) {
             .layout-menu-toggle.menu-link {
-                display: block !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background: rgba(67, 89, 113, 0.08);
+                transition: all 0.2s ease;
             }
+            
+            .layout-menu-toggle.menu-link:hover {
+                background: rgba(67, 89, 113, 0.15);
+            }
+            
+            .layout-menu-toggle.menu-link i {
+                transition: transform 0.3s ease;
+            }
+        }
+        
+        /* App brand styling */
+        .app-brand.demo {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .app-brand-link {
+            display: flex;
+            align-items: center;
+            flex: 1;
         }
         
         /* Sidebar collapsed state */
