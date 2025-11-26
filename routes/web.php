@@ -273,7 +273,7 @@ Route::post('/payment/callback', [App\Http\Controllers\PaymentController::class,
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'return'])->name('payment.return');
 
 // Guest ordering routes (no auth required)
-Route::prefix('order')->name('order.')->middleware(['throttle:5,1'])->group(function () {
+Route::prefix('order')->name('order.')->group(function () {
     Route::get('/choose-domain', [App\Http\Controllers\OrderController::class, 'chooseDomain'])->name('choose-domain');
     Route::post('/select-domain', [App\Http\Controllers\OrderController::class, 'selectDomain'])->name('select-domain');
     Route::get('/select-template', [App\Http\Controllers\OrderController::class, 'selectTemplate'])->name('select-template');
