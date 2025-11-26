@@ -19,6 +19,7 @@ class DomainController extends Controller
     public function index(Request $request)
     {
         $filter = $request->get('filter', 'all'); // all, active, expired, expiring, safe, pending, suspended
+        $search = $request->get('search', '');
         
         // Build base query with MySQL for better performance
         $baseQuery = 'SELECT d.*, cd.name as client_name, s.name as server_name, dr.name as domain_register_name 
@@ -29,39 +30,57 @@ class DomainController extends Controller
         
         $whereClause = '';
         $bindings = [];
+        $conditions = [];
         
+        // Add search condition
+        if (!empty($search)) {
+            $conditions[] = '(d.domain_name LIKE ? OR cd.name LIKE ? OR s.name LIKE ? OR dr.name LIKE ? OR d.notes LIKE ?)';
+            $searchTerm = '%' . $search . '%';
+            $bindings[] = $searchTerm;
+            $bindings[] = $searchTerm;
+            $bindings[] = $searchTerm;
+            $bindings[] = $searchTerm;
+            $bindings[] = $searchTerm;
+        }
+        
+        // Add filter condition
         switch ($filter) {
             case 'active':
-                $whereClause = ' WHERE d.status = ?';
+                $conditions[] = 'd.status = ?';
                 $bindings[] = Domain::STATUS_ACTIVE;
                 break;
             case 'expired':
-                $whereClause = ' WHERE d.expired_date < ?';
+                $conditions[] = 'd.expired_date < ?';
                 $bindings[] = now();
                 break;
             case 'expiring':
-                $whereClause = ' WHERE d.expired_date >= ? AND d.expired_date <= ?';
+                $conditions[] = '(d.expired_date >= ? AND d.expired_date <= ?)';
                 $bindings[] = now();
                 $bindings[] = now()->addDays(30);
                 break;
             case 'critical':
-                $whereClause = ' WHERE d.expired_date >= ? AND d.expired_date <= ?';
+                $conditions[] = '(d.expired_date >= ? AND d.expired_date <= ?)';
                 $bindings[] = now();
                 $bindings[] = now()->addDays(7);
                 break;
             case 'safe':
-                $whereClause = ' WHERE d.expired_date > ?';
+                $conditions[] = 'd.expired_date > ?';
                 $bindings[] = now()->addDays(30);
                 break;
             case 'pending':
-                $whereClause = ' WHERE d.status = ?';
+                $conditions[] = 'd.status = ?';
                 $bindings[] = Domain::STATUS_PENDING;
                 break;
             case 'suspended':
-                $whereClause = ' WHERE d.status = ?';
+                $conditions[] = 'd.status = ?';
                 $bindings[] = Domain::STATUS_SUSPENDED;
                 break;
             // 'all' shows all domains
+        }
+        
+        // Build WHERE clause
+        if (!empty($conditions)) {
+            $whereClause = ' WHERE ' . implode(' AND ', $conditions);
         }
         
         $orderBy = ' ORDER BY d.expired_date ASC, d.domain_name ASC';
@@ -109,6 +128,7 @@ class DomainController extends Controller
             'domains',
             'stats', 
             'filter',
+            'search',
             'criticalExpirations',
             'upcomingExpirations'
         ));

@@ -30,7 +30,11 @@
                             <i class="bx bx-plus me-1"></i>Add Domain
                         </a>
                         <form method="GET" class="d-flex gap-2">
-                            <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <div class="input-group input-group-sm" style="width: 250px;">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" name="search" class="form-control" placeholder="Search domain..." value="{{ request('search') }}">
+                            </div>
+                            <select name="filter" class="form-select form-select-sm" style="width: auto;">
                                 <option value="all" {{ $filter == 'all' ? 'selected' : '' }}>All Domains</option>
                                 <option value="active" {{ $filter == 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="expired" {{ $filter == 'expired' ? 'selected' : '' }}>Expired</option>
@@ -40,6 +44,14 @@
                                 <option value="pending" {{ $filter == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="suspended" {{ $filter == 'suspended' ? 'selected' : '' }}>Suspended</option>
                             </select>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bx bx-filter me-1"></i>Filter
+                            </button>
+                            @if(request('search') || request('filter') != 'all')
+                            <a href="{{ route('admin.domains.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bx bx-reset me-1"></i>Reset
+                            </a>
+                            @endif
                         </form>
                         <form method="POST" action="{{ route('admin.domains.export') }}">
                             @csrf

@@ -366,7 +366,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 <script>
 // Auto-sync expiration date with domain register
@@ -437,3 +436,4 @@ document.getElementById('status').addEventListener('change', function() {
     }
 });
 </script>
+@endsection
