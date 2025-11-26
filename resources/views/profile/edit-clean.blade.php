@@ -46,8 +46,9 @@
                         <span class="badge bg-label-primary">
                             <i class="bx bx-user me-1"></i>{{ ucfirst($user->role) }}
                         </span>
-                        <span class="badge bg-label-success">
-                            <i class="bx bx-check-circle me-1"></i>Active
+                        <span class="badge {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'bg-label-danger' : 'bg-label-success' }}">
+                            <i class="bx {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'bx-x-circle' : 'bx-check-circle' }} me-1"></i>
+                            {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'Inactive' : 'Active' }}
                         </span>
                     </div>
                 </div>
