@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand">
         <a href="{{ route('client.dashboard') }}" class="app-brand-link">
-            <span class="app-brand-text h5">Client Portal</span>
+            <img src="{{ asset('images/exputra-logo.png') }}" alt="Exputra" style="height: 25px;">
         </a>
     </div>
 
