@@ -219,23 +219,19 @@
                                     </td>
                                     <td>
                                         <div class="small">
-                                            <div class="mb-1">
-                                                <strong>Website:</strong> 
-                                                <span class="{{ $client->website_service_expired->isPast() ? 'text-danger' : ($client->website_service_expired->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
-                                                    {{ $client->website_service_expired->format('M d, Y') }}
-                                                </span>
-                                            </div>
-                                            <div class="mb-1">
-                                                <strong>Domain:</strong> 
-                                                <span class="{{ $client->domain_expired->isPast() ? 'text-danger' : ($client->domain_expired->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
-                                                    {{ $client->domain_expired->format('M d, Y') }}
-                                                </span>
-                                            </div>
                                             <div>
-                                                <strong>Hosting:</strong> 
-                                                <span class="{{ $client->hosting_expired->isPast() ? 'text-danger' : ($client->hosting_expired->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
-                                                    {{ $client->hosting_expired->format('M d, Y') }}
-                                                </span>
+                                                <strong>Domain:</strong> 
+                                                @if($client->domain && $client->domain->expired_date)
+                                                    <span class="{{ $client->domain->expired_date->isPast() ? 'text-danger' : ($client->domain->expired_date->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
+                                                        {{ $client->domain->expired_date->format('M d, Y') }}
+                                                    </span>
+                                                    <small class="text-muted">({{ $client->domain->domain_name }})</small>
+                                                @else
+                                                    <span class="text-muted">No domain assigned</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-muted mt-1">
+                                                <small>All services follow domain expiration</small>
                                             </div>
                                         </div>
                                     </td>

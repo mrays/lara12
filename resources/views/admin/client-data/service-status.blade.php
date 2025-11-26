@@ -272,14 +272,8 @@
                             @foreach($upcomingExpirations as $client)
                                 @php
                                     $expirations = [];
-                                    if ($client->website_service_expired && $client->website_service_expired->lte(now()->addDays(60))) {
-                                        $expirations[] = ['type' => 'Website Service', 'date' => $client->website_service_expired];
-                                    }
-                                    if ($client->domain_expired && $client->domain_expired->lte(now()->addDays(60))) {
-                                        $expirations[] = ['type' => 'Domain', 'date' => $client->domain_expired];
-                                    }
-                                    if ($client->hosting_expired && $client->hosting_expired->lte(now()->addDays(60))) {
-                                        $expirations[] = ['type' => 'Hosting', 'date' => $client->hosting_expired];
+                                    if ($client->domain && $client->domain->expired_date && $client->domain->expired_date->lte(now()->addDays(60))) {
+                                        $expirations[] = ['type' => 'Domain', 'date' => $client->domain->expired_date, 'domain_name' => $client->domain->domain_name];
                                     }
                                 @endphp
                                 
@@ -314,7 +308,10 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-label-primary">{{ $expiration['type'] }}</span>
+                                            <span class="badge bg-label-primary">Domain</span>
+                                            @if(isset($expiration['domain_name']))
+                                                <small class="text-muted d-block">{{ $expiration['domain_name'] }}</small>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="{{ $expiration['date']->isPast() ? 'text-danger' : ($expiration['date']->lte(now()->addDays(7)) ? 'text-warning' : 'text-info') }}">

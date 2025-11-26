@@ -17,7 +17,7 @@ class ClientDataController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ClientData::with(['server', 'domainRegister', 'user']);
+        $query = ClientData::with(['server', 'domainRegister', 'user', 'domain']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -47,12 +47,14 @@ class ClientDataController extends Controller
 
         $clients = $query->orderBy('name')->get();
 
-        // Get counts for status badges
+        // Get counts for status badges using domain expiration
+        $allClients = ClientData::with('domain')->get();
+        
         $statusCounts = [
-            'all' => ClientData::count(),
-            'active' => ClientData::where('status', 'active')->count(),
-            'expired' => ClientData::where('status', 'expired')->count(),
-            'warning' => ClientData::where('status', 'warning')->count(),
+            'all' => $allClients->count(),
+            'active' => $allClients->where('status', 'active')->count(),
+            'expired' => $allClients->where('status', 'expired')->count(),
+            'warning' => $allClients->where('status', 'warning')->count(),
         ];
 
         // Get related data for filters
@@ -105,9 +107,10 @@ class ClientDataController extends Controller
     {
         $servers = Server::orderBy('name')->get();
         $domainRegisters = DomainRegister::orderBy('name')->get();
+        $domains = Domain::orderBy('domain_name')->get();
         $users = User::where('role', 'client')->orderBy('name')->get();
 
-        return view('admin.client-data.edit', compact('client', 'servers', 'domainRegisters', 'users'));
+        return view('admin.client-data.edit', compact('client', 'servers', 'domainRegisters', 'domains', 'users'));
     }
 
     /**
@@ -119,19 +122,13 @@ class ClientDataController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string',
             'whatsapp' => 'required|string|max:20',
-            'website_service_expired' => 'required|date',
-            'domain_expired' => 'required|date',
-            'hosting_expired' => 'required|date',
+            'domain_id' => 'required|exists:domains,id',
             'server_id' => 'nullable|exists:servers,id',
             'domain_register_id' => 'nullable|exists:domain_registers,id',
             'user_id' => 'nullable|exists:users,id',
             'status' => 'required|in:active,expired,warning',
             'notes' => 'nullable|string',
         ]);
-
-        // Auto-sync website service expiration with domain expiration
-        // Website service should follow domain expiration
-        $validated['website_service_expired'] = $validated['domain_expired'];
 
         $client->update($validated);
 

@@ -81,43 +81,27 @@
                             @enderror
                         </div>
 
-                        <!-- Service Information -->
+                        <!-- Domain Selection -->
                         <h6 class="fw-semibold mb-3 mt-4">Informasi Layanan</h6>
 
-                        <!-- Domain Expired -->
+                        <!-- Domain -->
                         <div class="mb-3">
-                            <label for="domain_expired" class="form-label">Expired Domain <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('domain_expired') is-invalid @enderror" 
-                                   id="domain_expired" name="domain_expired" value="{{ old('domain_expired', $client->domain_expired->format('Y-m-d')) }}" required>
-                            @error('domain_expired')
+                            <label for="domain_id" class="form-label">Domain <span class="text-danger">*</span></label>
+                            <select class="form-select @error('domain_id') is-invalid @enderror" id="domain_id" name="domain_id" required>
+                                <option value="">Pilih Domain</option>
+                                @foreach($domains as $domain)
+                                    <option value="{{ $domain->id }}" {{ old('domain_id', $client->domain_id) == $domain->id ? 'selected' : '' }}>
+                                        {{ $domain->domain_name }}
+                                        @if($domain->expired_date)
+                                            (Expired: {{ $domain->expired_date->format('M d, Y') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('domain_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-
-                        <!-- Website Service Expired -->
-                        <div class="mb-3">
-                            <label for="website_service_expired" class="form-label">Expired Website Service <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="date" class="form-control @error('website_service_expired') is-invalid @enderror" 
-                                       id="website_service_expired" name="website_service_expired" value="{{ old('website_service_expired', $client->website_service_expired->format('Y-m-d')) }}" required>
-                                <button type="button" class="btn btn-outline-secondary" onclick="syncWebsiteWithDomain()">
-                                    <i class="bx bx-sync"></i> Sync dengan Domain
-                                </button>
-                            </div>
-                            <small class="text-muted">Website service expiration akan mengikuti expired domain</small>
-                            @error('website_service_expired')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Hosting Expired -->
-                        <div class="mb-3">
-                            <label for="hosting_expired" class="form-label">Expired Hosting <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('hosting_expired') is-invalid @enderror" 
-                                   id="hosting_expired" name="hosting_expired" value="{{ old('hosting_expired', $client->hosting_expired->format('Y-m-d')) }}" required>
-                            @error('hosting_expired')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="form-text">Tanggal expired layanan akan mengikuti expired date domain yang dipilih</div>
                         </div>
 
                         <!-- Assignments -->
@@ -364,35 +348,35 @@ function viewRegister() {
 
 // Check all expirations
 function checkAllExpirations() {
-    const dates = [
-        { name: 'Website Service', date: new Date('{{ $client->website_service_expired->format("Y-m-d") }}') },
-        { name: 'Domain', date: new Date('{{ $client->domain_expired->format("Y-m-d") }}') },
-        { name: 'Hosting', date: new Date('{{ $client->hosting_expired->format("Y-m-d") }}') }
-    ];
-    
-    const today = new Date();
-    let messages = [];
-    
-    dates.forEach(item => {
-        const diffTime = item.date - today;
+    @if($client->domain && $client->domain->expired_date)
+        const domainDate = new Date('{{ $client->domain->expired_date->format("Y-m-d") }}');
+        const today = new Date();
+        const diffTime = domainDate - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
+        let message = '';
         if (diffDays < 0) {
-            messages.push(`${item.name}: Expired ${Math.abs(diffDays)} days ago`);
+            message = `Domain ({{ $client->domain->domain_name }}): Expired ${Math.abs(diffDays)} days ago`;
         } else if (diffDays <= 30) {
-            messages.push(`${item.name}: Will expire in ${diffDays} days`);
+            message = `Domain ({{ $client->domain->domain_name }}): Will expire in ${diffDays} days`;
         } else {
-            messages.push(`${item.name}: Valid for ${diffDays} more days`);
+            message = `Domain ({{ $client->domain->domain_name }}): Valid for ${diffDays} more days`;
         }
-    });
-    
-    showToast(messages.join('\n'), 'info');
+        
+        showToast(message + '\nAll services follow domain expiration', 'info');
+    @else
+        showToast('No domain assigned to this client', 'warning');
+    @endif
 }
 
 // Send renewal reminder
 function sendRenewalReminder() {
-    const message = encodeURIComponent(`Halo {{ $client->name }},\n\nIni adalah pengingat untuk layanan Anda:\n\n- Website Service: {{ $client->website_service_expired->format('M d, Y') }}\n- Domain: {{ $client->domain_expired->format('M d, Y') }}\n- Hosting: {{ $client->hosting_expired->format('M d, Y') }}\n\nSilakan lakukan perpanjangan sebelum tanggal kadaluarsa.\n\nTerima kasih.`);
-    window.open(`{{ $client->whatsapp_link }}?text=${message}`, '_blank');
+    @if($client->domain && $client->domain->expired_date)
+        const message = encodeURIComponent(`Halo {{ $client->name }},\n\nIni adalah pengingat untuk layanan Anda:\n\n- Domain ({{ $client->domain->domain_name }}): {{ $client->domain->expired_date->format('M d, Y') }}\n- Website Service: Mengikuti expired domain\n- Hosting: Mengikuti expired domain\n\nSilakan lakukan perpanjangan sebelum tanggal kadaluarsa.\n\nTerima kasih.`);
+        window.open(`{{ $client->whatsapp_link }}?text=${message}`, '_blank');
+    @else
+        showToast('No domain assigned to this client', 'warning');
+    @endif
 }
 
 // View user
@@ -416,34 +400,6 @@ function showToast(message, type) {
     setTimeout(() => {
         toast.remove();
     }, 5000);
-}
-
-// Sync dates from domain register selection
-function syncDatesFromRegister() {
-    const select = document.getElementById('domain_register_id');
-    const selectedOption = select.options[select.selectedIndex];
-    const domainExpired = selectedOption.getAttribute('data-domain-expired');
-    
-    if (domainExpired) {
-        // Auto-fill domain expired date
-        document.getElementById('domain_expired').value = domainExpired;
-        
-        // Auto-sync website service expired with domain
-        syncWebsiteWithDomain();
-        
-        showToast('Tanggal expired domain dan website service di-sync otomatis', 'success');
-    }
-}
-
-// Sync website service expired with domain expired
-function syncWebsiteWithDomain() {
-    const domainExpired = document.getElementById('domain_expired').value;
-    if (domainExpired) {
-        document.getElementById('website_service_expired').value = domainExpired;
-        showToast('Website service expiration di-sync dengan domain expiration', 'success');
-    } else {
-        showToast('Pilih tanggal domain expired terlebih dahulu', 'warning');
-    }
 }
 </script>
 @endsection
