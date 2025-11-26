@@ -185,6 +185,7 @@ class ServicePackageController extends Controller
                 'name' => $validated['name'],
                 'description' => $validated['description'],
                 'base_price' => $validated['base_price'],
+                'features' => $validated['features'],
                 'is_active' => $request->has('is_active') ? 1 : 0,
             ]);
 

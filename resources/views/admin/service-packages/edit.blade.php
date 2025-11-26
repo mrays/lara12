@@ -32,7 +32,24 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.service-packages.update', $package->id) }}" method="POST">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <h6><i class="bx bx-error-circle me-2"></i>Validation Errors:</h6>
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            <i class="bx bx-check-circle me-2"></i>{{ session('success') }}
+                        </div>
+                    @endif
+
+                    <form action="{{ route('admin.service-packages.update', $package->id) }}" method="POST" id="packageForm">
                         @csrf
                         @method('PUT')
                         
@@ -253,7 +270,7 @@
                                 <a href="{{ route('admin.service-packages.show', $package->id) }}" class="btn btn-outline-info">
                                     <i class="tf-icons bx bx-show me-1"></i>View Details
                                 </a>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="updatePackageBtn">
                                     <i class="tf-icons bx bx-save me-1"></i>Update Package
                                 </button>
                             </div>
@@ -588,10 +605,40 @@ document.addEventListener('DOMContentLoaded', function() {
         // Disable discount input if domain is free
         const isFreeCheckbox = row.querySelector('.domain-free-checkbox');
         const discountInput = row.querySelector('.domain-discount-input');
-        if (isFreeCheckbox.checked) {
+        if (isFreeCheckbox && isFreeCheckbox.checked) {
             discountInput.disabled = true;
         }
     });
+
+    // Form submit handler
+    const form = document.getElementById('packageForm');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+            
+            // Show loading state on submit button
+            const submitBtn = document.getElementById('updatePackageBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="tf-icons bx bx-loader-alt bx-spin me-1"></i>Updating...';
+            }
+            
+            // Remove empty feature rows before submit
+            const featureRows = document.querySelectorAll('.feature-row');
+            featureRows.forEach(row => {
+                const nameInput = row.querySelector('input[name*="[name]"]');
+                const valueInput = row.querySelector('input[name*="[value]"]');
+                
+                if (nameInput && valueInput && (!nameInput.value.trim() || !valueInput.value.trim())) {
+                    // Remove empty inputs to avoid validation errors
+                    nameInput.remove();
+                    valueInput.remove();
+                    row.querySelector('select[name*="[type]"]')?.remove();
+                }
+            });
+        });
+    }
 });
 </script>
 @endsection
