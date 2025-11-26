@@ -2,6 +2,25 @@
 
 @section('title', 'Server Management')
 
+@push('styles')
+<style>
+    .avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .avatar i {
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+    .bg-label-primary { background-color: rgba(105, 108, 255, 0.16) !important; color: #696cff !important; }
+    .bg-label-success { background-color: rgba(113, 221, 55, 0.16) !important; color: #71dd37 !important; }
+    .bg-label-danger { background-color: rgba(255, 62, 29, 0.16) !important; color: #ff3e1d !important; }
+    .bg-label-warning { background-color: rgba(255, 171, 0, 0.16) !important; color: #ffab00 !important; }
+    .bg-label-info { background-color: rgba(3, 195, 236, 0.16) !important; color: #03c3ec !important; }
+</style>
+@endpush
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Breadcrumb -->
