@@ -3,6 +3,8 @@
 @section('title', 'Client Data Management')
 
 @push('styles')
+<!-- Boxicons CDN for better icon support -->
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <style>
     /* Fix avatar icon display */
     .avatar {
@@ -13,6 +15,10 @@
     .avatar i {
         font-size: 1.5rem;
         line-height: 1;
+    }
+    .avatar-lg {
+        width: 48px;
+        height: 48px;
     }
     /* Label background colors */
     .bg-label-primary {

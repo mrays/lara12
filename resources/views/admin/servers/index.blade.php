@@ -3,7 +3,10 @@
 @section('title', 'Server Management')
 
 @push('styles')
+<!-- Boxicons CDN for better icon support -->
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <style>
+    /* Fix avatar icon display */
     .avatar {
         display: flex;
         align-items: center;
@@ -13,11 +16,31 @@
         font-size: 1.5rem;
         line-height: 1;
     }
-    .bg-label-primary { background-color: rgba(105, 108, 255, 0.16) !important; color: #696cff !important; }
-    .bg-label-success { background-color: rgba(113, 221, 55, 0.16) !important; color: #71dd37 !important; }
-    .bg-label-danger { background-color: rgba(255, 62, 29, 0.16) !important; color: #ff3e1d !important; }
-    .bg-label-warning { background-color: rgba(255, 171, 0, 0.16) !important; color: #ffab00 !important; }
-    .bg-label-info { background-color: rgba(3, 195, 236, 0.16) !important; color: #03c3ec !important; }
+    .avatar-lg {
+        width: 48px;
+        height: 48px;
+    }
+    /* Label background colors */
+    .bg-label-primary {
+        background-color: rgba(105, 108, 255, 0.16) !important;
+        color: #696cff !important;
+    }
+    .bg-label-success {
+        background-color: rgba(113, 221, 55, 0.16) !important;
+        color: #71dd37 !important;
+    }
+    .bg-label-danger {
+        background-color: rgba(255, 62, 29, 0.16) !important;
+        color: #ff3e1d !important;
+    }
+    .bg-label-warning {
+        background-color: rgba(255, 171, 0, 0.16) !important;
+        color: #ffab00 !important;
+    }
+    .bg-label-info {
+        background-color: rgba(3, 195, 236, 0.16) !important;
+        color: #03c3ec !important;
+    }
 </style>
 @endpush
 
