@@ -152,7 +152,7 @@ class ClientDataController extends Controller
      */
     public function serviceStatus()
     {
-        $clients = ClientData::with(['server', 'domainRegister'])->get();
+        $clients = ClientData::with(['server', 'domainRegister', 'domain'])->get();
         
         $overview = [
             'total_clients' => $clients->count(),
@@ -198,15 +198,16 @@ class ClientDataController extends Controller
                 ];
             });
 
-        // Upcoming expirations (next 60 days / 2 months)
-        $upcomingExpirations = ClientData::with(['server', 'domainRegister'])
-            ->where(function($q) {
-                $q->where('website_service_expired', '<=', now()->addDays(60))
-                  ->orWhere('domain_expired', '<=', now()->addDays(60))
-                  ->orWhere('hosting_expired', '<=', now()->addDays(60));
+        // Upcoming expirations (next 60 days / 2 months) - using domain expiration
+        $upcomingExpirations = ClientData::with(['server', 'domainRegister', 'domain'])
+            ->whereHas('domain', function($q) {
+                $q->where('expired_date', '<=', now()->addDays(60))
+                  ->where('expired_date', '>', now()->subDays(1)); // Include recent expired
             })
-            ->orderBy('domain_expired')
-            ->get();
+            ->get()
+            ->sortBy(function($client) {
+                return $client->domain ? $client->domain->expired_date : null;
+            });
 
         return view('admin.client-data.service-status', compact('overview', 'serverStats', 'registerStats', 'upcomingExpirations'));
     }
