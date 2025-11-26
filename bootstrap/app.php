@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Add user status check to web middleware group
-        $middleware->web(append: [
+        $middleware->group('web', [
             \App\Http\Middleware\CheckUserStatus::class,
         ]);
     })
