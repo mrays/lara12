@@ -82,63 +82,66 @@
         </div>
     </div>
 
-    <!-- Status Summary -->
+    <!-- Statistics Cards -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-success bg-lighten">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-success me-3">
-                            <i class="bx bx-check-circle fs-4"></i>
-                        </div>
+                    <div class="d-flex align-items-start justify-content-between">
                         <div>
-                            <h4 class="mb-0">{{ $statusCounts['active'] }}</h4>
-                            <small class="text-muted">Active</small>
+                            <h6 class="mb-2">Total</h6>
+                            <h3 class="mb-0">{{ $statusCounts['all'] }}</h3>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-warning me-3">
-                            <i class="bx bx-time fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['warning'] }}</h4>
-                            <small class="text-muted">Warning</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-danger me-3">
-                            <i class="bx bx-x-circle fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['expired'] }}</h4>
-                            <small class="text-muted">Expired</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-primary me-3">
+                        <div class="avatar avatar-lg bg-label-primary rounded-circle">
                             <i class="bx bx-user fs-4"></i>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
                         <div>
-                            <h4 class="mb-0">{{ $statusCounts['all'] }}</h4>
-                            <small class="text-muted">Total Client</small>
+                            <h6 class="mb-2 text-success">Active</h6>
+                            <h3 class="mb-0 text-success">{{ $statusCounts['active'] }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-label-success rounded-circle">
+                            <i class="bx bx-check-circle fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <h6 class="mb-2 text-warning">Warning</h6>
+                            <h3 class="mb-0 text-warning">{{ $statusCounts['warning'] }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-label-warning rounded-circle">
+                            <i class="bx bx-time-five fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <h6 class="mb-2 text-danger">Expired</h6>
+                            <h3 class="mb-0 text-danger">{{ $statusCounts['expired'] }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-label-danger rounded-circle">
+                            <i class="bx bx-x-circle fs-4"></i>
                         </div>
                     </div>
                 </div>
