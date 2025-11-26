@@ -231,6 +231,9 @@
                                                 </button>
                                                 <div class="dropdown-menu">
                                                     <h6 class="dropdown-header">Account Actions</h6>
+                                                    <a href="{{ route('admin.upgrade-requests.index') }}" class="dropdown-item">
+                                                        <i class="tf-icons bx bx-credit-card me-1"></i> View Upgrade Requests
+                                                    </a>
                                                     <button class="dropdown-item" onclick="resetPassword({{ $client->id }}, '{{ $client->name }}')">
                                                         <i class="tf-icons bx bx-key me-1"></i> Reset Password
                                                     </button>
