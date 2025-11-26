@@ -2,7 +2,7 @@
     <div class="app-brand demo">
         <a href="{{ route('client.dashboard') }}" class="app-brand-link">
             <img src="{{ asset('images/exputra-logo.png') }}" alt="Exputra" style="height: 25px;">
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">{{ config('company.name', 'Exputra') }}</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">Exputra Billing</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
