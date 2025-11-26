@@ -47,12 +47,12 @@ return [
     */
     
     'address' => [
-        'street' => 'Jl. Teknologi Digital No. 123',
-        'city' => 'Jakarta',
+        'street' => 'Jl. Lubang Buaya, Cipayung, Rumah No 57 Blok A',
+        'city' => 'Jakarta Timur',
         'state' => 'DKI Jakarta',
-        'postal_code' => '12345',
+        'postal_code' => '13810',
         'country' => 'Indonesia',
-        'full' => 'Jl. Teknologi Digital No. 123, Jakarta, DKI Jakarta 12345, Indonesia',
+        'full' => 'Jl. Lubang Buaya, Cipayung, Rumah No 57 Blok A, Jakarta Timur, DKI Jakarta 13810, Indonesia',
     ],
     
     /*
