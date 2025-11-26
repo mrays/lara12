@@ -242,9 +242,26 @@
                                     ->where('client_id', auth()->id())
                                     ->whereIn('status', ['pending', 'approved', 'processing'])
                                     ->first();
+                                
+                                // Sembunyikan alert jika sudah approved/processing lebih dari 7 hari
+                                $showUpgradeStatus = false;
+                                if ($pendingUpgradeRequest) {
+                                    if ($pendingUpgradeRequest->status === 'pending') {
+                                        // Selalu tampilkan untuk status pending
+                                        $showUpgradeStatus = true;
+                                    } elseif ($pendingUpgradeRequest->processed_at) {
+                                        // Untuk approved/processing, tampilkan hanya jika kurang dari 7 hari
+                                        $daysSinceProcessed = now()->diffInDays($pendingUpgradeRequest->processed_at);
+                                        $showUpgradeStatus = $daysSinceProcessed <= 7;
+                                    } else {
+                                        // Jika tidak ada processed_at, gunakan updated_at
+                                        $daysSinceUpdated = now()->diffInDays($pendingUpgradeRequest->updated_at);
+                                        $showUpgradeStatus = $daysSinceUpdated <= 7;
+                                    }
+                                }
                             @endphp
                             
-                            @if($pendingUpgradeRequest)
+                            @if($pendingUpgradeRequest && $showUpgradeStatus)
                                 <div class="row mb-4">
                                     <div class="col-12">
                                         <div class="alert alert-{{ $pendingUpgradeRequest->status === 'pending' ? 'warning' : ($pendingUpgradeRequest->status === 'approved' ? 'success' : 'info') }} d-flex align-items-start">
