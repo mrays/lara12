@@ -15,7 +15,8 @@ class AdminDashboardController extends Controller
         $stats = [
             'total_clients' => \DB::table('users')->where('role', 'client')->count(),
             'total_services' => \DB::table('services')->count(),
-            'active_services' => \DB::table('services')->where('status', 'Active')->count(), // Gunakan 'Active' dulu
+            'active_services' => \DB::table('services')->where('status', 'Active')->count(),
+            'pending_services' => \DB::table('services')->where('status', 'Pending')->count(),
             'total_invoices' => \DB::table('invoices')->count(),
             'paid_invoices' => \DB::table('invoices')->where('status', 'Paid')->count(),
             'unpaid_invoices' => \DB::table('invoices')->where('status', 'Unpaid')->count(),

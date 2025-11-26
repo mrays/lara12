@@ -40,13 +40,33 @@ class ServicePackageController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'features' => 'nullable|array'
         ]);
+
+        // Process features
+        $features = [];
+        if ($request->has('features')) {
+            foreach ($request->features as $feature) {
+                if (!empty($feature['name']) && !empty($feature['value'])) {
+                    $key = $feature['name'];
+                    $value = $feature['value'];
+                    
+                    // Convert boolean values
+                    if ($feature['type'] === 'boolean') {
+                        $value = in_array(strtolower($value), ['true', '1', 'yes', 'on']) ? true : false;
+                    }
+                    
+                    $features[$key] = $value;
+                }
+            }
+        }
 
         ServicePackage::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'base_price' => $validated['base_price'],
+            'features' => $features,
             'is_active' => $request->has('is_active') ? 1 : 0,
         ]);
 
@@ -96,8 +116,29 @@ class ServicePackageController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'features' => 'nullable|array'
         ]);
+
+        // Process features
+        $features = [];
+        if ($request->has('features')) {
+            foreach ($request->features as $feature) {
+                if (!empty($feature['name']) && !empty($feature['value'])) {
+                    $key = $feature['name'];
+                    $value = $feature['value'];
+                    
+                    // Convert boolean values
+                    if ($feature['type'] === 'boolean') {
+                        $value = in_array(strtolower($value), ['true', '1', 'yes', 'on']) ? true : false;
+                    }
+                    
+                    $features[$key] = $value;
+                }
+            }
+        }
+        
+        $validated['features'] = $features;
 
         // Process free domains separately with custom validation
         $freeDomains = $request->input('free_domains', []);

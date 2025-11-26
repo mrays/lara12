@@ -93,6 +93,87 @@
                             <small class="form-text text-muted">Detailed description of features and specifications</small>
                         </div>
 
+                        <!-- Package Features -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="tf-icons bx bx-check-square me-2"></i>Package Features
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addFeatureRow()">
+                                    <i class="bx bx-plus me-1"></i>Add Feature
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="featuresContainer">
+                                    @if($package->features && count($package->features) > 0)
+                                        @foreach($package->features as $key => $value)
+                                            <div class="feature-row mb-3">
+                                                <div class="row align-items-end">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Feature Name</label>
+                                                        <input type="text" class="form-control" name="features[{{ $loop->index }}][name]" value="{{ $key }}" placeholder="e.g., storage, websites, email_accounts">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Value</label>
+                                                        <input type="text" class="form-control" name="features[{{ $loop->index }}][value]" value="{{ is_bool($value) ? ($value ? 'true' : 'false') : $value }}" placeholder="e.g., 2 GB, 1, true">
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Type</label>
+                                                        <select class="form-select" name="features[{{ $loop->index }}][type]">
+                                                            <option value="text" {{ !is_bool($value) ? 'selected' : '' }}>Text</option>
+                                                            <option value="boolean" {{ is_bool($value) ? 'selected' : '' }}>Boolean</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeFeatureRow(this)">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="feature-row mb-3">
+                                            <div class="row align-items-end">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Feature Name</label>
+                                                    <input type="text" class="form-control" name="features[0][name]" placeholder="e.g., storage">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Value</label>
+                                                    <input type="text" class="form-control" name="features[0][value]" placeholder="e.g., 2 GB">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Type</label>
+                                                    <select class="form-select" name="features[0][type]">
+                                                        <option value="text">Text</option>
+                                                        <option value="boolean">Boolean</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeFeatureRow(this)">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <small>
+                                        <strong>Feature Examples:</strong><br>
+                                        • <strong>storage:</strong> 2 GB (text)<br>
+                                        • <strong>websites:</strong> 1 (text)<br>
+                                        • <strong>email_accounts:</strong> 1 (text)<br>
+                                        • <strong>cpanel:</strong> true (boolean)<br>
+                                        • <strong>ssl:</strong> true (boolean)<br>
+                                        • <strong>domain:</strong> true (boolean)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Status -->
                         <div class="mb-4">
                             <div class="form-check form-switch">
@@ -445,6 +526,52 @@ function updateAllDomainPreviews() {
         const index = parseInt(row.dataset.index);
         updateDomainPreview(index);
     });
+}
+
+// Features management functions
+let featureIndex = {{ $package->features ? count($package->features) : 1 }};
+
+function addFeatureRow() {
+    const container = document.getElementById('featuresContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'feature-row mb-3';
+    newRow.innerHTML = `
+        <div class="row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Feature Name</label>
+                <input type="text" class="form-control" name="features[${featureIndex}][name]" placeholder="e.g., storage, websites, email_accounts">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Value</label>
+                <input type="text" class="form-control" name="features[${featureIndex}][value]" placeholder="e.g., 2 GB, 1, true">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select class="form-select" name="features[${featureIndex}][type]">
+                    <option value="text">Text</option>
+                    <option value="boolean">Boolean</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeFeatureRow(this)">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    container.appendChild(newRow);
+    featureIndex++;
+}
+
+function removeFeatureRow(button) {
+    const row = button.closest('.feature-row');
+    if (document.querySelectorAll('.feature-row').length > 1) {
+        row.remove();
+    } else {
+        // Clear the inputs instead of removing if it's the last row
+        row.querySelectorAll('input').forEach(input => input.value = '');
+        row.querySelector('select').selectedIndex = 0;
+    }
 }
 
 // Initialize on page load

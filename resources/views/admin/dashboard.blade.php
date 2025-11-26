@@ -72,6 +72,33 @@
         </div>
     </div>
 
+    <!-- Pending Services Notification -->
+    @if($stats['pending_services'] > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="bx bx-time-five me-3 fs-4"></i>
+                <div class="flex-grow-1">
+                    <h6 class="alert-heading mb-1">
+                        <i class="bx bx-bell me-1"></i>Pending Services Alert
+                    </h6>
+                    <p class="mb-2">
+                        You have <strong>{{ $stats['pending_services'] }}</strong> service(s) with <strong>Pending</strong> status that require attention.
+                    </p>
+                    <small class="text-muted">
+                        These services are waiting for activation or payment confirmation.
+                    </small>
+                </div>
+                <div class="ms-3">
+                    <a href="{{ route('admin.services.index') }}?status=Pending" class="btn btn-warning">
+                        <i class="bx bx-cog me-1"></i>Manage Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- All Invoices Management -->
     <div class="row">
         <div class="col-12">

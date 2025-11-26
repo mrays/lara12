@@ -332,7 +332,7 @@
                                                                 Waiting for payment confirmation. This usually takes 1-24 hours.
                                                                 @break
                                                             @case('Sedang Dibuat')
-                                                                Setting up your server environment. This may take 2-4 hours.
+                                                                Sedang dibuat. Biasanya memakan waktu 2-7 hari.
                                                                 @break
                                                             @case('Suspended')
                                                                 Service has been suspended. Please contact support.
@@ -373,7 +373,13 @@
                                     @else
                                         <div class="alert alert-warning d-flex align-items-center mb-3">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            <span>Service is currently {{ strtolower($service->status) }}. Please contact support for assistance.</span>
+                                            <span>
+                                                @if($service->status === 'Sedang Dibuat')
+                                                    Layanan sedang dalam proses pembuatan. Silakan hubungi tim support untuk bantuan.
+                                                @else
+                                                    Service is currently {{ strtolower($service->status) }}. Please contact support for assistance.
+                                                @endif
+                                            </span>
                                         </div>
                                         <button class="btn btn-warning" onclick="contactSupport()">
                                             <i class="bx bx-phone me-1"></i>Contact Support

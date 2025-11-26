@@ -11,6 +11,8 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
+        $status = $request->query('status');
+        
         // Use direct DB query for compatibility
         $services = \DB::table('services')
             ->leftJoin('users', 'services.client_id', '=', 'users.id')
@@ -19,10 +21,13 @@ class ServiceController extends Controller
                 return $query->where('services.name', 'like', "%$q%")
                            ->orWhere('services.domain', 'like', "%$q%");
             })
+            ->when($status, function($query) use ($status) {
+                return $query->where('services.status', $status);
+            })
             ->orderBy('services.created_at', 'desc')
             ->get();
             
-        return view('admin.services.index', compact('services'));
+        return view('admin.services.index', compact('services', 'status'));
     }
 
     public function create()

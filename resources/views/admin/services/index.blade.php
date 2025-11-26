@@ -4,10 +4,52 @@
 
 @section('content')
 <div class="container-xxl">
+  <!-- Pending Services Alert -->
+  @php
+    $pendingCount = collect($services)->where('status', 'Pending')->count();
+  @endphp
+  
+  @if($pendingCount > 0 && !request('status'))
+  <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+    <i class="bx bx-time-five me-3 fs-4"></i>
+    <div class="flex-grow-1">
+      <h6 class="alert-heading mb-1">
+        <i class="bx bx-bell me-1"></i>Pending Services Alert
+      </h6>
+      <p class="mb-0">
+        You have <strong>{{ $pendingCount }}</strong> service(s) with <strong>Pending</strong> status that require attention.
+      </p>
+    </div>
+    <div class="ms-3">
+      <button class="btn btn-warning btn-sm" onclick="filterByStatus('Pending')">
+        <i class="bx bx-filter me-1"></i>View Pending
+      </button>
+    </div>
+  </div>
+  @endif
+
   <div class="card">
     <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <h5 class="mb-0">Services</h5>
+      <h5 class="mb-0">
+        Services
+        @if(request('status'))
+          <span class="badge bg-warning ms-2">{{ request('status') }}</span>
+        @endif
+      </h5>
       <div class="d-flex flex-wrap gap-2 align-items-center">
+        <!-- Status Filter -->
+        <select class="form-select form-select-sm" style="width: 150px;" onchange="filterByStatus(this.value)">
+          <option value="">All Status</option>
+          <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+          <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+          <option value="Suspended" {{ request('status') == 'Suspended' ? 'selected' : '' }}>Suspended</option>
+          <option value="Terminated" {{ request('status') == 'Terminated' ? 'selected' : '' }}>Terminated</option>
+          <option value="Dibatalkan" {{ request('status') == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+          <option value="Disuspen" {{ request('status') == 'Disuspen' ? 'selected' : '' }}>Disuspen</option>
+          <option value="Sedang Dibuat" {{ request('status') == 'Sedang Dibuat' ? 'selected' : '' }}>Sedang Dibuat</option>
+          <option value="Ditutup" {{ request('status') == 'Ditutup' ? 'selected' : '' }}>Ditutup</option>
+        </select>
+        
         <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
           <i class="bx bx-trash"></i>
           <span class="d-none d-md-inline ms-1">Delete Selected</span>
@@ -47,7 +89,21 @@
               <td class="d-none d-md-table-cell">{{ $s->domain ?? '-' }}</td>
               <td>{{ $s->client_name ?? '-' }}</td>
               <td class="d-none d-lg-table-cell">{{ $s->due_date ? date('Y-m-d', strtotime($s->due_date)) : '-' }}</td>
-              <td><span class="badge {{ $s->status=='Active'?'bg-success':'bg-secondary' }}">{{ $s->status }}</span></td>
+              <td>
+                <span class="badge 
+                  @switch($s->status)
+                    @case('Active') bg-success @break
+                    @case('Pending') bg-warning @break
+                    @case('Sedang Dibuat') bg-primary @break
+                    @case('Suspended') bg-secondary @break
+                    @case('Terminated') bg-secondary @break
+                    @case('Dibatalkan') bg-secondary @break
+                    @case('Disuspen') bg-secondary @break
+                    @case('Ditutup') bg-secondary @break
+                    @default bg-secondary
+                  @endswitch
+                ">{{ $s->status }}</span>
+              </td>
             <td>
               <div class="d-flex gap-1">
                 <a class="btn btn-sm btn-outline-info" href="{{ route('admin.services.manage-details', $s->id) }}" title="Manage Client View">
@@ -124,6 +180,17 @@ function deleteService(serviceId) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+// Filter by status function
+function filterByStatus(status) {
+    const url = new URL(window.location);
+    if (status) {
+        url.searchParams.set('status', status);
+    } else {
+        url.searchParams.delete('status');
+    }
+    window.location.href = url.toString();
 }
 </script>
 @endsection
