@@ -250,6 +250,12 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.upgrade-requests.index');
         Route::get('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'show'])
             ->name('admin.upgrade-requests.show');
+        Route::post('upgrade-requests/{upgradeRequest}/approve', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'approve'])
+            ->name('admin.upgrade-requests.approve');
+        Route::post('upgrade-requests/{upgradeRequest}/reject', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'reject'])
+            ->name('admin.upgrade-requests.reject');
+        Route::post('upgrade-requests/{upgradeRequest}/mark-processing', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'markAsProcessing'])
+            ->name('admin.upgrade-requests.mark-processing');
         Route::delete('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'destroy'])
             ->name('admin.upgrade-requests.destroy');
         Route::post('client-data/bulk-delete', [App\Http\Controllers\Admin\ClientDataController::class, 'bulkDelete'])
