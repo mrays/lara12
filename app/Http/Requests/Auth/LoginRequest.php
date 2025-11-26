@@ -51,18 +51,13 @@ class LoginRequest extends FormRequest
 
         // Check if user is active
         $user = Auth::user();
-        if ($user) {
-            \Log::info('Login attempt - User: ' . $user->email . ', Status: ' . $user->status);
-            
-            if ($user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' || $user->status === null || $user->status === '') {
-                \Log::warning('Login blocked - Inactive user: ' . $user->email);
-                Auth::logout();
-                RateLimiter::hit($this->throttleKey());
+        if ($user && $user->status === 'Inactive') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
 
-                throw ValidationException::withMessages([
-                    'email' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
-                ]);
-            }
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
+            ]);
         }
 
         RateLimiter::clear($this->throttleKey());

@@ -72,7 +72,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-sm me-3">
-                                                <img src="{{ asset('vendor/sneat/assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle">
+                                                <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($invoice->client_name ?? 'N', 0, 1)) }}</span>
                                             </div>
                                             <div>
                                                 <h6 class="mb-0">{{ $invoice->client_name ?? 'N/A' }}</h6>

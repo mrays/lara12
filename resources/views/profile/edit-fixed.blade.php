@@ -38,7 +38,9 @@
             <div class="card mb-4">
                 <div class="card-body text-center">
                     <div class="avatar avatar-xl mb-3">
-                        <img src="{{ asset('vendor/sneat/assets/img/avatars/1.png') }}" alt="Profile" class="rounded-circle">
+                        <span class="avatar-initial rounded-circle bg-label-primary" style="width: 80px; height: 80px; font-size: 2rem;">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </span>
                     </div>
                     <h5 class="mb-1">{{ $user->name }}</h5>
                     <p class="text-muted mb-3">{{ $user->email }}</p>
@@ -46,9 +48,9 @@
                         <span class="badge bg-label-primary">
                             <i class="bx bx-user me-1"></i>{{ ucfirst($user->role) }}
                         </span>
-                        <span class="badge {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'bg-label-danger' : 'bg-label-success' }}">
-                            <i class="bx {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'bx-x-circle' : 'bx-check-circle' }} me-1"></i>
-                            {{ $user->status === 'INACTIVE' || $user->status === 'inactive' || $user->status === 0 || $user->status === '0' ? 'Inactive' : 'Active' }}
+                        <span class="badge {{ $user->status === 'Inactive' ? 'bg-label-danger' : 'bg-label-success' }}">
+                            <i class="bx {{ $user->status === 'Inactive' ? 'bx-x-circle' : 'bx-check-circle' }} me-1"></i>
+                            {{ $user->status === 'Inactive' ? 'Inactive' : 'Active' }}
                         </span>
                     </div>
                 </div>
