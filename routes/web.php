@@ -248,6 +248,19 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.client-data.bulk-delete');
         Route::post('domains/bulk-delete', [App\Http\Controllers\Admin\DomainController::class, 'bulkDelete'])
             ->name('admin.domains.bulk-delete');
+
+        // Gmail Settings
+        Route::get('settings/gmail', [App\Http\Controllers\Admin\GmailSettingsController::class, 'index'])
+            ->name('admin.settings.gmail');
+        Route::get('settings/gmail/auth', [App\Http\Controllers\Admin\GmailSettingsController::class, 'authenticate'])
+            ->name('admin.settings.gmail.auth');
+        Route::get('settings/gmail/callback', [App\Http\Controllers\Admin\GmailSettingsController::class, 'callback'])
+            ->name('admin.settings.gmail.callback');
+        Route::delete('settings/gmail/revoke', [App\Http\Controllers\Admin\GmailSettingsController::class, 'revoke'])
+            ->name('admin.settings.gmail.revoke');
+        Route::post('settings/gmail/test', [App\Http\Controllers\Admin\GmailSettingsController::class, 'sendTestEmail'])
+            ->name('admin.settings.gmail.test');
+
     ///akhir darigrp admin
     });
     // Payment routes
@@ -278,24 +291,6 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->n
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/gmail-test', function () { return view('gmail-test'); })->name('gmail.test')->middleware('auth');
 Route::post('/test-gmail-api', [GoogleAuthController::class, 'sendTestEmail'])->name('test.gmail.api')->middleware('auth');
-
-// Admin routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Service upgrade requests management
-    Route::get('/upgrade-requests', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'index'])->name('upgrade-requests.index');
-    Route::get('/upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'show'])->name('upgrade-requests.show');
-    Route::post('/upgrade-requests/{upgradeRequest}/approve', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'approve'])->name('upgrade-requests.approve');
-    Route::post('/upgrade-requests/{upgradeRequest}/reject', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'reject'])->name('upgrade-requests.reject');
-    Route::post('/upgrade-requests/{upgradeRequest}/processing', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'markAsProcessing'])->name('upgrade-requests.processing');
-    Route::post('/upgrade-requests/bulk-action', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'bulkAction'])->name('upgrade-requests.bulk-action');
-
-    // Gmail Settings
-    Route::get('/settings/gmail', [App\Http\Controllers\Admin\GmailSettingsController::class, 'index'])->name('settings.gmail');
-    Route::get('/settings/gmail/auth', [App\Http\Controllers\Admin\GmailSettingsController::class, 'authenticate'])->name('settings.gmail.auth');
-    Route::get('/settings/gmail/callback', [App\Http\Controllers\Admin\GmailSettingsController::class, 'callback'])->name('settings.gmail.callback');
-    Route::delete('/settings/gmail/revoke', [App\Http\Controllers\Admin\GmailSettingsController::class, 'revoke'])->name('settings.gmail.revoke');
-    Route::post('/settings/gmail/test', [App\Http\Controllers\Admin\GmailSettingsController::class, 'sendTestEmail'])->name('settings.gmail.test');
-});
 
 // Test routes (remove in production)
 Route::get('/test/payment/config', [App\Http\Controllers\TestPaymentController::class, 'testConfig']);
