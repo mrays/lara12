@@ -1,6 +1,6 @@
 @extends('layouts.sneat-dashboard')
 
-@section('title', 'Manage Service - ' . ($service->product ?? 'Service'))
+@section('title', 'Kelola Layanan - ' . ($service->product ?? 'Layanan'))
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -11,9 +11,9 @@
                 <a href="{{ route('dashboard') }}">Dashboard</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{{ route('client.services.index') }}">My Services</a>
+                <a href="{{ route('client.services.index') }}">Layanan Saya</a>
             </li>
-            <li class="breadcrumb-item active">{{ $service->product ?? 'Service' }}</li>
+            <li class="breadcrumb-item active">{{ $service->product ?? 'Layanan' }}</li>
         </ol>
     </nav>
 
@@ -74,7 +74,7 @@
                                          aria-valuemax="100">
                                     </div>
                                 </div>
-                                <small class="text-{{ $progressColor }} d-block mt-1">{{ $progressValue }}% Complete</small>
+                                <small class="text-{{ $progressColor }} d-block mt-1">{{ $progressValue }}% Selesai</small>
                             @endif
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                                         id="overview-tab" data-bs-toggle="pill" 
                                         data-bs-target="#overview" type="button" 
                                         role="tab" aria-controls="overview" aria-selected="true">
-                                    <i class="bx bx-star me-2"></i>Overview
+                                    <i class="bx bx-star me-2"></i>Ringkasan
                                 </button>
                             </li>
                             <li class="nav-item">
@@ -104,7 +104,7 @@
                                         id="information-tab" data-bs-toggle="pill" 
                                         data-bs-target="#information" type="button" 
                                         role="tab" aria-controls="information" aria-selected="false">
-                                    <i class="bx bx-info-circle me-2"></i>Information
+                                    <i class="bx bx-info-circle me-2"></i>Informasi
                                 </button>
                             </li>
                             <li class="nav-item">
@@ -112,7 +112,7 @@
                                         id="actions-tab" data-bs-toggle="pill" 
                                         data-bs-target="#actions" type="button" 
                                         role="tab" aria-controls="actions" aria-selected="false">
-                                    <i class="bx bx-cog me-2"></i>Actions
+                                    <i class="bx bx-cog me-2"></i>Aksi
                                 </button>
                             </li>
                         </ul>
@@ -132,7 +132,7 @@
                             <span class="badge bg-primary rounded-pill">{{ $service->status === 'Active' ? '1' : '0' }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="bx bx-dots-horizontal me-2"></i>Coming Soon</span>
+                            <span><i class="bx bx-dots-horizontal me-2"></i>Segera Hadir</span>
                             <span class="badge bg-secondary rounded-pill">0</span>
                         </li>
                     </ul>
@@ -142,13 +142,13 @@
             <!-- Billing -->
             <div class="card mt-3">
                 <div class="card-header">
-                    <h6 class="mb-0">BILLING</h6>
+                    <h6 class="mb-0">TAGIHAN</h6>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <a href="{{ route('client.invoices.index') }}" class="text-decoration-none">
-                                <i class="bx bx-receipt me-2"></i>Invoices
+                                <i class="bx bx-receipt me-2"></i>Tagihan
                             </a>
                         </li>
                     </ul>
@@ -158,7 +158,7 @@
             <!-- Support -->
             <div class="card mt-3">
                 <div class="card-header">
-                    <h6 class="mb-0">SUPPORT</h6>
+                    <h6 class="mb-0">BANTUAN</h6>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
@@ -185,7 +185,7 @@
                             <!-- Service Details -->
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold text-muted">Username</label>
+                                    <label class="form-label fw-semibold text-muted">Nama Pengguna</label>
                                     <div class="input-group">
                                         @if($service->status === 'Active' && !empty($service->username))
                                             <input type="text" class="form-control" value="{{ $service->username }}" readonly>
@@ -200,12 +200,12 @@
                                         @endif
                                     </div>
                                     @if($service->status !== 'Active' || empty($service->username))
-                                        <small class="text-muted">Username akan diatur oleh admin setelah service aktif</small>
+                                        <small class="text-muted">Nama pengguna akan diatur oleh admin setelah layanan aktif</small>
                                     @endif
                                 </div>
                                 
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold text-muted">Password</label>
+                                    <label class="form-label fw-semibold text-muted">Kata Sandi</label>
                                     <div class="input-group">
                                         @if($service->status === 'Active' && !empty($service->password))
                                             <input type="password" id="password-field" class="form-control" value="{{ $service->password }}" readonly>
@@ -226,7 +226,7 @@
                                         @endif
                                     </div>
                                     @if($service->status !== 'Active' || empty($service->password))
-                                        <small class="text-muted">Password akan diatur oleh admin setelah service aktif</small>
+                                        <small class="text-muted">Kata sandi akan diatur oleh admin setelah layanan aktif</small>
                                     @endif
                                 </div>
 
@@ -250,43 +250,43 @@
                                         <div class="alert alert-{{ $pendingUpgradeRequest->status === 'pending' ? 'warning' : ($pendingUpgradeRequest->status === 'approved' ? 'success' : 'info') }} d-flex align-items-start">
                                             <i class="bx bx-{{ $pendingUpgradeRequest->status === 'pending' ? 'time' : ($pendingUpgradeRequest->status === 'approved' ? 'check-circle' : 'cog') }} me-2 mt-1"></i>
                                             <div class="flex-grow-1">
-                                                <strong>Upgrade Request Status:</strong>
+                                                <strong>Status Permintaan Upgrade:</strong>
                                                 <div class="mt-2">
                                                     <span class="badge bg-{{ $pendingUpgradeRequest->status === 'pending' ? 'warning' : ($pendingUpgradeRequest->status === 'approved' ? 'success' : 'info') }} me-2">
                                                         {{ ucfirst($pendingUpgradeRequest->status) }}
                                                     </span>
                                                     <small class="text-muted">
-                                                        Request #{{ $pendingUpgradeRequest->id }} submitted on {{ $pendingUpgradeRequest->created_at->format('M d, Y') }}
+                                                        Permintaan #{{ $pendingUpgradeRequest->id }} diajukan pada {{ $pendingUpgradeRequest->created_at->format('d M Y') }}
                                                     </small>
                                                 </div>
                                                 <div class="mt-2">
-                                                    <strong>From:</strong> {{ $pendingUpgradeRequest->current_plan }} 
+                                                    <strong>Dari:</strong> {{ $pendingUpgradeRequest->current_plan }} 
                                                     <i class="bx bx-right-arrow-alt mx-2"></i>
-                                                    <strong>To:</strong> {{ $pendingUpgradeRequest->requested_plan }}
+                                                    <strong>Ke:</strong> {{ $pendingUpgradeRequest->requested_plan }}
                                                 </div>
                                                 
                                                 @if($pendingUpgradeRequest->status === 'approved')
                                                     <div class="mt-2 text-success">
                                                         <i class="bx bx-check-circle me-1"></i>
-                                                        Your upgrade request has been approved! 
-                                                        <a href="{{ route('client.invoices.index') }}" class="alert-link">Check your invoices</a> for payment details.
+                                                        Permintaan upgrade Anda telah disetujui! 
+                                                        <a href="{{ route('client.invoices.index') }}" class="alert-link">Cek tagihan Anda</a> untuk detail pembayaran.
                                                     </div>
                                                 @elseif($pendingUpgradeRequest->status === 'processing')
                                                     <div class="mt-2 text-info">
                                                         <i class="bx bx-cog me-1"></i>
-                                                        Your upgrade request is currently being processed by our team.
+                                                        Permintaan upgrade Anda sedang diproses oleh tim kami.
                                                     </div>
                                                 @else
                                                     <div class="mt-2 text-warning">
                                                         <i class="bx bx-time me-1"></i>
-                                                        Your upgrade request is pending admin approval.
+                                                        Permintaan upgrade Anda menunggu persetujuan admin.
                                                     </div>
                                                 @endif
                                                 
                                                 @if($pendingUpgradeRequest->admin_notes)
                                                     <div class="mt-2">
                                                         <small class="text-muted">
-                                                            <strong>Admin Notes:</strong> {{ $pendingUpgradeRequest->admin_notes }}
+                                                            <strong>Catatan Admin:</strong> {{ $pendingUpgradeRequest->admin_notes }}
                                                         </small>
                                                     </div>
                                                 @endif
@@ -303,15 +303,15 @@
                                         <div class="card border-0 bg-light">
                                             <div class="card-body">
                                                 <h6 class="mb-3">
-                                                    <i class="bx bx-cog me-2"></i>Service Setup Progress
+                                                    <i class="bx bx-cog me-2"></i>Progres Pengaturan Layanan
                                                 </h6>
                                                 
                                                 @php
                                                     $steps = [
-                                                        ['name' => 'Order Received', 'status' => 'completed'],
-                                                        ['name' => 'Payment Verification', 'status' => $service->status === 'Pending' ? 'current' : 'completed'],
-                                                        ['name' => 'Server Setup', 'status' => $service->status === 'Sedang Dibuat' ? 'current' : ($service->status === 'Pending' ? 'pending' : 'completed')],
-                                                        ['name' => 'Service Activation', 'status' => $service->status === 'Active' ? 'completed' : ($service->status === 'Sedang Dibuat' ? 'pending' : 'pending')]
+                                                        ['name' => 'Pesanan Diterima', 'status' => 'completed'],
+                                                        ['name' => 'Verifikasi Pembayaran', 'status' => $service->status === 'Pending' ? 'current' : 'completed'],
+                                                        ['name' => 'Pengaturan Server', 'status' => $service->status === 'Sedang Dibuat' ? 'current' : ($service->status === 'Pending' ? 'pending' : 'completed')],
+                                                        ['name' => 'Aktivasi Layanan', 'status' => $service->status === 'Active' ? 'completed' : ($service->status === 'Sedang Dibuat' ? 'pending' : 'pending')]
                                                     ];
                                                 @endphp
                                                 
@@ -352,28 +352,28 @@
                                                     <small class="text-muted">
                                                         @switch($service->status)
                                                             @case('Pending')
-                                                                Waiting for payment confirmation. This usually takes 1-24 hours.
+                                                                Menunggu konfirmasi pembayaran. Biasanya memakan waktu 1-24 jam.
                                                                 @break
                                                             @case('Sedang Dibuat')
                                                                 Sedang dibuat. Biasanya memakan waktu 2-7 hari.
                                                                 @break
                                                             @case('Suspended')
-                                                                Service has been suspended. Please contact support.
+                                                                Layanan telah disuspen. Silakan hubungi support.
                                                                 @break
                                                             @case('Terminated')
-                                                                Service has been terminated.
+                                                                Layanan telah dihentikan.
                                                                 @break
                                                             @case('Dibatalkan')
-                                                                Service has been cancelled.
+                                                                Layanan telah dibatalkan.
                                                                 @break
                                                             @case('Disuspen')
-                                                                Service has been suspended by admin.
+                                                                Layanan telah disuspen oleh admin.
                                                                 @break
                                                             @case('Ditutup')
-                                                                Service has been closed.
+                                                                Layanan telah ditutup.
                                                                 @break
                                                             @default
-                                                                Service setup in progress. Please wait...
+                                                                Pengaturan layanan sedang berjalan. Mohon tunggu...
                                                         @endswitch
                                                     </small>
                                                 </div>
@@ -386,13 +386,55 @@
                             <!-- Action Buttons -->
                             <div class="row mb-4">
                                 <div class="col-12">
+                                    @php
+                                        // Cek apakah layanan akan expired dalam 3 bulan
+                                        $showRenewalAlert = false;
+                                        $daysUntilExpiry = null;
+                                        $expiryMessage = '';
+                                        
+                                        if ($service->due_date) {
+                                            $dueDate = \Carbon\Carbon::parse($service->due_date);
+                                            $threeMonthsFromNow = now()->addMonths(3);
+                                            $showRenewalAlert = $dueDate->lte($threeMonthsFromNow);
+                                            $daysUntilExpiry = now()->diffInDays($dueDate, false);
+                                            
+                                            if ($daysUntilExpiry <= 0) {
+                                                $expiryMessage = 'Layanan Anda sudah expired!';
+                                            } elseif ($daysUntilExpiry <= 7) {
+                                                $expiryMessage = "Layanan Anda akan expired dalam {$daysUntilExpiry} hari!";
+                                            } elseif ($daysUntilExpiry <= 30) {
+                                                $expiryMessage = "Layanan Anda akan expired dalam {$daysUntilExpiry} hari.";
+                                            } elseif ($daysUntilExpiry <= 90) {
+                                                $weeks = floor($daysUntilExpiry / 7);
+                                                $expiryMessage = "Layanan Anda akan expired dalam sekitar {$weeks} minggu.";
+                                            }
+                                        }
+                                    @endphp
+                                    
                                     @if($service->status === 'Active')
-                                        <button class="btn btn-primary me-2" onclick="loginDashboard('{{ $service->domain }}')">
-                                            <i class="bx bx-log-in me-1"></i>Login Dashboard
-                                        </button>
-                                        <button class="btn btn-success" onclick="contactSupport()">
-                                            <i class="bx bx-message-dots me-1"></i>Hubungi Kami
-                                        </button>
+                                        @if($showRenewalAlert && $daysUntilExpiry !== null)
+                                            <div class="alert alert-{{ $daysUntilExpiry <= 7 ? 'danger' : ($daysUntilExpiry <= 30 ? 'warning' : 'info') }} d-flex align-items-center mb-3">
+                                                <i class="bx bx-{{ $daysUntilExpiry <= 7 ? 'error-circle' : 'time' }} me-2"></i>
+                                                <span>
+                                                    <strong>{{ $expiryMessage }}</strong> 
+                                                    Segera perpanjang untuk menghindari gangguan layanan.
+                                                </span>
+                                            </div>
+                                        @endif
+                                        
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-primary" onclick="loginDashboard('{{ $service->domain }}')">
+                                                <i class="bx bx-log-in me-1"></i>Masuk Dashboard
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="contactSupport()">
+                                                <i class="bx bx-message-dots me-1"></i>Hubungi Kami
+                                            </button>
+                                            @if($showRenewalAlert)
+                                                <button class="btn btn-success" onclick="changePassword()">
+                                                    <i class="bx bx-refresh me-1"></i>Perpanjang Sekarang
+                                                </button>
+                                            @endif
+                                        </div>
                                     @else
                                         <div class="alert alert-warning d-flex align-items-center mb-3">
                                             <i class="bx bx-info-circle me-2"></i>
@@ -400,13 +442,20 @@
                                                 @if($service->status === 'Sedang Dibuat')
                                                     Layanan sedang dalam proses pembuatan. Silakan hubungi tim support untuk bantuan.
                                                 @else
-                                                    Service is currently {{ strtolower($service->status) }}. Please contact support for assistance.
+                                                    Layanan sedang {{ strtolower($service->status) }}. Silakan hubungi support untuk bantuan.
                                                 @endif
                                             </span>
                                         </div>
-                                        <button class="btn btn-warning" onclick="contactSupport()">
-                                            <i class="bx bx-phone me-1"></i>Contact Support
-                                        </button>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-warning" onclick="contactSupport()">
+                                                <i class="bx bx-phone me-1"></i>Hubungi Support
+                                            </button>
+                                            @if($showRenewalAlert)
+                                                <button class="btn btn-success" onclick="changePassword()">
+                                                    <i class="bx bx-refresh me-1"></i>Perpanjang Layanan
+                                                </button>
+                                            @endif
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -415,7 +464,7 @@
                             <div class="alert alert-primary d-flex align-items-start mb-4">
                                 <i class="bx bx-info-circle me-2 mt-1"></i>
                                 <div>
-                                    <strong>Tips:</strong> Silakan klik tombol <strong>"Login Dashboard"</strong> untuk masuk ke Dashboard Website
+                                    <strong>Tips:</strong> Silakan klik tombol <strong>"Masuk Dashboard"</strong> untuk masuk ke Dashboard Website
                                 </div>
                             </div>
 
@@ -424,8 +473,8 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <h6 class="mb-2">Current Plan</h6>
-                                            <h5 class="mb-1">Your Current Plan is {{ $service->product ?? 'Basic' }}</h5>
+                                            <h6 class="mb-2">Paket Saat Ini</h6>
+                                            <h5 class="mb-1">Paket Anda saat ini adalah {{ $service->product ?? 'Basic' }}</h5>
                                             <p class="text-muted mb-3">
                                                 @if($service->billing_cycle === 'yearly' || $service->billing_cycle === 'annually')
                                                     Berlangganan tahunan dengan nilai lebih baik
@@ -435,8 +484,8 @@
                                             </p>
                                             
                                             <div class="mb-3">
-                                                <small class="text-muted">Active until {{ $service->due_date ? $service->due_date->format('M d, Y') : 'Dec 09, 2021' }}</small><br>
-                                                <small class="text-muted">We will send you a notification upon Subscription expiration</small>
+                                                <small class="text-muted">Aktif sampai {{ $service->due_date ? $service->due_date->format('d M Y') : '09 Des 2021' }}</small><br>
+                                                <small class="text-muted">Kami akan mengirimkan notifikasi saat langganan mendekati kadaluarsa</small>
                                             </div>
                                             
                                             <div class="mb-3">
@@ -450,7 +499,7 @@
                                                         /{{ $service->translated_billing_cycle }}
                                                     @endif
                                                 </span>
-                                                <span class="badge bg-label-info">Popular</span>
+                                                <span class="badge bg-label-info">Populer</span>
                                             </div>
                                             
                                             <p class="text-muted mb-3">
@@ -463,10 +512,10 @@
                                             
                                             <div class="d-flex gap-2">
                                                 <button class="btn btn-primary" onclick="upgradePlan()">
-                                                    <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Plan
+                                                    <i class="bx bx-up-arrow-alt me-1"></i>Upgrade Paket
                                                 </button>
                                                 <button class="btn btn-outline-danger" onclick="cancelSubscription()">
-                                                    Cancel Subscription
+                                                    Batalkan Langganan
                                                 </button>
                                             </div>
                                         </div>
@@ -474,15 +523,15 @@
                                         <div class="col-md-4">
                                             <div class="d-flex align-items-center justify-content-center h-100">
                                                 <div class="text-center">
-                                                    <p class="text-muted mb-3">Manage your subscription and upgrade anytime</p>
+                                                    <p class="text-muted mb-3">Kelola langganan dan upgrade kapan saja</p>
                                                     
                                                     <div class="mb-3">
-                                                        <h6 class="mb-1">Service Status</h6>
+                                                        <h6 class="mb-1">Status Layanan</h6>
                                                         @if($service->status === 'Active')
                                                             <div class="progress mb-2" style="height: 8px;">
                                                                 <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
                                                             </div>
-                                                            <small class="text-success">Your service is Active</small>
+                                                            <small class="text-success">Layanan Anda aktif</small>
                                                         @else
                                                             <!-- Animated Progress for Non-Active Status -->
                                                             <div class="progress mb-2" style="height: 12px;">
@@ -519,7 +568,7 @@
                                                                 </div>
                                                             </div>
                                                             <small class="text-{{ $progressColor }}">
-                                                                Service is {{ $service->status }} ({{ $progressValue }}% complete)
+                                                                Layanan {{ $service->status }} ({{ $progressValue }}% selesai)
                                                             </small>
                                                         @endif
                                                     </div>
@@ -537,37 +586,37 @@
                 <div class="tab-pane fade" id="information" role="tabpanel" aria-labelledby="information-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Service Information</h5>
+                            <h5 class="mb-0">Informasi Layanan</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Service Details</h6>
+                                    <h6>Detail Layanan</h6>
                                     <table class="table table-borderless">
                                         <tr>
-                                            <td><strong>Service Name:</strong></td>
-                                            <td>{{ $service->product ?? 'Service' }}</td>
+                                            <td><strong>Nama Layanan:</strong></td>
+                                            <td>{{ $service->product ?? 'Layanan' }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Product:</strong></td>
+                                            <td><strong>Produk:</strong></td>
                                             <td>{{ $service->product }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Domain:</strong></td>
-                                            <td>{{ $service->domain ?? 'Not specified' }}</td>
+                                            <td>{{ $service->domain ?? 'Belum ditentukan' }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Status:</strong></td>
                                             <td>
                                                 @switch($service->status)
                                                     @case('Active')
-                                                        <span class="badge bg-success">Active</span>
+                                                        <span class="badge bg-success">Aktif</span>
                                                         @break
                                                     @case('Suspended')
-                                                        <span class="badge bg-warning">Suspended</span>
+                                                        <span class="badge bg-warning">Disuspen</span>
                                                         @break
                                                     @case('Terminated')
-                                                        <span class="badge bg-danger">Terminated</span>
+                                                        <span class="badge bg-danger">Dihentikan</span>
                                                         @break
                                                     @default
                                                         <span class="badge bg-secondary">{{ $service->status }}</span>
@@ -575,28 +624,28 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Created:</strong></td>
-                                            <td>{{ $service->created_at ? $service->created_at->format('M d, Y') : 'N/A' }}</td>
+                                            <td><strong>Dibuat:</strong></td>
+                                            <td>{{ $service->created_at ? $service->created_at->format('d M Y') : '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Next Due:</strong></td>
-                                            <td>{{ $service->due_date ? $service->due_date->format('M d, Y') : 'N/A' }}</td>
+                                            <td><strong>Jatuh Tempo:</strong></td>
+                                            <td>{{ $service->due_date ? $service->due_date->format('d M Y') : '-' }}</td>
                                         </tr>
                                     </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>Billing Information</h6>
+                                    <h6>Informasi Tagihan</h6>
                                     <table class="table table-borderless">
                                         <tr>
-                                            <td><strong>Billing Cycle:</strong></td>
+                                            <td><strong>Siklus Tagihan:</strong></td>
                                             <td>{{ $service->translated_billing_cycle }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Price:</strong></td>
+                                            <td><strong>Harga:</strong></td>
                                             <td>Rp {{ number_format($service->price, 0, ',', '.') }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Setup Fee:</strong></td>
+                                            <td><strong>Biaya Setup:</strong></td>
                                             <td>Rp {{ number_format($service->setup_fee ?? 0, 0, ',', '.') }}</td>
                                         </tr>
                                     </table>
@@ -610,12 +659,12 @@
                 <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Available Actions</h5>
+                            <h5 class="mb-0">Aksi Tersedia</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>Service Management</h6>
+                                    <h6>Manajemen Layanan</h6>
                                     <div class="list-group">
                                         <a href="#" class="list-group-item list-group-item-action" onclick="upgradePlan()">
                                             <i class="bx bx-up-arrow-alt me-2"></i>Upgrade Layanan
@@ -626,13 +675,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>Support</h6>
+                                    <h6>Bantuan</h6>
                                     <div class="list-group">
                                         <a href="#" class="list-group-item list-group-item-action" onclick="contactSupport()">
-                                            <i class="bx bx-message-dots me-2"></i>Contact Support
+                                            <i class="bx bx-message-dots me-2"></i>Hubungi Support
                                         </a>
                                         <a href="{{ route('client.invoices.index') }}" class="list-group-item list-group-item-action">
-                                            <i class="bx bx-receipt me-2"></i>View Invoices
+                                            <i class="bx bx-receipt me-2"></i>Lihat Tagihan
                                         </a>
                                     </div>
                                 </div>
@@ -650,17 +699,17 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="upgradePlanModalLabel">Pricing Plans</h5>
+                <h5 class="modal-title" id="upgradePlanModalLabel">Daftar Paket</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-4">
-                    <p class="text-muted">All plans include 40+ advanced tools and features to boost your product. Choose the best plan to fit your needs.</p>
+                    <p class="text-muted">Semua paket mencakup 40+ fitur dan alat canggih untuk meningkatkan produk Anda. Pilih paket terbaik sesuai kebutuhan Anda.</p>
                     
                     <!-- Billing Info -->
                     <div class="d-flex align-items-center justify-content-center mb-4">
                         <span class="text-primary fw-semibold">Tahunan</span>
-                        <span class="badge bg-label-success ms-2">Best Value</span>
+                        <span class="badge bg-label-success ms-2">Nilai Terbaik</span>
                         <input type="hidden" id="billingToggle" value="annually">
                     </div>
                 </div>
@@ -672,7 +721,7 @@
                         <div class="card border {{ $index === 1 ? 'border-primary' : '' }} h-100 position-relative">
                             @if($index === 1)
                                 <div class="position-absolute top-0 start-50 translate-middle">
-                                    <span class="badge bg-primary">Popular</span>
+                                    <span class="badge bg-primary">Populer</span>
                                 </div>
                             @endif
                             
@@ -695,7 +744,7 @@
                                     <h2 class="text-primary mb-0">
                                         Rp {{ number_format($package->base_price, 0, ',', '.') }}
                                     </h2>
-                                    <small class="text-muted">/year</small>
+                                    <small class="text-muted">/tahun</small>
                                 </div>
 
                                 <!-- Features -->
@@ -716,7 +765,7 @@
                                     @else
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="bx bx-check text-success me-2"></i>
-                                            <span class="text-muted">Standard features included</span>
+                                            <span class="text-muted">Fitur standar sudah termasuk</span>
                                         </div>
                                     @endif
                                 </div>
@@ -724,7 +773,7 @@
                                 <!-- Action Button -->
                                 @if($service->product === $package->name)
                                     <button class="btn btn-success w-100" disabled>
-                                        Your Current Plan
+                                        Paket Anda Saat Ini
                                     </button>
                                 @else
                                     <button class="btn {{ $index === 1 ? 'btn-primary' : 'btn-outline-primary' }} w-100" 
@@ -748,7 +797,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="upgradeRequestModalLabel">
-                    <i class="bx bx-up-arrow-alt me-2"></i>Request Service Upgrade
+                    <i class="bx bx-up-arrow-alt me-2"></i>Permintaan Upgrade Layanan
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -756,20 +805,20 @@
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="bx bx-info-circle me-2"></i>
-                        <strong>Upgrade Request Process:</strong> Your request will be reviewed by our admin team. You will be notified once it's approved and an invoice will be generated.
+                        <strong>Proses Permintaan Upgrade:</strong> Permintaan Anda akan ditinjau oleh tim admin kami. Anda akan diberitahu setelah disetujui dan invoice akan dibuat.
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="current_plan" class="form-label">Current Plan</label>
+                                <label for="current_plan" class="form-label">Paket Saat Ini</label>
                                 <input type="text" class="form-control" id="current_plan" name="current_plan" 
                                        value="{{ $service->product }}" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="current_price" class="form-label">Current Price</label>
+                                <label for="current_price" class="form-label">Harga Saat Ini</label>
                                 <input type="text" class="form-control" id="current_price" name="current_price" 
                                        value="Rp {{ number_format($service->price, 0, ',', '.') }}" readonly>
                             </div>
@@ -779,69 +828,69 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="requested_plan" class="form-label">Requested Plan</label>
+                                <label for="requested_plan" class="form-label">Paket yang Diminta</label>
                                 <input type="text" class="form-control" id="requested_plan" name="requested_plan" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="requested_price" class="form-label">New Price</label>
+                                <label for="requested_price" class="form-label">Harga Baru</label>
                                 <input type="text" class="form-control" id="requested_price" name="requested_price" readonly>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="billing_cycle" class="form-label">Billing Cycle</label>
+                        <label for="billing_cycle" class="form-label">Siklus Tagihan</label>
                         <input type="text" class="form-control" id="billing_cycle" name="billing_cycle" readonly>
                     </div>
 
                     <div class="mb-3">
-                        <label for="upgrade_reason" class="form-label">Reason for Upgrade <span class="text-danger">*</span></label>
+                        <label for="upgrade_reason" class="form-label">Alasan Upgrade <span class="text-danger">*</span></label>
                         <select class="form-select" id="upgrade_reason" name="upgrade_reason" required>
-                            <option value="">Select reason...</option>
-                            <option value="need_more_resources">Need More Resources</option>
-                            <option value="additional_features">Need Additional Features</option>
-                            <option value="business_growth">Business Growth</option>
-                            <option value="performance_improvement">Performance Improvement</option>
-                            <option value="other">Other</option>
+                            <option value="">Pilih alasan...</option>
+                            <option value="need_more_resources">Butuh Lebih Banyak Resource</option>
+                            <option value="additional_features">Butuh Fitur Tambahan</option>
+                            <option value="business_growth">Pertumbuhan Bisnis</option>
+                            <option value="performance_improvement">Peningkatan Performa</option>
+                            <option value="other">Lainnya</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label for="additional_notes" class="form-label">Additional Notes</label>
+                        <label for="additional_notes" class="form-label">Catatan Tambahan</label>
                         <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" 
-                                  placeholder="Please provide any additional information about your upgrade request..."></textarea>
+                                  placeholder="Berikan informasi tambahan tentang permintaan upgrade Anda..."></textarea>
                     </div>
 
                     <!-- Price Comparison -->
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h6 class="card-title">Price Comparison</h6>
+                            <h6 class="card-title">Perbandingan Harga</h6>
                             <div class="row text-center">
                                 <div class="col-4">
-                                    <small class="text-muted">Current</small>
+                                    <small class="text-muted">Saat Ini</small>
                                     <div class="fw-bold">Rp {{ number_format($service->price, 0, ',', '.') }}</div>
                                 </div>
                                 <div class="col-4">
                                     <i class="bx bx-right-arrow-alt text-primary"></i>
                                 </div>
                                 <div class="col-4">
-                                    <small class="text-muted">New</small>
+                                    <small class="text-muted">Baru</small>
                                     <div class="fw-bold text-primary" id="new_price_display">-</div>
                                 </div>
                             </div>
                             <div class="text-center mt-2">
-                                <small class="text-muted">Price difference: </small>
+                                <small class="text-muted">Selisih harga: </small>
                                 <span class="fw-bold" id="price_difference">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-primary" id="submitUpgradeBtn" onclick="submitUpgradeRequest()">
-                        <i class="bx bx-paper-plane me-2"></i>Submit Request
+                        <i class="bx bx-paper-plane me-2"></i>Kirim Permintaan
                     </button>
                 </div>
             </form>
@@ -868,7 +917,7 @@ function togglePasswordVisibility() {
 function copyToClipboard(text) {
     if (text) {
         navigator.clipboard.writeText(text).then(function() {
-            showToast('Copied to clipboard!', 'success');
+            showToast('Disalin ke clipboard!', 'success');
         }).catch(function() {
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -876,7 +925,7 @@ function copyToClipboard(text) {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            showToast('Copied to clipboard!', 'success');
+            showToast('Disalin ke clipboard!', 'success');
         });
     }
 }
@@ -907,7 +956,7 @@ function loginDashboard(domain) {
     @elseif($service->domain)
         window.open('https://{{ $service->domain }}/admin', '_blank');
     @else
-        alert('No dashboard URL available for this service');
+        alert('URL dashboard tidak tersedia untuk layanan ini');
     @endif
 }
 
@@ -919,12 +968,12 @@ function contactSupport() {
 
 function changePassword() {
     // Confirm renewal
-    if (!confirm('Apakah Anda ingin membuat invoice perpanjangan untuk layanan ini?')) {
+    if (!confirm('Apakah Anda ingin mengajukan perpanjangan untuk layanan ini?\n\nSetelah diajukan:\n- Invoice akan dibuat\n- Permintaan akan dikirim ke admin\n- Status layanan akan berubah menjadi Pending')) {
         return;
     }
     
     // Show loading
-    showToast('Membuat invoice perpanjangan...', 'info');
+    showToast('Mengajukan permintaan perpanjangan...', 'info');
     
     console.log('Service ID: {{ $service->id }}');
     console.log('Renewal URL: /client/services/{{ $service->id }}/renewal');
@@ -953,26 +1002,29 @@ function changePassword() {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            showToast('Invoice perpanjangan berhasil dibuat!', 'success');
+            showToast('Permintaan perpanjangan berhasil diajukan!', 'success');
             
             // Show confirmation dialog with payment option
             const confirmPayment = confirm(
-                `Invoice #${data.invoice_number} telah dibuat.\n\n` +
+                `Permintaan perpanjangan berhasil!\n\n` +
+                `Invoice #${data.invoice_number} telah dibuat.\n` +
                 `Jumlah: Rp ${Number(data.amount).toLocaleString('id-ID')}\n` +
                 `Jatuh Tempo: ${data.due_date}\n\n` +
+                `Status layanan Anda sekarang: Pending\n` +
+                `Permintaan akan ditinjau oleh admin.\n\n` +
                 `Apakah Anda ingin langsung melakukan pembayaran sekarang?`
             );
             
             if (confirmPayment) {
                 window.location.href = data.payment_url;
             } else {
-                // Redirect to invoices page after a delay
+                // Reload page to show updated status
                 setTimeout(() => {
-                    window.location.href = '/client/invoices';
-                }, 2000);
+                    window.location.reload();
+                }, 1500);
             }
         } else {
-            showToast(data.message || 'Gagal membuat invoice perpanjangan', 'danger');
+            showToast(data.message || 'Gagal mengajukan perpanjangan', 'danger');
         }
     })
     .catch(error => {
@@ -989,14 +1041,14 @@ function upgradePlan() {
 
 function cancelSubscription() {
     // Show cancellation reason modal
-    const reason = prompt('Please provide a reason for cancellation:');
+    const reason = prompt('Berikan alasan pembatalan:');
     if (!reason || reason.trim() === '') {
-        showToast('Cancellation reason is required.', 'warning');
+        showToast('Alasan pembatalan diperlukan.', 'warning');
         return;
     }
     
     // Show loading
-    showToast('Processing cancellation request...', 'warning');
+    showToast('Memproses permintaan pembatalan...', 'warning');
     
     // Submit cancellation request
     fetch(`/services/{{ $service->id }}/cancellation-request`, {
@@ -1012,19 +1064,19 @@ function cancelSubscription() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('Cancellation request submitted successfully! Our admin team will review it shortly.', 'success');
+            showToast('Permintaan pembatalan berhasil dikirim! Tim admin kami akan segera meninjaunya.', 'success');
             
             // Optionally refresh the page after a delay
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
         } else {
-            showToast(data.message || 'Failed to submit cancellation request', 'danger');
+            showToast(data.message || 'Gagal mengirim permintaan pembatalan', 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('An error occurred while submitting your request', 'danger');
+        showToast('Terjadi kesalahan saat mengirim permintaan Anda', 'danger');
     });
 }
 
@@ -1084,7 +1136,7 @@ function submitUpgradeRequest() {
     })
     .then(data => {
         if (data.success) {
-            showToast('Upgrade request submitted successfully!', 'success');
+            showToast('Permintaan upgrade berhasil dikirim!', 'success');
             
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('upgradeRequestModal'));
@@ -1095,16 +1147,16 @@ function submitUpgradeRequest() {
             
             // Show success message
             setTimeout(() => {
-                alert('Your upgrade request has been submitted and is pending admin approval. You will be notified once it\'s processed.');
+                alert('Permintaan upgrade Anda telah dikirim dan menunggu persetujuan admin. Anda akan diberitahu setelah diproses.');
             }, 1000);
         } else {
-            showToast(data.message || 'Failed to submit upgrade request', 'danger');
+            showToast(data.message || 'Gagal mengirim permintaan upgrade', 'danger');
             console.error('Server error:', data);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('An error occurred while submitting your request: ' + error.message, 'danger');
+        showToast('Terjadi kesalahan saat mengirim permintaan Anda: ' + error.message, 'danger');
     })
     .finally(() => {
         // Reset button
@@ -1125,7 +1177,7 @@ function refreshUpgradeStatus() {
     .then(data => {
         if (data.hasUpgradeRequest && data.status !== 'pending') {
             // Status changed, reload page to show updated status
-            showToast('Your upgrade request status has been updated!', 'info');
+            showToast('Status permintaan upgrade Anda telah diperbarui!', 'info');
             setTimeout(() => location.reload(), 2000);
         }
     })

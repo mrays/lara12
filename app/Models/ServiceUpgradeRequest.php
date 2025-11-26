@@ -199,7 +199,37 @@ class ServiceUpgradeRequest extends Model
         return match($this->request_type) {
             'upgrade' => 'Upgrade',
             'cancellation' => 'Pembatalan',
+            'renewal' => 'Perpanjangan',
             default => 'Unknown'
         };
+    }
+
+    /**
+     * Create a renewal request
+     */
+    public static function createRenewalRequest($serviceId, $clientId, $invoiceId = null, $notes = null)
+    {
+        $service = Service::findOrFail($serviceId);
+        
+        return self::create([
+            'service_id' => $serviceId,
+            'client_id' => $clientId,
+            'current_plan' => $service->product,
+            'requested_plan' => $service->product . ' (Perpanjangan)',
+            'current_price' => $service->price,
+            'requested_price' => $service->price,
+            'upgrade_reason' => 'Renewal',
+            'additional_notes' => $notes ?? 'Permintaan perpanjangan layanan' . ($invoiceId ? '. Invoice #' . $invoiceId : ''),
+            'status' => 'pending',
+            'request_type' => 'renewal',
+        ]);
+    }
+
+    /**
+     * Check if this is a renewal request
+     */
+    public function isRenewal()
+    {
+        return $this->request_type === 'renewal';
     }
 }

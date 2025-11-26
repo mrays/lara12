@@ -220,6 +220,10 @@
                                         <span class="badge bg-danger">
                                             <i class="bx bx-x-circle me-1"></i>Pembatalan
                                         </span>
+                                    @elseif($request->request_type === 'renewal')
+                                        <span class="badge bg-success">
+                                            <i class="bx bx-refresh me-1"></i>Perpanjangan
+                                        </span>
                                     @else
                                         <span class="badge bg-primary">
                                             <i class="bx bx-credit-card me-1"></i>Upgrade
@@ -265,6 +269,12 @@
                                             <span class="badge bg-danger">
                                                 <i class="bx bx-x-circle me-1"></i>CANCELLED
                                             </span>
+                                        @elseif($request->request_type === 'renewal')
+                                            <span class="badge bg-light text-dark">{{ $request->current_plan }}</span>
+                                            <i class="bx bx-refresh mx-2 text-success"></i>
+                                            <span class="badge bg-success">
+                                                <i class="bx bx-refresh me-1"></i>RENEWAL
+                                            </span>
                                         @else
                                             <span class="badge bg-light text-dark">{{ $request->current_plan }}</span>
                                             <i class="bx bx-right-arrow-alt mx-2"></i>
@@ -277,6 +287,10 @@
                                         <span class="fw-bold text-danger">
                                             <i class="bx bx-x-circle me-1"></i>Cancellation
                                         </span>
+                                    @elseif($request->request_type === 'renewal')
+                                        <span class="fw-bold text-success">
+                                            Rp {{ number_format($request->requested_price, 0, ',', '.') }}
+                                        </span>
                                     @else
                                         <span class="fw-bold {{ $request->price_difference >= 0 ? 'text-success' : 'text-danger' }}">
                                             {{ $request->formatted_price_difference }}
@@ -285,9 +299,11 @@
                                 </td>
                                 <td>
                                     <small class="text-muted">
-                                        @if($request->request_type === 'cancellation' && $request->additional_notes)
+                                        @if($request->request_type === 'renewal' && $request->additional_notes)
                                             {{ Str::limit($request->additional_notes, 50) }}
-                                        @elseif($request->upgrade_reason && $request->upgrade_reason !== 'Cancellation')
+                                        @elseif($request->request_type === 'cancellation' && $request->additional_notes)
+                                            {{ Str::limit($request->additional_notes, 50) }}
+                                        @elseif($request->upgrade_reason && !in_array($request->upgrade_reason, ['Cancellation', 'Renewal']))
                                             {{ $request->upgrade_reason }}
                                         @else
                                             -

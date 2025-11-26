@@ -274,16 +274,34 @@ class ServiceManagementController extends Controller
 
             \Log::info('Invoice created with ID: ' . $invoice->id);
 
+            // Create renewal request for admin to review
+            $renewalRequest = \App\Models\ServiceUpgradeRequest::createRenewalRequest(
+                $serviceData->id,
+                $serviceData->client_id,
+                $invoiceNumber,
+                "Permintaan perpanjangan layanan {$serviceData->product}" . ($serviceData->domain ? " ({$serviceData->domain})" : "") . ". Invoice: {$invoiceNumber}"
+            );
+
+            \Log::info('Renewal request created with ID: ' . $renewalRequest->id);
+
+            // Update service status to Pending (waiting for payment/approval)
+            \DB::table('services')
+                ->where('id', $serviceData->id)
+                ->update(['status' => 'Pending']);
+
+            \Log::info('Service status updated to Pending');
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Invoice perpanjangan berhasil dibuat!',
+                'message' => 'Permintaan perpanjangan berhasil dibuat!',
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoiceNumber,
                 'amount' => $serviceData->price,
-                'due_date' => $dueDate->format('M d, Y'),
-                'payment_url' => route('client.invoices.pay', $invoice->id)
+                'due_date' => $dueDate->format('d M Y'),
+                'payment_url' => route('client.invoices.pay', $invoice->id),
+                'renewal_request_id' => $renewalRequest->id
             ]);
 
         } catch (\Exception $e) {
