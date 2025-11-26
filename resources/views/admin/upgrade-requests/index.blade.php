@@ -163,18 +163,23 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Upgrade Requests</h5>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
                 <button class="btn btn-danger btn-sm" onclick="deleteSelected()" id="bulkDeleteBtn" style="display: none;">
-                    <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                    <i class="bx bx-trash"></i>
+                    <span class="d-none d-lg-inline ms-1">Delete</span>
+                    (<span id="selectedCount">0</span>)
                 </button>
                 <button class="btn btn-success btn-sm" onclick="bulkAction('approve')" id="bulkApproveBtn" style="display: none;">
-                    <i class="bx bx-check me-1"></i>Approve Selected
+                    <i class="bx bx-check"></i>
+                    <span class="d-none d-lg-inline ms-1">Approve</span>
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="bulkAction('reject')" id="bulkRejectBtn" style="display: none;">
-                    <i class="bx bx-x me-1"></i>Reject Selected
+                <button class="btn btn-warning btn-sm" onclick="bulkAction('reject')" id="bulkRejectBtn" style="display: none;">
+                    <i class="bx bx-x"></i>
+                    <span class="d-none d-lg-inline ms-1">Reject</span>
                 </button>
                 <button class="btn btn-info btn-sm" onclick="bulkAction('mark_processing')" id="bulkProcessingBtn" style="display: none;">
-                    <i class="bx bx-cog me-1"></i>Mark as Processing
+                    <i class="bx bx-cog"></i>
+                    <span class="d-none d-lg-inline ms-1">Processing</span>
                 </button>
             </div>
         </div>
@@ -184,8 +189,8 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>
-                                    <input type="checkbox" id="selectAll" class="form-check-input">
+                                <th width="45" class="text-center">
+                                    <input type="checkbox" id="selectAll" class="form-check-input cursor-pointer" style="width: 18px; height: 18px;">
                                 </th>
                                 <th>Request ID</th>
                                 <th>Type</th>
@@ -202,9 +207,9 @@
                         <tbody>
                             @foreach($upgradeRequests as $request)
                             <tr>
-                                <td>
+                                <td class="text-center">
                                     @if($request->status === 'pending')
-                                        <input type="checkbox" class="form-check-input request-checkbox" value="{{ $request->id }}">
+                                        <input type="checkbox" class="form-check-input request-checkbox cursor-pointer" value="{{ $request->id }}" style="width: 18px; height: 18px;">
                                     @endif
                                 </td>
                                 <td>
@@ -328,6 +333,12 @@
                                                     </a>
                                                 </li>
                                             @endif
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#" onclick="deleteRequest({{ $request->id }})">
+                                                    <i class="bx bx-trash me-2"></i>Delete Request
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </td>
@@ -437,6 +448,20 @@ function deleteSelected() {
             form.appendChild(input);
         });
         
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function deleteRequest(requestId) {
+    if (confirm('Are you sure you want to delete this upgrade request? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/upgrade-requests/${requestId}`;
+        form.innerHTML = `
+            @csrf
+            @method('DELETE')
+        `;
         document.body.appendChild(form);
         form.submit();
     }

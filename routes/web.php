@@ -242,6 +242,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.clients.bulk-delete');
         Route::post('upgrade-requests/bulk-delete', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'bulkDelete'])
             ->name('admin.upgrade-requests.bulk-delete');
+        Route::delete('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'destroy'])
+            ->name('admin.upgrade-requests.destroy');
         Route::post('client-data/bulk-delete', [App\Http\Controllers\Admin\ClientDataController::class, 'bulkDelete'])
             ->name('admin.client-data.bulk-delete');
         Route::post('domains/bulk-delete', [App\Http\Controllers\Admin\DomainController::class, 'bulkDelete'])

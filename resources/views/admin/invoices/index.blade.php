@@ -14,11 +14,13 @@
                         </h5>
                         <small class="text-muted">Manage all invoices and their status</small>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash"></i>
+                            <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                            (<span id="selectedCount">0</span>)
                         </button>
-                        <select class="form-select" style="width: 150px;" id="filterInvoiceStatus">
+                        <select class="form-select form-select-sm" style="width: 130px;" id="filterInvoiceStatus">
                             <option value="">All Status</option>
                             <option value="Paid">Paid</option>
                             <option value="Unpaid">Unpaid</option>
@@ -28,8 +30,9 @@
                             <option value="Lunas">Lunas</option>
                             <option value="Belum Lunas">Belum Lunas</option>
                         </select>
-                        <a href="{{ route('admin.invoices.create') }}" class="btn btn-primary">
-                            <i class="bx bx-plus me-1"></i>New Invoice
+                        <a href="{{ route('admin.invoices.create') }}" class="btn btn-primary btn-sm">
+                            <i class="bx bx-plus"></i>
+                            <span class="d-none d-sm-inline ms-1">New Invoice</span>
                         </a>
                     </div>
                 </div>
@@ -46,8 +49,8 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="40">
-                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    <th width="45" class="text-center">
+                                        <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                     </th>
                                     <th>#</th>
                                     <th>Client</th>
@@ -62,8 +65,8 @@
                             <tbody>
                                 @forelse($invoices as $invoice)
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $invoice->id }}" onchange="updateSelectedCount()">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $invoice->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                     </td>
                                     <td><span class="fw-bold text-primary">#{{ $invoice->id }}</span></td>
                                     <td>

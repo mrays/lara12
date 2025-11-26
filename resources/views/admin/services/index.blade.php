@@ -5,33 +5,49 @@
 @section('content')
 <div class="container-xxl">
   <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <h5>Services</h5>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-          <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <h5 class="mb-0">Services</h5>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+          <i class="bx bx-trash"></i>
+          <span class="d-none d-md-inline ms-1">Delete Selected</span>
+          (<span id="selectedCount">0</span>)
         </button>
-        <a href="{{ route('admin.services.create') }}" class="btn btn-primary">New Service</a>
+        <a href="{{ route('admin.services.create') }}" class="btn btn-primary btn-sm">
+          <i class="bx bx-plus"></i>
+          <span class="d-none d-sm-inline ms-1">New Service</span>
+        </a>
       </div>
     </div>
     <div class="card-body">
-      <table class="table">
-        <thead>
-          <tr>
-            <th width="40"><input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()"></th>
-            <th>#</th><th>Product</th><th>Domain</th><th>Client</th><th>Due Date</th><th>Status</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($services as $s)
-          <tr>
-            <td><input type="checkbox" class="form-check-input row-checkbox" value="{{ $s->id }}" onchange="updateSelectedCount()"></td>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="45" class="text-center">
+                <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
+              </th>
+              <th>#</th>
+              <th>Product</th>
+              <th class="d-none d-md-table-cell">Domain</th>
+              <th>Client</th>
+              <th class="d-none d-lg-table-cell">Due Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($services as $s)
+            <tr>
+              <td class="text-center">
+                <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $s->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
+              </td>
             <td>{{ $s->id }}</td>
-            <td>{{ $s->product }}</td>
-            <td>{{ $s->domain ?? '-' }}</td>
-            <td>{{ $s->client_name ?? '-' }}</td>
-            <td>{{ $s->due_date ? date('Y-m-d', strtotime($s->due_date)) : '-' }}</td>
-            <td><span class="badge {{ $s->status=='Active'?'bg-success':'bg-secondary' }}">{{ $s->status }}</span></td>
+              <td>{{ $s->product }}</td>
+              <td class="d-none d-md-table-cell">{{ $s->domain ?? '-' }}</td>
+              <td>{{ $s->client_name ?? '-' }}</td>
+              <td class="d-none d-lg-table-cell">{{ $s->due_date ? date('Y-m-d', strtotime($s->due_date)) : '-' }}</td>
+              <td><span class="badge {{ $s->status=='Active'?'bg-success':'bg-secondary' }}">{{ $s->status }}</span></td>
             <td>
               <div class="d-flex gap-1">
                 <a class="btn btn-sm btn-outline-info" href="{{ route('admin.services.manage-details', $s->id) }}" title="Manage Client View">
@@ -47,8 +63,9 @@
             </td>
           </tr>
           @endforeach
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

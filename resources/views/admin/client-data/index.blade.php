@@ -68,15 +68,19 @@
                             </h5>
                             <p class="text-muted mb-0">Kelola data client dan informasi layanan</p>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                                <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                                <i class="bx bx-trash"></i>
+                                <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                                (<span id="selectedCount">0</span>)
                             </button>
-                            <a href="{{ route('admin.client-data.service-status') }}" class="btn btn-info">
-                                <i class="bx bx-bar-chart me-1"></i>Service Status
+                            <a href="{{ route('admin.client-data.service-status') }}" class="btn btn-info btn-sm">
+                                <i class="bx bx-bar-chart"></i>
+                                <span class="d-none d-md-inline ms-1">Service Status</span>
                             </a>
-                            <a href="{{ route('admin.client-data.create') }}" class="btn btn-primary">
-                                <i class="bx bx-plus me-1"></i>Tambah Client
+                            <a href="{{ route('admin.client-data.create') }}" class="btn btn-primary btn-sm">
+                                <i class="bx bx-plus"></i>
+                                <span class="d-none d-sm-inline ms-1">Tambah Client</span>
                             </a>
                         </div>
                     </div>
@@ -193,13 +197,13 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th width="40">
-                                    <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                <th width="45" class="text-center">
+                                    <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                 </th>
                                 <th>Nama Client</th>
-                                <th>Alamat</th>
+                                <th class="d-none d-md-table-cell">Alamat</th>
                                 <th>WhatsApp</th>
-                                <th>Domains</th>
+                                <th class="d-none d-lg-table-cell">Domains</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -207,8 +211,8 @@
                         <tbody>
                             @foreach($clients as $client)
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $client->id }}" onchange="updateSelectedCount()">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $client->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                     </td>
                                     <td>
                                         <div>
@@ -219,39 +223,40 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         <small>{{ Str::limit($client->address, 50) }}</small>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <a href="{{ $client->whatsapp_link }}" target="_blank" class="text-decoration-none">
                                                 <i class="bx bxl-whatsapp text-success me-1"></i>
-                                                {{ $client->whatsapp }}
+                                                <span class="d-none d-sm-inline">{{ $client->whatsapp }}</span>
+                                                <span class="d-sm-none">WA</span>
                                             </a>
-                                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard('{{ $client->whatsapp }}')" title="Copy">
+                                            <button class="btn btn-sm btn-outline-secondary ms-2 d-none d-md-inline-block" onclick="copyToClipboard('{{ $client->whatsapp }}')" title="Copy">
                                                 <i class="bx bx-copy"></i>
                                             </button>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-lg-table-cell">
                                         @if($client->domains->count() > 0)
                                             <div class="small">
-                                                @foreach($client->domains->take(3) as $domain)
+                                                @foreach($client->domains->take(2) as $domain)
                                                     <div class="mb-1">
-                                                        <strong>{{ $domain->domain_name }}</strong>
+                                                        <strong>{{ Str::limit($domain->domain_name, 20) }}</strong>
                                                         @if($domain->expired_date)
                                                             <span class="{{ $domain->expired_date->isPast() ? 'text-danger' : ($domain->expired_date->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
-                                                                ({{ $domain->expired_date->format('M d, Y') }})
+                                                                ({{ $domain->expired_date->format('d/m/y') }})
                                                             </span>
                                                         @endif
                                                     </div>
                                                 @endforeach
-                                                @if($client->domains->count() > 3)
-                                                    <small class="text-muted">+{{ $client->domains->count() - 3 }} domain lainnya</small>
+                                                @if($client->domains->count() > 2)
+                                                    <small class="text-muted">+{{ $client->domains->count() - 2 }} lainnya</small>
                                                 @endif
                                             </div>
                                         @else
-                                            <span class="text-muted">Belum ada domain</span>
+                                            <span class="text-muted">-</span>
                                         @endif
                                     </td>
                                     <td>

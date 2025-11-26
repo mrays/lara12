@@ -15,12 +15,15 @@
                         </h5>
                         <small class="text-muted">Manage service packages that can be assigned to clients</small>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash"></i>
+                            <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                            (<span id="selectedCount">0</span>)
                         </button>
-                        <a href="{{ route('admin.service-packages.create') }}" class="btn btn-primary">
-                            <i class="tf-icons bx bx-plus me-1"></i>New Package
+                        <a href="{{ route('admin.service-packages.create') }}" class="btn btn-primary btn-sm">
+                            <i class="tf-icons bx bx-plus"></i>
+                            <span class="d-none d-sm-inline ms-1">New Package</span>
                         </a>
                     </div>
                 </div>
@@ -60,8 +63,8 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="40">
-                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    <th width="45" class="text-center">
+                                        <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                     </th>
                                     <th>#</th>
                                     <th>Package Name</th>
@@ -75,8 +78,8 @@
                             <tbody>
                                 @forelse($packages as $package)
                                     <tr>
-                                        <td>
-                                            <input type="checkbox" class="form-check-input row-checkbox" value="{{ $package->id }}" onchange="updateSelectedCount()">
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $package->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                         </td>
                                         <td>{{ $package->id }}</td>
                                         <td>

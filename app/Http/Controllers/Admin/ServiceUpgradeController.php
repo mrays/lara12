@@ -196,6 +196,17 @@ class ServiceUpgradeController extends Controller
     }
 
     /**
+     * Delete a single upgrade request
+     */
+    public function destroy(ServiceUpgradeRequest $upgradeRequest)
+    {
+        $upgradeRequest->delete();
+        
+        return redirect()->route('admin.upgrade-requests.index')
+            ->with('success', 'Upgrade request deleted successfully');
+    }
+
+    /**
      * Bulk actions for multiple requests
      */
     public function bulkAction(Request $request)

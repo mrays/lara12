@@ -67,12 +67,15 @@
                         </h5>
                         <small class="text-muted">Manage individual domains with client and server assignments</small>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
                         <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                            <i class="bx bx-trash"></i>
+                            <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                            (<span id="selectedCount">0</span>)
                         </button>
                         <a href="{{ route('admin.domains.create') }}" class="btn btn-primary btn-sm">
-                            <i class="bx bx-plus me-1"></i>Add Domain
+                            <i class="bx bx-plus"></i>
+                            <span class="d-none d-sm-inline ms-1">Add Domain</span>
                         </a>
                         <form method="GET" class="d-flex gap-2">
                             <div class="input-group input-group-sm" style="width: 250px;">
@@ -322,14 +325,14 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th width="40">
-                                            <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                        <th width="45" class="text-center">
+                                            <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                         </th>
                                         <th>Domain</th>
-                                        <th>Client</th>
-                                        <th>Server</th>
-                                        <th>Register</th>
-                                        <th>Expired Date</th>
+                                        <th class="d-none d-lg-table-cell">Client</th>
+                                        <th class="d-none d-xl-table-cell">Server</th>
+                                        <th class="d-none d-xl-table-cell">Register</th>
+                                        <th>Expired</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -337,37 +340,37 @@
                                 <tbody>
                                     @foreach($domains as $domain)
                                     <tr>
-                                        <td>
-                                            <input type="checkbox" class="form-check-input row-checkbox" value="{{ $domain->id }}" onchange="updateSelectedCount()">
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $domain->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm me-2">
+                                                <div class="avatar avatar-sm me-2 d-none d-sm-block">
                                                     <span class="avatar-initial rounded-circle bg-label-primary">
                                                         {{ substr($domain->domain_name, 0, 1) }}
                                                     </span>
                                                 </div>
                                                 <div>
                                                     <div class="fw-medium">{{ $domain->domain_name }}</div>
-                                                    <small class="text-muted">{{ $domain->notes }}</small>
+                                                    <small class="text-muted d-none d-md-inline">{{ $domain->notes }}</small>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-lg-table-cell">
                                             @if($domain->client_name)
                                                 <span class="badge bg-info">{{ $domain->client_name }}</span>
                                             @else
                                                 <span class="text-muted">No client</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="d-none d-xl-table-cell">
                                             @if($domain->server_name)
                                                 <span class="badge bg-secondary">{{ $domain->server_name }}</span>
                                             @else
                                                 <span class="text-muted">No server</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="d-none d-xl-table-cell">
                                             @if($domain->domain_register_name)
                                                 <span class="badge bg-warning">{{ $domain->domain_register_name }}</span>
                                             @else
@@ -376,25 +379,25 @@
                                         </td>
                                         <td>
                                             @if($domain->expired_date)
-                                                <div class="d-flex align-items-center gap-2">
+                                                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-1 gap-md-2">
                                                     <span class="badge {{ $domain->expired_date->isPast() ? 'bg-danger' : ($domain->expired_date->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }}">
-                                                        {{ $domain->expired_date->format('M d, Y') }}
+                                                        {{ $domain->expired_date->format('d/m/y') }}
                                                     </span>
                                                     @php
                                                         $daysLeft = $domain->expired_date->diffInDays(now(), false);
                                                         $isExpired = $domain->expired_date->isPast();
                                                         $daysRounded = abs(round($daysLeft));
                                                     @endphp
-                                                    <small class="text-muted">
+                                                    <small class="text-muted d-none d-sm-inline">
                                                         @if($isExpired)
-                                                            -{{ $daysRounded }} hari
+                                                            -{{ $daysRounded }}d
                                                         @else
-                                                            {{ $daysRounded }} hari lagi
+                                                            {{ $daysRounded }}d
                                                         @endif
                                                     </small>
                                                 </div>
                                             @else
-                                                <span class="badge bg-secondary">Not Set</span>
+                                                <span class="badge bg-secondary">-</span>
                                             @endif
                                         </td>
                                         <td>

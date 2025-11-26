@@ -14,13 +14,18 @@
                                 <i class="bx bx-globe me-2"></i>Domain Extensions
                             </h5>
                         </div>
-                        <div class="col-md-6 text-end">
-                            <button type="button" class="btn btn-danger me-2" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                                <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
-                            </button>
-                            <a href="{{ route('admin.domain-extensions.create') }}" class="btn btn-primary">
-                                <i class="bx bx-plus me-1"></i>Extension Baru
-                            </a>
+                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                            <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
+                                <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                                    <i class="bx bx-trash"></i>
+                                    <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                                    (<span id="selectedCount">0</span>)
+                                </button>
+                                <a href="{{ route('admin.domain-extensions.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="bx bx-plus"></i>
+                                    <span class="d-none d-sm-inline ms-1">Extension Baru</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -76,8 +81,8 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th width="40">
-                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    <th width="45" class="text-center">
+                                        <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                     </th>
                                     <th>Extension</th>
                                     <th>Durasi</th>
@@ -90,8 +95,8 @@
                             <tbody>
                                 @forelse($domainExtensions as $extension)
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $extension->id }}" onchange="updateSelectedCount()">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $extension->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                     </td>
                                     <td>
                                         <span class="badge bg-info fs-6">{{ $extension->extension }}</span>

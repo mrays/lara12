@@ -15,12 +15,15 @@
                         </h5>
                         <small class="text-muted">Manage all clients and their accounts</small>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
-                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash"></i>
+                            <span class="d-none d-md-inline ms-1">Delete Selected</span>
+                            (<span id="selectedCount">0</span>)
                         </button>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newClientModal">
-                            <i class="bx bx-plus me-1"></i>New Client
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newClientModal">
+                            <i class="bx bx-plus"></i>
+                            <span class="d-none d-sm-inline ms-1">New Client</span>
                         </button>
                     </div>
                 </div>
@@ -129,23 +132,23 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="40">
-                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    <th width="45" class="text-center">
+                                        <input type="checkbox" class="form-check-input cursor-pointer" id="selectAll" onclick="toggleSelectAll()" style="width: 18px; height: 18px;">
                                     </th>
                                     <th>#</th>
                                     <th>Client Info</th>
-                                    <th>Contact</th>
-                                    <th>Services</th>
+                                    <th class="d-none d-md-table-cell">Contact</th>
+                                    <th class="d-none d-lg-table-cell">Services</th>
                                     <th>Status</th>
-                                    <th>Joined</th>
+                                    <th class="d-none d-lg-table-cell">Joined</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($clients as $client)
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $client->id }}" onchange="updateSelectedCount()">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $client->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                     </td>
                                     <td>
                                         <span class="fw-bold text-primary">#{{ $client->id }}</span>
@@ -165,10 +168,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         <div>
                                             <i class="bx bx-envelope me-1"></i>
-                                            <small>{{ $client->email }}</small>
+                                            <small>{{ Str::limit($client->email, 25) }}</small>
                                         </div>
                                         @if($client->phone)
                                         <div class="mt-1">
@@ -177,7 +180,7 @@
                                         </div>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="d-none d-lg-table-cell">
                                         <div class="d-flex align-items-center">
                                             <span class="badge bg-primary me-2">{{ \DB::table('services')->where('client_id', $client->id)->count() }}</span>
                                             <small class="text-muted">
@@ -197,8 +200,8 @@
                                                 <span class="badge bg-success">Active</span>
                                         @endswitch
                                     </td>
-                                    <td>
-                                        <small class="text-muted">{{ $client->created_at->format('M d, Y') }}</small>
+                                    <td class="d-none d-lg-table-cell">
+                                        <small class="text-muted">{{ $client->created_at->format('d/m/y') }}</small>
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
