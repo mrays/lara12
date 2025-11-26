@@ -37,19 +37,37 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            @switch($service->status)
-                                @case('Active')
-                                    <span class="badge bg-label-success fs-6 mb-2">ACTIVE</span>
-                                    @break
-                                @case('Suspended')
-                                    <span class="badge bg-label-warning fs-6 mb-2">SUSPENDED</span>
-                                    @break
-                                @case('Terminated')
-                                    <span class="badge bg-label-danger fs-6 mb-2">TERMINATED</span>
-                                    @break
-                                @default
-                                    <span class="badge bg-label-secondary fs-6 mb-2">{{ strtoupper($service->status) }}</span>
-                            @endswitch
+                            @if($service->status === 'Active')
+                                <span class="badge bg-label-success fs-6 mb-2">ACTIVE</span>
+                            @else
+                                @php
+                                    $progressValue = match($service->status) {
+                                        'Pending' => 25,
+                                        'Processing' => 50,
+                                        'Setup' => 75,
+                                        'Suspended' => 60,
+                                        default => 10
+                                    };
+                                    $progressColor = match($service->status) {
+                                        'Pending' => 'warning',
+                                        'Processing' => 'info', 
+                                        'Setup' => 'primary',
+                                        'Suspended' => 'danger',
+                                        default => 'secondary'
+                                    };
+                                @endphp
+                                <span class="badge bg-label-{{ $progressColor }} fs-6 mb-2">{{ strtoupper($service->status) }}</span>
+                                <div class="progress mt-2" style="height: 6px; width: 150px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-{{ $progressColor }}" 
+                                         role="progressbar" 
+                                         style="width: {{ $progressValue }}%"
+                                         aria-valuenow="{{ $progressValue }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="text-{{ $progressColor }} d-block mt-1">{{ $progressValue }}% Complete</small>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -247,6 +265,81 @@
                                 </div>
                             @endif
 
+                            <!-- Service Setup Progress (for non-active services) -->
+                            @if($service->status !== 'Active')
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="mb-3">
+                                                    <i class="bx bx-cog me-2"></i>Service Setup Progress
+                                                </h6>
+                                                
+                                                @php
+                                                    $steps = [
+                                                        ['name' => 'Order Received', 'status' => 'completed'],
+                                                        ['name' => 'Payment Verification', 'status' => $service->status === 'Pending' ? 'current' : 'completed'],
+                                                        ['name' => 'Server Setup', 'status' => in_array($service->status, ['Processing', 'Setup']) ? 'current' : ($service->status === 'Pending' ? 'pending' : 'completed')],
+                                                        ['name' => 'Service Activation', 'status' => $service->status === 'Setup' ? 'current' : 'pending']
+                                                    ];
+                                                @endphp
+                                                
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    @foreach($steps as $index => $step)
+                                                        <div class="d-flex flex-column align-items-center" style="flex: 1;">
+                                                            <div class="mb-2">
+                                                                @if($step['status'] === 'completed')
+                                                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                                        <i class="bx bx-check"></i>
+                                                                    </div>
+                                                                @elseif($step['status'] === 'current')
+                                                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                                        <div class="spinner-border spinner-border-sm" role="status">
+                                                                            <span class="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                @else
+                                                                    <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                                        <i class="bx bx-time text-muted"></i>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <small class="text-center {{ $step['status'] === 'completed' ? 'text-success' : ($step['status'] === 'current' ? 'text-primary' : 'text-muted') }}">
+                                                                {{ $step['name'] }}
+                                                            </small>
+                                                        </div>
+                                                        
+                                                        @if($index < count($steps) - 1)
+                                                            <div class="flex-grow-1 mx-2" style="height: 2px; margin-top: -20px;">
+                                                                <div class="bg-{{ $steps[$index + 1]['status'] === 'completed' ? 'success' : 'light' }}" style="height: 100%;"></div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                                
+                                                <div class="mt-3 text-center">
+                                                    <small class="text-muted">
+                                                        @switch($service->status)
+                                                            @case('Pending')
+                                                                Waiting for payment confirmation. This usually takes 1-24 hours.
+                                                                @break
+                                                            @case('Processing')
+                                                                Setting up your server environment. This may take 2-4 hours.
+                                                                @break
+                                                            @case('Setup')
+                                                                Finalizing service configuration. Almost ready!
+                                                                @break
+                                                            @default
+                                                                Service setup in progress. Please wait...
+                                                        @endswitch
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <!-- Action Buttons -->
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -336,10 +429,42 @@
                                                     
                                                     <div class="mb-3">
                                                         <h6 class="mb-1">Service Status</h6>
-                                                        <div class="progress mb-2" style="height: 8px;">
-                                                            <div class="progress-bar bg-{{ $service->status == 'Active' ? 'success' : 'warning' }}" role="progressbar" style="width: 100%"></div>
-                                                        </div>
-                                                        <small class="text-muted">Your service is {{ $service->status }}</small>
+                                                        @if($service->status === 'Active')
+                                                            <div class="progress mb-2" style="height: 8px;">
+                                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                                                            </div>
+                                                            <small class="text-success">Your service is Active</small>
+                                                        @else
+                                                            <!-- Animated Progress for Non-Active Status -->
+                                                            <div class="progress mb-2" style="height: 12px;">
+                                                                @php
+                                                                    $progressValue = match($service->status) {
+                                                                        'Pending' => 25,
+                                                                        'Processing' => 50,
+                                                                        'Setup' => 75,
+                                                                        'Suspended' => 60,
+                                                                        default => 10
+                                                                    };
+                                                                    $progressColor = match($service->status) {
+                                                                        'Pending' => 'warning',
+                                                                        'Processing' => 'info', 
+                                                                        'Setup' => 'primary',
+                                                                        'Suspended' => 'danger',
+                                                                        default => 'secondary'
+                                                                    };
+                                                                @endphp
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-{{ $progressColor }}" 
+                                                                     role="progressbar" 
+                                                                     style="width: {{ $progressValue }}%"
+                                                                     aria-valuenow="{{ $progressValue }}" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100">
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-{{ $progressColor }}">
+                                                                Service is {{ $service->status }} ({{ $progressValue }}% complete)
+                                                            </small>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
