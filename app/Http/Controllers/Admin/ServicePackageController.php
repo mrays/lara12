@@ -16,7 +16,8 @@ class ServicePackageController extends Controller
      */
     public function index()
     {
-        $packages = ServicePackage::select('id', 'name', 'description', 'base_price', 'is_active', 'created_at')
+        $packages = ServicePackage::select('id', 'name', 'description', 'base_price', 'is_active', 'is_visible', 'is_custom', 'created_at')
+            ->orderBy('is_custom', 'asc') // Standard packages first
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -41,6 +42,8 @@ class ServicePackageController extends Controller
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
             'is_active' => 'boolean',
+            'is_visible' => 'boolean',
+            'is_custom' => 'boolean',
             'features' => 'nullable|array'
         ]);
 
@@ -68,6 +71,8 @@ class ServicePackageController extends Controller
             'base_price' => $validated['base_price'],
             'features' => $features,
             'is_active' => $request->has('is_active') ? 1 : 0,
+            'is_visible' => $request->has('is_visible') ? 1 : 1, // Default visible
+            'is_custom' => $request->has('is_custom') ? 1 : 0,
         ]);
 
         return redirect()->route('admin.service-packages.index')
@@ -117,6 +122,8 @@ class ServicePackageController extends Controller
             'description' => 'required|string',
             'base_price' => 'required|numeric|min:0',
             'is_active' => 'boolean',
+            'is_visible' => 'boolean',
+            'is_custom' => 'boolean',
             'features' => 'nullable|array'
         ]);
 
@@ -187,6 +194,8 @@ class ServicePackageController extends Controller
                 'base_price' => $validated['base_price'],
                 'features' => $validated['features'],
                 'is_active' => $request->has('is_active') ? 1 : 0,
+                'is_visible' => $request->has('is_visible') ? 1 : 0,
+                'is_custom' => $request->has('is_custom') ? 1 : 0,
             ]);
 
             // Remove existing free domains
@@ -280,5 +289,39 @@ class ServicePackageController extends Controller
             ->get();
 
         return response()->json($packages);
+    }
+
+    /**
+     * Toggle package visibility
+     */
+    public function toggleVisibility($id)
+    {
+        $package = ServicePackage::findOrFail($id);
+        
+        $package->update([
+            'is_visible' => !$package->is_visible,
+        ]);
+
+        $status = $package->is_visible ? 'visible' : 'hidden';
+        
+        return redirect()->route('admin.service-packages.index')
+            ->with('success', "Package is now {$status} on client order page!");
+    }
+
+    /**
+     * Toggle package custom status
+     */
+    public function toggleCustom($id)
+    {
+        $package = ServicePackage::findOrFail($id);
+        
+        $package->update([
+            'is_custom' => !$package->is_custom,
+        ]);
+
+        $status = $package->is_custom ? 'marked as custom' : 'marked as standard';
+        
+        return redirect()->route('admin.service-packages.index')
+            ->with('success', "Package {$status} successfully!");
     }
 }

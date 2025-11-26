@@ -13,20 +13,51 @@
   <label class="form-label">Service Package</label>
   <select name="package_id" class="form-select" id="package_select" onchange="updatePackageDetails()">
     <option value="">-- choose service package --</option>
-    @php
-      $packages = \DB::table('service_packages')->where('is_active', 1)->orderBy('name')->get();
-    @endphp
-    @foreach($packages as $pkg)
-      <option value="{{ $pkg->id }}" 
-              data-name="{{ $pkg->name }}" 
-              data-description="{{ $pkg->description }}" 
-              data-price="{{ $pkg->base_price }}"
-              {{ (old('package_id', $service->package_id ?? '') == $pkg->id) ? 'selected':'' }}>
-        {{ $pkg->name }} - Rp {{ number_format($pkg->base_price, 0, ',', '.') }}
-      </option>
-    @endforeach
+    @if(isset($packages))
+      @php
+        $standardPackages = $packages->where('is_custom', false);
+        $customPackages = $packages->where('is_custom', true);
+      @endphp
+      
+      @if($standardPackages->count() > 0)
+        <optgroup label="📦 Standard Packages">
+          @foreach($standardPackages as $pkg)
+            <option value="{{ $pkg->id }}" 
+                    data-name="{{ $pkg->name }}" 
+                    data-description="{{ $pkg->description }}" 
+                    data-price="{{ $pkg->base_price }}"
+                    data-custom="0"
+                    {{ (old('package_id', $service->package_id ?? '') == $pkg->id) ? 'selected':'' }}>
+              {{ $pkg->name }} - Rp {{ number_format($pkg->base_price, 0, ',', '.') }}
+            </option>
+          @endforeach
+        </optgroup>
+      @endif
+      
+      @if($customPackages->count() > 0)
+        <optgroup label="⭐ Custom Packages (Special Pricing)">
+          @foreach($customPackages as $pkg)
+            <option value="{{ $pkg->id }}" 
+                    data-name="{{ $pkg->name }}" 
+                    data-description="{{ $pkg->description }}" 
+                    data-price="{{ $pkg->base_price }}"
+                    data-custom="1"
+                    {{ (old('package_id', $service->package_id ?? '') == $pkg->id) ? 'selected':'' }}>
+              ⭐ {{ $pkg->name }} - Rp {{ number_format($pkg->base_price, 0, ',', '.') }}
+            </option>
+          @endforeach
+        </optgroup>
+      @endif
+    @endif
   </select>
-  <small class="form-text text-muted">Select a service package or leave empty for custom service</small>
+  <small class="form-text text-muted">Select a service package or leave empty for custom service. Custom packages (⭐) are for special client pricing.</small>
+</div>
+
+<div class="mb-3" id="custom_package_alert" style="display: none;">
+  <div class="alert alert-warning">
+    <i class="bx bx-star me-1"></i>
+    <strong>Custom Package Selected!</strong> This is a special package with custom pricing for specific clients.
+  </div>
 </div>
 
 <div class="mb-3">
@@ -92,6 +123,7 @@
 function updatePackageDetails() {
     const select = document.getElementById('package_select');
     const selectedOption = select.options[select.selectedIndex];
+    const customAlert = document.getElementById('custom_package_alert');
     
     if (selectedOption.value) {
         // Auto-fill product name
@@ -103,11 +135,19 @@ function updatePackageDetails() {
         // Show package description
         document.getElementById('description_content').innerHTML = selectedOption.dataset.description;
         document.getElementById('package_description').style.display = 'block';
+        
+        // Show/hide custom package alert
+        if (selectedOption.dataset.custom === '1') {
+            customAlert.style.display = 'block';
+        } else {
+            customAlert.style.display = 'none';
+        }
     } else {
         // Clear fields if no package selected
         document.getElementById('product_input').value = '';
         document.getElementById('price_input').value = '';
         document.getElementById('package_description').style.display = 'none';
+        customAlert.style.display = 'none';
     }
 }
 

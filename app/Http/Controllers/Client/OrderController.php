@@ -21,7 +21,8 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $packages = ServicePackage::where('is_active', true)
+        // Only show packages that are active, visible, and not custom
+        $packages = ServicePackage::availableForOrder()
             ->with('domainExtension')
             ->orderBy('base_price', 'asc')
             ->get();

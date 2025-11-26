@@ -71,23 +71,29 @@
                                     <th>Description</th>
                                     <th>Base Price</th>
                                     <th>Status</th>
-                                    <th>Created</th>
+                                    <th>Visibility</th>
+                                    <th>Type</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($packages as $package)
-                                    <tr>
+                                    <tr class="{{ $package->is_custom ? 'table-warning' : '' }}">
                                         <td class="text-center">
                                             <input type="checkbox" class="form-check-input row-checkbox cursor-pointer" value="{{ $package->id }}" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
                                         </td>
                                         <td>{{ $package->id }}</td>
                                         <td>
                                             <strong>{{ $package->name }}</strong>
+                                            @if($package->is_custom)
+                                                <span class="badge bg-warning text-dark ms-1" title="Custom package for specific clients">
+                                                    <i class="bx bx-star"></i>
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <div class="text-truncate" style="max-width: 300px;" title="{{ $package->description }}">
-                                                {{ Str::limit($package->description, 80) }}
+                                            <div class="text-truncate" style="max-width: 250px;" title="{{ $package->description }}">
+                                                {{ Str::limit($package->description, 60) }}
                                             </div>
                                         </td>
                                         <td>
@@ -103,41 +109,75 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $package->created_at ? date('M d, Y', strtotime($package->created_at)) : '-' }}
+                                            @if($package->is_visible)
+                                                <span class="badge bg-info" title="Visible on client order page">
+                                                    <i class="bx bx-show"></i> Visible
+                                                </span>
+                                            @else
+                                                <span class="badge bg-dark" title="Hidden from client order page">
+                                                    <i class="bx bx-hide"></i> Hidden
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <div class="d-flex gap-1">
-                                                <!-- View Package -->
-                                                <a href="{{ route('admin.service-packages.show', $package->id) }}" 
-                                                   class="btn btn-sm btn-outline-info" title="View Details">
-                                                    <i class="tf-icons bx bx-show"></i>
-                                                </a>
-                                                
-                                                <!-- Edit Package -->
-                                                <a href="{{ route('admin.service-packages.edit', $package->id) }}" 
-                                                   class="btn btn-sm btn-outline-primary" title="Edit Package">
-                                                    <i class="tf-icons bx bx-edit"></i>
-                                                </a>
-                                                
-                                                <!-- Toggle Status -->
-                                                <button class="btn btn-sm btn-outline-warning" 
-                                                        onclick="togglePackageStatus({{ $package->id }}, {{ $package->is_active ? 'true' : 'false' }})" 
-                                                        title="{{ $package->is_active ? 'Deactivate' : 'Activate' }} Package">
-                                                    <i class="tf-icons bx {{ $package->is_active ? 'bx-toggle-right' : 'bx-toggle-left' }}"></i>
+                                            @if($package->is_custom)
+                                                <span class="badge bg-warning text-dark" title="Custom package for specific clients only">
+                                                    <i class="bx bx-star"></i> Custom
+                                                </span>
+                                            @else
+                                                <span class="badge bg-primary" title="Standard package for all clients">
+                                                    <i class="bx bx-package"></i> Standard
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
-                                                
-                                                <!-- Delete Package -->
-                                                <button class="btn btn-sm btn-outline-danger" 
-                                                        onclick="deletePackage({{ $package->id }}, '{{ $package->name }}')" 
-                                                        title="Delete Package">
-                                                    <i class="tf-icons bx bx-trash"></i>
-                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('admin.service-packages.show', $package->id) }}">
+                                                            <i class="bx bx-show me-2"></i>View Details
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('admin.service-packages.edit', $package->id) }}">
+                                                            <i class="bx bx-edit me-2"></i>Edit Package
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="togglePackageStatus({{ $package->id }}, {{ $package->is_active ? 'true' : 'false' }}); return false;">
+                                                            <i class="bx {{ $package->is_active ? 'bx-x-circle text-warning' : 'bx-check-circle text-success' }} me-2"></i>
+                                                            {{ $package->is_active ? 'Deactivate' : 'Activate' }}
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="toggleVisibility({{ $package->id }}, {{ $package->is_visible ? 'true' : 'false' }}); return false;">
+                                                            <i class="bx {{ $package->is_visible ? 'bx-hide text-dark' : 'bx-show text-info' }} me-2"></i>
+                                                            {{ $package->is_visible ? 'Hide from Order Page' : 'Show on Order Page' }}
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="toggleCustom({{ $package->id }}, {{ $package->is_custom ? 'true' : 'false' }}); return false;">
+                                                            <i class="bx {{ $package->is_custom ? 'bx-package text-primary' : 'bx-star text-warning' }} me-2"></i>
+                                                            {{ $package->is_custom ? 'Mark as Standard' : 'Mark as Custom' }}
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" onclick="deletePackage({{ $package->id }}, '{{ $package->name }}'); return false;">
+                                                            <i class="bx bx-trash me-2"></i>Delete Package
+                                                        </a>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center py-4">
+                                        <td colspan="9" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="tf-icons bx bx-package fs-1 mb-2"></i>
                                                 <p>No service packages found.</p>
@@ -205,6 +245,42 @@ function togglePackageStatus(packageId, currentStatus) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/service-packages/${packageId}/toggle-status`;
+        form.innerHTML = `
+            @csrf
+            @method('PUT')
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Toggle package visibility
+function toggleVisibility(packageId, currentVisibility) {
+    const action = currentVisibility ? 'hide' : 'show';
+    if (confirm(`Are you sure you want to ${action} this package on the client order page?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/service-packages/${packageId}/toggle-visibility`;
+        form.innerHTML = `
+            @csrf
+            @method('PUT')
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Toggle package custom status
+function toggleCustom(packageId, isCustom) {
+    const action = isCustom ? 'standard' : 'custom';
+    const message = isCustom 
+        ? 'Mark this package as standard? It will be available for all clients.'
+        : 'Mark this package as custom? It will only be assignable manually to specific clients.';
+    
+    if (confirm(message)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/service-packages/${packageId}/toggle-custom`;
         form.innerHTML = `
             @csrf
             @method('PUT')

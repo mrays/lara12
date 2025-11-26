@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\Client;
+use App\Models\ServicePackage;
 
 class ServiceController extends Controller
 {
@@ -16,7 +17,8 @@ class ServiceController extends Controller
         // Use direct DB query for compatibility
         $services = \DB::table('services')
             ->leftJoin('users', 'services.client_id', '=', 'users.id')
-            ->select('services.*', 'users.name as client_name', 'users.email as client_email')
+            ->leftJoin('service_packages', 'services.package_id', '=', 'service_packages.id')
+            ->select('services.*', 'users.name as client_name', 'users.email as client_email', 'service_packages.name as package_name', 'service_packages.is_custom as package_is_custom')
             ->when($q, function($query) use ($q) {
                 return $query->where('services.name', 'like', "%$q%")
                            ->orWhere('services.domain', 'like', "%$q%");
@@ -37,13 +39,21 @@ class ServiceController extends Controller
             ->where('role', 'client')
             ->orderBy('name')
             ->get();
-        return view('admin.services.create', compact('clients'));
+        
+        // Get ALL active packages (including custom ones) for admin to assign
+        $packages = ServicePackage::where('is_active', true)
+            ->orderBy('is_custom', 'asc')
+            ->orderBy('name')
+            ->get();
+            
+        return view('admin.services.create', compact('clients', 'packages'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'client_id'=>'required|exists:users,id',
+            'package_id'=>'nullable|exists:service_packages,id',
             'product'=>'required|string|max:191',
             'domain'=>'nullable|string|max:191',
             'price'=>'required|numeric',
@@ -70,13 +80,21 @@ class ServiceController extends Controller
             ->where('role', 'client')
             ->orderBy('name')
             ->get();
-        return view('admin.services.edit', compact('service','clients'));
+        
+        // Get ALL active packages (including custom ones) for admin to assign
+        $packages = ServicePackage::where('is_active', true)
+            ->orderBy('is_custom', 'asc')
+            ->orderBy('name')
+            ->get();
+            
+        return view('admin.services.edit', compact('service','clients', 'packages'));
     }
 
     public function update(Request $request, Service $service)
     {
         $data = $request->validate([
             'client_id'=>'required|exists:users,id',
+            'package_id'=>'nullable|exists:service_packages,id',
             'product'=>'required|string|max:191',
             'domain'=>'nullable|string|max:191',
             'price'=>'required|numeric',

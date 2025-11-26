@@ -88,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
             ->names('admin.service-packages');
         Route::put('service-packages/{package}/toggle-status', [App\Http\Controllers\Admin\ServicePackageController::class, 'toggleStatus'])
             ->name('admin.service-packages.toggle-status');
+        Route::put('service-packages/{package}/toggle-visibility', [App\Http\Controllers\Admin\ServicePackageController::class, 'toggleVisibility'])
+            ->name('admin.service-packages.toggle-visibility');
+        Route::put('service-packages/{package}/toggle-custom', [App\Http\Controllers\Admin\ServicePackageController::class, 'toggleCustom'])
+            ->name('admin.service-packages.toggle-custom');
         Route::get('api/service-packages/active', [App\Http\Controllers\Admin\ServicePackageController::class, 'getActivePackages'])
             ->name('admin.service-packages.active');
             

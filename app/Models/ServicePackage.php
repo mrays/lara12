@@ -15,6 +15,8 @@ class ServicePackage extends Model
         'base_price',
         'features',
         'is_active',
+        'is_visible',
+        'is_custom',
         'domain_extension_id',
         'domain_duration_years',
         'is_domain_free',
@@ -25,6 +27,8 @@ class ServicePackage extends Model
         'features' => 'array',
         'base_price' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_visible' => 'boolean',
+        'is_custom' => 'boolean',
         'is_domain_free' => 'boolean',
         'domain_discount_percent' => 'decimal:2'
     ];
@@ -59,6 +63,40 @@ class ServicePackage extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for visible packages (shown on client order page)
+     */
+    public function scopeVisible($query)
+    {
+        return $query->where('is_visible', true);
+    }
+
+    /**
+     * Scope for custom packages (special packages for specific clients)
+     */
+    public function scopeCustom($query)
+    {
+        return $query->where('is_custom', true);
+    }
+
+    /**
+     * Scope for standard packages (non-custom, visible to all)
+     */
+    public function scopeStandard($query)
+    {
+        return $query->where('is_custom', false);
+    }
+
+    /**
+     * Scope for packages available on client order page
+     */
+    public function scopeAvailableForOrder($query)
+    {
+        return $query->where('is_active', true)
+                     ->where('is_visible', true)
+                     ->where('is_custom', false);
     }
 
     /**
