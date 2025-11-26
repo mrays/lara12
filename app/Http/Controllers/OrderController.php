@@ -188,30 +188,23 @@ class OrderController extends Controller
         ]);
 
         try {
-            // Create user account (for authentication)
+            // Create user account (for authentication and business data)
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'role' => 'client',
-                'email_verified_at' => now(),
-            ]);
-
-            // Create client record (for business data)
-            $client = Client::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'address' => $request->address,
+                'password' => bcrypt($request->password),
+                'role' => 'client',
                 'status' => 'Active',
-                'user_id' => $user->id,
+                'email_verified_at' => now(),
             ]);
 
-            // Store client ID in session
-            Session::put('order.client_id', $client->id);
+            // Store user ID as client ID in session (using User as Client)
+            Session::put('order.client_id', $user->id);
             Session::put('order.user_id', $user->id);
-            Session::put('order.client_name', $client->name);
-            Session::put('order.client_email', $client->email);
+            Session::put('order.client_name', $user->name);
+            Session::put('order.client_email', $user->email);
 
             // Log in the new user
             auth()->login($user);
