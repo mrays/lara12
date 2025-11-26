@@ -35,70 +35,7 @@
         </div>
     </div>
 
-    <!-- Status Summary -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-success bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-success me-3">
-                            <i class="bx bx-check-circle fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['active'] }}</h4>
-                            <small class="text-muted">Active</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-danger me-3">
-                            <i class="bx bx-x-circle fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['expired'] }}</h4>
-                            <small class="text-muted">Expired</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-warning me-3">
-                            <i class="bx bx-pause-circle fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['suspended'] }}</h4>
-                            <small class="text-muted">Suspended</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary bg-lighten">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-primary me-3">
-                            <i class="bx bx-globe fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0">{{ $statusCounts['all'] }}</h4>
-                            <small class="text-muted">Total Register</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">

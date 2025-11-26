@@ -141,14 +141,7 @@
             </a>
         </li>
 
-        <!-- Domain Registers -->
-        <li class="menu-item {{ request()->routeIs('admin.domain-registers.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.domain-registers.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-globe"></i>
-                <div data-i18n="Domain Registers">Domain Registers</div>
-            </a>
-        </li>
-
+        
         <!-- Domains -->
         <li class="menu-item {{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">
             <a href="{{ route('admin.domains.index') }}" class="menu-link">
