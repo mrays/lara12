@@ -187,24 +187,47 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold text-muted">Username</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="{{ $service->username ?? 'BININOK' }}" readonly>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->username ?? 'BININOK' }}')">
-                                            <i class="bx bx-copy"></i>
-                                        </button>
+                                        @if($service->status === 'Active' && !empty($service->username))
+                                            <input type="text" class="form-control" value="{{ $service->username }}" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->username }}')">
+                                                <i class="bx bx-copy"></i>
+                                            </button>
+                                        @else
+                                            <input type="text" class="form-control" value="" placeholder="Belum diatur" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" disabled>
+                                                <i class="bx bx-copy"></i>
+                                            </button>
+                                        @endif
                                     </div>
+                                    @if($service->status !== 'Active' || empty($service->username))
+                                        <small class="text-muted">Username akan diatur oleh admin setelah service aktif</small>
+                                    @endif
                                 </div>
                                 
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-semibold text-muted">Password</label>
                                     <div class="input-group">
-                                        <input type="password" id="password-field" class="form-control" value="{{ $service->password ?? 'booyofS*w&*DN' }}" readonly>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
-                                            <i class="bx bx-show" id="password-toggle-icon"></i>
-                                        </button>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->password ?? 'booyofS*w&*DN' }}')">
-                                            <i class="bx bx-copy"></i>
-                                        </button>
+                                        @if($service->status === 'Active' && !empty($service->password))
+                                            <input type="password" id="password-field" class="form-control" value="{{ $service->password }}" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                                <i class="bx bx-show" id="password-toggle-icon"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('{{ $service->password }}')">
+                                                <i class="bx bx-copy"></i>
+                                            </button>
+                                        @else
+                                            <input type="password" class="form-control" value="" placeholder="Belum diatur" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" disabled>
+                                                <i class="bx bx-show"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" type="button" disabled>
+                                                <i class="bx bx-copy"></i>
+                                            </button>
+                                        @endif
                                     </div>
+                                    @if($service->status !== 'Active' || empty($service->password))
+                                        <small class="text-muted">Password akan diatur oleh admin setelah service aktif</small>
+                                    @endif
                                 </div>
 
                                 <div class="col-md-4 mb-3">

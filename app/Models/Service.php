@@ -22,6 +22,12 @@ class Service extends Model
         'ip',
         'status',
         'notes',
+        'username',
+        'password',
+        'server',
+        'login_url',
+        'description',
+        'setup_fee',
     ];
 
     protected $casts = [

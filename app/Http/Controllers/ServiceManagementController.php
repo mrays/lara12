@@ -82,8 +82,9 @@ class ServiceManagementController extends Controller
             'created_at' => $serviceData->created_at ? \Carbon\Carbon::parse($serviceData->created_at) : null,
             'updated_at' => $serviceData->updated_at ? \Carbon\Carbon::parse($serviceData->updated_at) : null,
             // Add default values for fields that might not exist in database yet
-            'username' => $serviceData->username ?? 'admin',
-            'password' => $serviceData->password ?? 'musang',
+            // Only show credentials if service is Active, otherwise show empty
+            'username' => ($serviceData->status === 'Active') ? ($serviceData->username ?? '') : '',
+            'password' => ($serviceData->status === 'Active') ? ($serviceData->password ?? '') : '',
             'server' => $serviceData->server ?? 'Default Server',
             'login_url' => $serviceData->login_url ?? 'https://example.com/login',
             'description' => $serviceData->description ?? 'Service description for client',

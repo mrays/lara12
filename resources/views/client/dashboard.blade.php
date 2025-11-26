@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <span>Unpaid Amount</span>
-                        <h3 class="card-title text-nowrap mb-1">${{ number_format($stats['unpaid_amount'], 2) }}</h3>
+                        <h3 class="card-title text-nowrap mb-1">Rp {{ number_format($stats['unpaid_amount'], 0, ',', '.') }}</h3>
                         <small class="text-danger fw-semibold">
                             <i class="bx bx-down-arrow-alt"></i> 
                             {{ $stats['unpaid_invoices'] }} unpaid
@@ -121,7 +121,7 @@
                                 </small>
                             </div>
                             <div class="user-progress text-end">
-                                <small class="fw-semibold">${{ number_format($invoice->total_amount, 2) }}</small>
+                                <small class="fw-semibold">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</small>
                                 <br>
                                 <span class="badge bg-label-{{ $invoice->status_color }}">{{ $invoice->status }}</span>
                             </div>
@@ -192,7 +192,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="fw-semibold">${{ number_format($service->price, 2) }}</span>
+                                    <span class="fw-semibold">Rp {{ number_format($service->price, 0, ',', '.') }}</span>
                                     <br>
                                     <small class="text-muted">{{ $service->translated_billing_cycle }}</small>
                                 </td>

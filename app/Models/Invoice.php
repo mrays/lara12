@@ -64,7 +64,7 @@ class Invoice extends Model
     // Accessors & Mutators
     public function getFormattedTotalAttribute()
     {
-        return '$' . number_format($this->total_amount, 2);
+        return 'Rp ' . number_format($this->total_amount, 0, ',', '.');
     }
 
     public function getStatusColorAttribute()
