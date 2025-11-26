@@ -134,6 +134,7 @@
         </li>
 
         <!-- Gmail Settings -->
+        @if(Route::has('admin.settings.gmail'))
         <li class="menu-item {{ request()->routeIs('admin.settings.gmail*') ? 'active' : '' }}">
             <a href="{{ route('admin.settings.gmail') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-envelope"></i>
@@ -147,6 +148,7 @@
                 @endif
             </a>
         </li>
+        @endif
 
     </ul>
 </aside>
