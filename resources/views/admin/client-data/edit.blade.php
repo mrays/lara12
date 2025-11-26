@@ -81,78 +81,8 @@
                             @enderror
                         </div>
 
-                        <!-- Domain Selection -->
-                        <h6 class="fw-semibold mb-3 mt-4">Informasi Layanan</h6>
-
-                        <!-- Domain -->
-                        <div class="mb-3">
-                            <label for="domain_id" class="form-label">Domain <span class="text-danger">*</span></label>
-                            <select class="form-select @error('domain_id') is-invalid @enderror" id="domain_id" name="domain_id" required>
-                                <option value="">Pilih Domain</option>
-                                @foreach($domains as $domain)
-                                    <option value="{{ $domain->id }}" {{ old('domain_id', $client->domain_id) == $domain->id ? 'selected' : '' }}>
-                                        {{ $domain->domain_name }}
-                                        @if($domain->expired_date)
-                                            (Expired: {{ $domain->expired_date->format('M d, Y') }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('domain_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <div class="form-text">Tanggal expired layanan akan mengikuti expired date domain yang dipilih</div>
-                        </div>
-
-                        <!-- Assignments -->
-                        <h6 class="fw-semibold mb-3 mt-4">Penugasan</h6>
-
-                        <!-- Server -->
-                        <div class="mb-3">
-                            <label for="server_id" class="form-label">Server Hosting</label>
-                            <select class="form-select @error('server_id') is-invalid @enderror" id="server_id" name="server_id">
-                                <option value="">Pilih Server</option>
-                                @foreach($servers as $server)
-                                    <option value="{{ $server->id }}" {{ old('server_id', $client->server_id) == $server->id ? 'selected' : '' }}>
-                                        {{ $server->name }} ({{ $server->ip_address }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('server_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Domain Register -->
-                        <div class="mb-3">
-                            <label for="domain_register_id" class="form-label">Domain Register <small class="text-muted">(Opsional)</small></label>
-                            <select class="form-select @error('domain_register_id') is-invalid @enderror" id="domain_register_id" name="domain_register_id" onchange="syncDatesFromRegister()">
-                                <option value="">-- Pilih Domain Register --</option>
-                                @if($domainRegisters->count() > 0)
-                                    @foreach($domainRegisters as $register)
-                                        <option value="{{ $register->id }}" 
-                                                data-domain-expired="{{ $register->expired_date ? $register->expired_date->format('Y-m-d') : '' }}"
-                                                {{ old('domain_register_id', $client->domain_register_id) == $register->id ? 'selected' : '' }}>
-                                            {{ $register->name }} 
-                                            @if($register->expired_date)
-                                                (Exp: {{ $register->expired_date->format('M d, Y') }})
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                @else
-                                    <option value="" disabled>Tidak ada domain register tersedia</option>
-                                @endif
-                            </select>
-                            @if($domainRegisters->count() == 0)
-                                <small class="text-warning">
-                                    <i class="bx bx-info-circle"></i> 
-                                    <a href="{{ route('admin.domain-registers.create') }}" target="_blank">Tambah Domain Register</a> terlebih dahulu
-                                </small>
-                            @endif
-                            @error('domain_register_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Other Settings -->
+                        <h6 class="fw-semibold mb-3 mt-4">Pengaturan Lainnya</h6>
 
                         <!-- User -->
                         <div class="mb-3">
@@ -240,31 +170,6 @@
                         </p>
                     </div>
 
-                    <!-- Expiration Status -->
-                    <div class="mb-3">
-                        <label class="form-label">Status Expiration:</label>
-                        @if($client->domain && $client->domain->expired_date)
-                            <div class="d-flex flex-column gap-1">
-                                <div>
-                                    <small>Domain:</small>
-                                    <span class="badge {{ $client->domain->expired_date->isPast() ? 'bg-danger' : ($client->domain->expired_date->lte(now()->addDays(30)) ? 'bg-warning' : 'bg-success') }} ms-2">
-                                        {{ $client->domain->expired_date->format('M d, Y') }}
-                                    </span>
-                                </div>
-                                <div class="text-muted">
-                                    <small>({{ $client->domain->domain_name }})</small>
-                                </div>
-                                <div class="text-muted mt-1">
-                                    <small><i class="bx bx-info-circle"></i> All services follow domain expiration</small>
-                                </div>
-                            </div>
-                        @else
-                            <div class="text-muted">
-                                <small>No domain assigned</small>
-                            </div>
-                        @endif
-                    </div>
-
                     <div class="d-flex gap-2">
                         <a href="{{ $client->whatsapp_link }}" target="_blank" class="btn btn-sm btn-outline-success">
                             <i class="bx bxl-whatsapp me-1"></i>WhatsApp
@@ -273,6 +178,54 @@
                             <i class="bx bx-envelope me-1"></i>Email
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Domain List -->
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bx bx-globe me-2"></i>Domain Client
+                    </h5>
+                    <a href="{{ route('admin.domains.create') }}?client_id={{ $client->id }}" class="btn btn-sm btn-primary">
+                        <i class="bx bx-plus"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if($clientDomains->count() > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($clientDomains as $domain)
+                                <div class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ $domain->domain_name }}</strong>
+                                        @if($domain->expired_date)
+                                            <br>
+                                            <small class="text-muted">
+                                                Exp: 
+                                                <span class="{{ $domain->expired_date->isPast() ? 'text-danger' : ($domain->expired_date->lte(now()->addDays(30)) ? 'text-warning' : 'text-success') }}">
+                                                    {{ $domain->expired_date->format('M d, Y') }}
+                                                </span>
+                                            </small>
+                                        @endif
+                                        @if($domain->server)
+                                            <br><small class="text-muted"><i class="bx bx-server"></i> {{ $domain->server->name }}</small>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('admin.domains.edit', $domain->id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bx bx-edit"></i>
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center text-muted py-3">
+                            <i class="bx bx-folder-open fs-1"></i>
+                            <p class="mb-0">Belum ada domain</p>
+                            <a href="{{ route('admin.domains.create') }}?client_id={{ $client->id }}" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="bx bx-plus me-1"></i>Tambah Domain
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -285,19 +238,9 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        @if($client->server)
-                        <button type="button" class="btn btn-outline-primary" onclick="viewServer()">
-                            <i class="bx bx-server me-2"></i>Lihat Server
-                        </button>
-                        @endif
-                        @if($client->domainRegister)
-                        <button type="button" class="btn btn-outline-info" onclick="viewRegister()">
-                            <i class="bx bx-globe me-2"></i>Lihat Register
-                        </button>
-                        @endif
-                        <button type="button" class="btn btn-outline-warning" onclick="checkAllExpirations()">
-                            <i class="bx bx-time me-2"></i>Cek Semua Expired
-                        </button>
+                        <a href="{{ route('admin.domains.create') }}?client_id={{ $client->id }}" class="btn btn-outline-primary">
+                            <i class="bx bx-plus me-2"></i>Tambah Domain
+                        </a>
                         <button type="button" class="btn btn-outline-success" onclick="sendRenewalReminder()">
                             <i class="bx bx-bell me-2"></i>Kirim Reminder
                         </button>
@@ -323,63 +266,24 @@ function openWhatsApp() {
 
 // Send email
 function sendEmail() {
-    @if($client->domain && $client->domain->expired_date)
-        const subject = encodeURIComponent('Informasi Layanan - {{ $client->name }}');
-        const body = encodeURIComponent('Halo {{ $client->name }},\n\nBerikut informasi layanan Anda:\n\n- Domain ({{ $client->domain->domain_name }}): {{ $client->domain->expired_date->format('M d, Y') }}\n- Website Service: Mengikuti expired domain\n- Hosting: Mengikuti expired domain\n\nTerima kasih.');
-        window.open(`mailto:?subject=${subject}&body=${body}`);
-    @else
-        showToast('No domain assigned to this client', 'warning');
-    @endif
-}
-
-// View server
-function viewServer() {
-    @if($client->server)
-    window.open('{{ route("admin.servers.edit", $client->server) }}', '_blank');
-    @else
-    showToast('Client tidak memiliki server', 'warning');
-    @endif
-}
-
-// View register
-function viewRegister() {
-    @if($client->domainRegister)
-    window.open('{{ route("admin.domain-registers.edit", $client->domainRegister) }}', '_blank');
-    @else
-    showToast('Client tidak memiliki domain register', 'warning');
-    @endif
-}
-
-// Check all expirations
-function checkAllExpirations() {
-    @if($client->domain && $client->domain->expired_date)
-        const domainDate = new Date('{{ $client->domain->expired_date->format("Y-m-d") }}');
-        const today = new Date();
-        const diffTime = domainDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        let message = '';
-        if (diffDays < 0) {
-            message = `Domain ({{ $client->domain->domain_name }}): Expired ${Math.abs(diffDays)} days ago`;
-        } else if (diffDays <= 30) {
-            message = `Domain ({{ $client->domain->domain_name }}): Will expire in ${diffDays} days`;
-        } else {
-            message = `Domain ({{ $client->domain->domain_name }}): Valid for ${diffDays} more days`;
-        }
-        
-        showToast(message + '\nAll services follow domain expiration', 'info');
-    @else
-        showToast('No domain assigned to this client', 'warning');
-    @endif
+    const subject = encodeURIComponent('Informasi Layanan - {{ $client->name }}');
+    const body = encodeURIComponent('Halo {{ $client->name }},\n\nTerima kasih telah menggunakan layanan kami.\n\nSalam.');
+    window.open(`mailto:?subject=${subject}&body=${body}`);
 }
 
 // Send renewal reminder
 function sendRenewalReminder() {
-    @if($client->domain && $client->domain->expired_date)
-        const message = encodeURIComponent(`Halo {{ $client->name }},\n\nIni adalah pengingat untuk layanan Anda:\n\n- Domain ({{ $client->domain->domain_name }}): {{ $client->domain->expired_date->format('M d, Y') }}\n- Website Service: Mengikuti expired domain\n- Hosting: Mengikuti expired domain\n\nSilakan lakukan perpanjangan sebelum tanggal kadaluarsa.\n\nTerima kasih.`);
+    @if($clientDomains->count() > 0)
+        let domainList = '';
+        @foreach($clientDomains as $domain)
+            @if($domain->expired_date)
+                domainList += '- {{ $domain->domain_name }}: {{ $domain->expired_date->format("M d, Y") }}\n';
+            @endif
+        @endforeach
+        const message = encodeURIComponent(`Halo {{ $client->name }},\n\nIni adalah pengingat untuk layanan domain Anda:\n\n${domainList}\nSilakan lakukan perpanjangan sebelum tanggal kadaluarsa.\n\nTerima kasih.`);
         window.open(`{{ $client->whatsapp_link }}?text=${message}`, '_blank');
     @else
-        showToast('No domain assigned to this client', 'warning');
+        showToast('Client belum memiliki domain', 'warning');
     @endif
 }
 

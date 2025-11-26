@@ -13,9 +13,6 @@ class ClientData extends Model
         'name',
         'address',
         'whatsapp',
-        'domain_id',
-        'server_id',
-        'domain_register_id',
         'user_id',
         'status',
         'notes',
@@ -27,27 +24,11 @@ class ClientData extends Model
     ];
 
     /**
-     * Get the domain that owns the client data
+     * Get domains owned by this client (1 client can have many domains)
      */
-    public function domain()
+    public function domains()
     {
-        return $this->belongsTo(Domain::class);
-    }
-
-    /**
-     * Get the server that owns the client data
-     */
-    public function server()
-    {
-        return $this->belongsTo(Server::class);
-    }
-
-    /**
-     * Get the domain register that owns the client data
-     */
-    public function domainRegister()
-    {
-        return $this->belongsTo(DomainRegister::class);
+        return $this->hasMany(Domain::class, 'client_id');
     }
 
     /**
@@ -63,11 +44,11 @@ class ClientData extends Model
      */
     public function isAnyServiceExpiringSoon()
     {
-        if (!$this->domain || !$this->domain->expired_date) {
-            return false;
-        }
-
-        return $this->domain->expired_date->lte(now()->addDays(60)) && !$this->domain->expired_date->isPast();
+        return $this->domains()
+            ->whereNotNull('expired_date')
+            ->where('expired_date', '<=', now()->addDays(60))
+            ->where('expired_date', '>', now())
+            ->exists();
     }
 
     /**
@@ -75,19 +56,23 @@ class ClientData extends Model
      */
     public function isAnyServiceExpired()
     {
-        if (!$this->domain || !$this->domain->expired_date) {
-            return false;
-        }
-
-        return $this->domain->expired_date->isPast();
+        return $this->domains()
+            ->whereNotNull('expired_date')
+            ->where('expired_date', '<', now())
+            ->exists();
     }
 
     /**
-     * Get the earliest expiration date
+     * Get the earliest expiration date from all domains
      */
     public function getEarliestExpirationAttribute()
     {
-        return $this->domain ? $this->domain->expired_date : null;
+        $domain = $this->domains()
+            ->whereNotNull('expired_date')
+            ->orderBy('expired_date')
+            ->first();
+            
+        return $domain ? $domain->expired_date : null;
     }
 
     /**

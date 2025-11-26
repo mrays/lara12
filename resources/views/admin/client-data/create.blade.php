@@ -76,63 +76,8 @@
                             @enderror
                         </div>
 
-                        <!-- Domain Selection -->
-                        <h6 class="fw-semibold mb-3 mt-4">Informasi Layanan</h6>
-
-                        <!-- Domain -->
-                        <div class="mb-3">
-                            <label for="domain_id" class="form-label">Domain <span class="text-danger">*</span></label>
-                            <select class="form-select @error('domain_id') is-invalid @enderror" id="domain_id" name="domain_id" required>
-                                <option value="">Pilih Domain</option>
-                                @foreach($domains as $domain)
-                                    <option value="{{ $domain->id }}" {{ old('domain_id') == $domain->id ? 'selected' : '' }}>
-                                        {{ $domain->domain_name }}
-                                        @if($domain->expired_date)
-                                            (Expired: {{ $domain->expired_date->format('M d, Y') }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('domain_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <div class="form-text">Tanggal expired layanan akan mengikuti expired date domain yang dipilih</div>
-                        </div>
-
-                        <!-- Assignments -->
-                        <h6 class="fw-semibold mb-3 mt-4">Penugasan</h6>
-
-                        <!-- Server -->
-                        <div class="mb-3">
-                            <label for="server_id" class="form-label">Server Hosting</label>
-                            <select class="form-select @error('server_id') is-invalid @enderror" id="server_id" name="server_id">
-                                <option value="">Pilih Server</option>
-                                @foreach($servers as $server)
-                                    <option value="{{ $server->id }}" {{ old('server_id') == $server->id ? 'selected' : '' }}>
-                                        {{ $server->name }} ({{ $server->ip_address }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('server_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Domain Register -->
-                        <div class="mb-3">
-                            <label for="domain_register_id" class="form-label">Domain Register</label>
-                            <select class="form-select @error('domain_register_id') is-invalid @enderror" id="domain_register_id" name="domain_register_id">
-                                <option value="">Pilih Register</option>
-                                @foreach($domainRegisters as $register)
-                                    <option value="{{ $register->id }}" {{ old('domain_register_id') == $register->id ? 'selected' : '' }}>
-                                        {{ $register->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('domain_register_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Other Settings -->
+                        <h6 class="fw-semibold mb-3 mt-4">Pengaturan Lainnya</h6>
 
                         <!-- User -->
                         <div class="mb-3">

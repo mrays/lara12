@@ -69,12 +69,9 @@ class ClientDataController extends Controller
      */
     public function create()
     {
-        $servers = Server::orderBy('name')->get();
-        $domainRegisters = DomainRegister::orderBy('name')->get();
-        $domains = Domain::with('client')->orderBy('domain_name')->get();
         $users = User::where('role', 'client')->orderBy('name')->get();
 
-        return view('admin.client-data.create', compact('servers', 'domainRegisters', 'domains', 'users'));
+        return view('admin.client-data.create', compact('users'));
     }
 
     /**
@@ -86,9 +83,6 @@ class ClientDataController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string',
             'whatsapp' => 'required|string|max:20',
-            'domain_id' => 'required|exists:domains,id',
-            'server_id' => 'nullable|exists:servers,id',
-            'domain_register_id' => 'nullable|exists:domain_registers,id',
             'user_id' => 'nullable|exists:users,id',
             'status' => 'required|in:active,expired,warning',
             'notes' => 'nullable|string',
@@ -105,12 +99,15 @@ class ClientDataController extends Controller
      */
     public function edit(ClientData $client)
     {
-        $servers = Server::orderBy('name')->get();
-        $domainRegisters = DomainRegister::orderBy('name')->get();
-        $domains = Domain::orderBy('domain_name')->get();
         $users = User::where('role', 'client')->orderBy('name')->get();
+        
+        // Get domains owned by this client
+        $clientDomains = Domain::with('server')
+            ->where('client_id', $client->id)
+            ->orderBy('domain_name')
+            ->get();
 
-        return view('admin.client-data.edit', compact('client', 'servers', 'domainRegisters', 'domains', 'users'));
+        return view('admin.client-data.edit', compact('client', 'users', 'clientDomains'));
     }
 
     /**
@@ -122,9 +119,6 @@ class ClientDataController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string',
             'whatsapp' => 'required|string|max:20',
-            'domain_id' => 'required|exists:domains,id',
-            'server_id' => 'nullable|exists:servers,id',
-            'domain_register_id' => 'nullable|exists:domain_registers,id',
             'user_id' => 'nullable|exists:users,id',
             'status' => 'required|in:active,expired,warning',
             'notes' => 'nullable|string',
