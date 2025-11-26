@@ -340,7 +340,7 @@ class DuitkuService
                 'max_amount' => 50000000
             ],
             'SP' => [
-                'name' => 'ShopeePay E-Wallet',
+                'name' => 'QRIS E-Wallet',
                 'type' => 'ewallet',
                 'icon' => 'shopee.png',
                 'min_amount' => 10000,

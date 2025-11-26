@@ -198,28 +198,11 @@
                                         @endif
                                                 <div class="card-body text-center">
                                                     <div class="payment-method-icon mb-2">
-                                                        @switch($code)
-                                                            @case('SP')
-                                                                <i class="bx bx-mobile" style="font-size: 2rem; color: #ee4d2d;"></i>
-                                                                @break
-                                                            @case('M2')
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #004CAD;"></i>
-                                                                @break
-                                                            @case('B1')
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066cc;"></i>
-                                                                @break
-                                                            @case('BR')
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #003d82;"></i>
-                                                                @break
-                                                            @case('I1')
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #0066CC;"></i>
-                                                                @break
-                                                            @case('MANUAL')
-                                                                <i class="bx bx-bank" style="font-size: 2rem; color: #28a745;"></i>
-                                                                @break
-                                                            @default
-                                                                <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d;"></i>
-                                                        @endswitch
+                                                        <img src="{{ asset('images/payment/' . $method['icon']) }}" 
+                                                             alt="{{ $method['name'] }}" 
+                                                             style="height: 40px; max-width: 80px; object-fit: contain;"
+                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                        <i class="bx bx-credit-card" style="font-size: 2rem; color: #6c757d; display: none;"></i>
                                                     </div>
                                                     <h6 class="mb-0">{{ $method['name'] }}</h6>
                                                     <small class="text-muted">
