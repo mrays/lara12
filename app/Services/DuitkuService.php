@@ -318,12 +318,12 @@ class DuitkuService
                 'min_amount' => 10000,
                 'max_amount' => 50000000
             ],
-            'B1' => [
-                'name' => 'BCA Virtual Account',
-                'type' => 'bank_transfer',
-                'icon' => 'bca.png',
+            'A1' => [
+                'name' => 'Alfamart',
+                'type' => 'retail',
+                'icon' => 'alfamart.png',
                 'min_amount' => 10000,
-                'max_amount' => 50000000
+                'max_amount' => 5000000
             ],
             'BR' => [
                 'name' => 'BRI Virtual Account',

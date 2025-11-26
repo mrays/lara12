@@ -210,6 +210,9 @@
                                                         @case('ewallet')
                                                             E-Wallet
                                                             @break
+                                                        @case('retail')
+                                                            Retail
+                                                            @break
                                                         @case('manual_transfer')
                                                             Manual Transfer → WhatsApp
                                                             @break
