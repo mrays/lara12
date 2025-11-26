@@ -52,24 +52,29 @@
                                 <small class="text-muted">Domain</small>
                                 <div class="fw-bold">{{ $orderData['full_domain'] }}</div>
                             </div>
+                            @if(isset($orderData['template_name']))
                             <div class="mb-2">
-                                <small class="text-muted">Hosting Package</small>
-                                <div class="fw-bold">{{ $orderData['package_name'] }}</div>
+                                <small class="text-muted">Selected Template</small>
+                                <div class="fw-bold">{{ $orderData['template_name'] }}</div>
                             </div>
+                            @endif
                         </div>
                         <div class="col-md-6 text-md-end">
                             <div class="mb-2">
                                 <small class="text-muted">Domain Registration</small>
                                 <div class="fw-bold">Rp {{ number_format($orderData['extension_price'], 0, ',', '.') }}</div>
                             </div>
+                            @if(isset($orderData['template_price']) && $orderData['template_price'] > 0)
                             <div class="mb-2">
-                                <small class="text-muted">Hosting Package</small>
-                                <div class="fw-bold">Rp {{ number_format($orderData['package_price'], 0, ',', '.') }}</div>
+                                <small class="text-muted">Template</small>
+                                <div class="fw-bold">Rp {{ number_format($orderData['template_price'], 0, ',', '.') }}</div>
                             </div>
+                            @endif
                             <hr class="my-2">
                             <div>
-                                <small class="text-muted">Total (First Year)</small>
-                                <div class="fw-bold text-success fs-5">Rp {{ number_format($orderData['total_price'], 0, ',', '.') }}</div>
+                                <small class="text-muted">Current Total</small>
+                                <div class="fw-bold text-success fs-5">Rp {{ number_format($orderData['extension_price'] + ($orderData['template_price'] ?? 0), 0, ',', '.') }}</div>
+                                <small class="text-muted d-block">+ Hosting package (selected next)</small>
                             </div>
                         </div>
                     </div>
@@ -236,7 +241,7 @@
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
 // Toggle password visibility
 document.getElementById('togglePassword').addEventListener('click', function() {
@@ -307,4 +312,4 @@ document.getElementById('passwordConfirmation').addEventListener('input', functi
     this.classList.remove('is-invalid');
 });
 </script>
-@endsection
+@endpush

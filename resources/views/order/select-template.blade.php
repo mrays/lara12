@@ -203,7 +203,7 @@
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
 function selectTemplate(templateId) {
     // Update hidden input
@@ -261,4 +261,4 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     selectTemplate(1); // Select first template by default
 @endif
 </script>
-@endsection
+@endpush

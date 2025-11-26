@@ -160,7 +160,7 @@
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
 const packagePrices = {};
 @foreach($packages as $package)
@@ -214,4 +214,4 @@ function updatePriceSummary(packageId) {
     document.getElementById('continueBtn').disabled = false;
 @endif
 </script>
-@endsection
+@endpush

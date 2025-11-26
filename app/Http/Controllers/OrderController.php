@@ -66,34 +66,37 @@ class OrderController extends Controller
             return redirect()->route('order.choose-domain');
         }
 
-        // Mock templates data - you can replace this with actual template model
-        $templates = [
-            [
-                'id' => 1,
-                'name' => 'Business Template',
-                'description' => 'Professional business website template',
+        // Get templates from service packages (temporary solution)
+        // You can create separate templates table later
+        $servicePackages = ServicePackage::where('is_active', true)->get();
+        
+        $templates = [];
+        foreach ($servicePackages->take(3) as $index => $package) {
+            $templates[] = [
+                'id' => $package->id,
+                'name' => $package->name . ' Template',
+                'description' => $package->description ?? 'Professional website template',
                 'category' => 'Business',
-                'preview_image' => '/images/templates/business.jpg',
-                'is_free' => true
-            ],
-            [
-                'id' => 2,
-                'name' => 'Portfolio Template',
-                'description' => 'Creative portfolio template for professionals',
-                'category' => 'Portfolio',
-                'preview_image' => '/images/templates/portfolio.jpg',
-                'is_free' => true
-            ],
-            [
-                'id' => 3,
-                'name' => 'E-commerce Template',
-                'description' => 'Modern online store template',
-                'category' => 'E-commerce',
-                'preview_image' => '/images/templates/ecommerce.jpg',
-                'is_free' => false,
-                'price' => 500000
-            ]
-        ];
+                'preview_image' => '/images/templates/template' . ($index + 1) . '.jpg',
+                'is_free' => $package->base_price == 0,
+                'price' => $package->base_price > 100000 ? 500000 : 0 // Template price logic
+            ];
+        }
+        
+        // Add default templates if no service packages
+        if (empty($templates)) {
+            $templates = [
+                [
+                    'id' => 1,
+                    'name' => 'Business Template',
+                    'description' => 'Professional business website template',
+                    'category' => 'Business',
+                    'preview_image' => '/images/templates/business.jpg',
+                    'is_free' => true,
+                    'price' => 0
+                ]
+            ];
+        }
 
         $domainExtension = DomainExtension::findOrFail(Session::get('order.extension_id'));
         
@@ -112,14 +115,22 @@ class OrderController extends Controller
         // Store template selection in session
         Session::put('order.template_id', $request->template_id);
         
-        // Find template (mock data for now)
-        $templates = [
-            1 => ['name' => 'Business Template', 'price' => 0],
-            2 => ['name' => 'Portfolio Template', 'price' => 0],
-            3 => ['name' => 'E-commerce Template', 'price' => 500000]
-        ];
-        
-        $selectedTemplate = $templates[$request->template_id] ?? $templates[1];
+        // Get template data from service packages
+        if ($request->template_id == 0) {
+            $selectedTemplate = ['name' => 'No Template', 'price' => 0];
+        } else {
+            $servicePackages = ServicePackage::where('is_active', true)->get();
+            $package = $servicePackages->find($request->template_id);
+            
+            if ($package) {
+                $selectedTemplate = [
+                    'name' => $package->name . ' Template',
+                    'price' => $package->base_price > 100000 ? 500000 : 0
+                ];
+            } else {
+                $selectedTemplate = ['name' => 'Business Template', 'price' => 0];
+            }
+        }
         Session::put('order.template_name', $selectedTemplate['name']);
         Session::put('order.template_price', $selectedTemplate['price']);
 
