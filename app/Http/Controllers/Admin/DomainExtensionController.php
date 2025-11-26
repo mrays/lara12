@@ -208,6 +208,28 @@ class DomainExtensionController extends Controller
     }
 
     /**
+     * Bulk delete domain extensions
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:domain_extensions,id'
+        ]);
+
+        $count = count($request->ids);
+        DomainExtension::whereIn('id', $request->ids)->delete();
+
+        Log::info('Domain extensions bulk deleted', [
+            'count' => $count,
+            'admin' => auth()->user()->name
+        ]);
+
+        return redirect()->route('admin.domain-extensions.index')
+            ->with('success', "{$count} extension(s) berhasil dihapus");
+    }
+
+    /**
      * Toggle the active status of a domain extension.
      */
     public function toggleStatus(DomainExtension $domainExtension)

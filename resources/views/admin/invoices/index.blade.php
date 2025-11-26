@@ -15,6 +15,9 @@
                         <small class="text-muted">Manage all invoices and their status</small>
                     </div>
                     <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
                         <select class="form-select" style="width: 150px;" id="filterInvoiceStatus">
                             <option value="">All Status</option>
                             <option value="Paid">Paid</option>
@@ -43,6 +46,9 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    </th>
                                     <th>#</th>
                                     <th>Client</th>
                                     <th>Service</th>
@@ -56,6 +62,9 @@
                             <tbody>
                                 @forelse($invoices as $invoice)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $invoice->id }}" onchange="updateSelectedCount()">
+                                    </td>
                                     <td><span class="fw-bold text-primary">#{{ $invoice->id }}</span></td>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -185,7 +194,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="9" class="text-center py-4">
                                         <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No invoices" width="150">
                                         <p class="mt-3 text-muted">No invoices found</p>
                                     </td>
@@ -263,6 +272,46 @@
 </div>
 
 <script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checked.length} invoice(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.invoices.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Edit invoice function
 function editInvoice(invoiceId, title, dueDate, invoiceNo, amount, status) {
     document.getElementById('editInvoiceForm').action = `/admin/invoices/${invoiceId}/quick-update`;

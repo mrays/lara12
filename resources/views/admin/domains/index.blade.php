@@ -68,6 +68,9 @@
                         <small class="text-muted">Manage individual domains with client and server assignments</small>
                     </div>
                     <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
                         <a href="{{ route('admin.domains.create') }}" class="btn btn-primary btn-sm">
                             <i class="bx bx-plus me-1"></i>Add Domain
                         </a>
@@ -319,6 +322,9 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th width="40">
+                                            <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                        </th>
                                         <th>Domain</th>
                                         <th>Client</th>
                                         <th>Server</th>
@@ -331,6 +337,9 @@
                                 <tbody>
                                     @foreach($domains as $domain)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input row-checkbox" value="{{ $domain->id }}" onchange="updateSelectedCount()">
+                                        </td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar avatar-sm me-2">
@@ -469,4 +478,46 @@
         </div>
     </div>
 </div>
+
+<script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checked.length} domain(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.domains.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection

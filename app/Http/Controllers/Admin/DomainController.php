@@ -291,6 +291,23 @@ class DomainController extends Controller
     }
     
     /**
+     * Bulk delete domains
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:domains,id'
+        ]);
+
+        $count = count($request->ids);
+        DB::table('domains')->whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.domains.index')
+            ->with('success', "{$count} domain(s) deleted successfully");
+    }
+
+    /**
      * Send renewal reminder for domain
      */
     public function sendReminder($domainId)

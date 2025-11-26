@@ -192,6 +192,42 @@ class ClientController extends Controller
     }
 
     /**
+     * Bulk delete clients
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:users,id'
+        ]);
+
+        // Check if any clients have services or invoices
+        $clientsWithData = \DB::table('services')
+            ->whereIn('client_id', $request->ids)
+            ->distinct()
+            ->pluck('client_id')
+            ->merge(
+                \DB::table('invoices')
+                    ->whereIn('client_id', $request->ids)
+                    ->distinct()
+                    ->pluck('client_id')
+            )
+            ->unique()
+            ->toArray();
+
+        if (!empty($clientsWithData)) {
+            return redirect()->route('admin.clients.index')
+                ->with('error', 'Cannot delete clients that have existing services or invoices');
+        }
+
+        $count = count($request->ids);
+        User::whereIn('id', $request->ids)->where('role', 'client')->delete();
+
+        return redirect()->route('admin.clients.index')
+            ->with('success', "{$count} client(s) deleted successfully");
+    }
+
+    /**
      * Reset client password
      */
     public function resetPassword(Request $request, User $client)

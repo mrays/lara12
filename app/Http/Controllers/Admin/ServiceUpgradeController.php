@@ -179,6 +179,23 @@ class ServiceUpgradeController extends Controller
     }
 
     /**
+     * Bulk delete upgrade requests
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:service_upgrade_requests,id'
+        ]);
+
+        $count = count($request->ids);
+        ServiceUpgradeRequest::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.upgrade-requests.index')
+            ->with('success', "{$count} request(s) deleted successfully");
+    }
+
+    /**
      * Bulk actions for multiple requests
      */
     public function bulkAction(Request $request)

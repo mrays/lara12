@@ -15,6 +15,9 @@
                             </h5>
                         </div>
                         <div class="col-md-6 text-end">
+                            <button type="button" class="btn btn-danger me-2" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                                <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                            </button>
                             <a href="{{ route('admin.domain-extensions.create') }}" class="btn btn-primary">
                                 <i class="bx bx-plus me-1"></i>Extension Baru
                             </a>
@@ -73,6 +76,9 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    </th>
                                     <th>Extension</th>
                                     <th>Durasi</th>
                                     <th>Harga</th>
@@ -84,6 +90,9 @@
                             <tbody>
                                 @forelse($domainExtensions as $extension)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $extension->id }}" onchange="updateSelectedCount()">
+                                    </td>
                                     <td>
                                         <span class="badge bg-info fs-6">{{ $extension->extension }}</span>
                                     </td>
@@ -134,7 +143,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
+                                    <td colspan="7" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="bx bx-globe fs-1"></i>
                                             <p class="mt-2 mb-0">Belum ada data extension domain</p>
@@ -151,4 +160,43 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Apakah Anda yakin ingin menghapus ${checked.length} extension? Tindakan ini tidak dapat dibatalkan.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.domain-extensions.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection

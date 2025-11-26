@@ -7,14 +7,25 @@
   <div class="card">
     <div class="card-header d-flex justify-content-between">
       <h5>Services</h5>
-      <a href="{{ route('admin.services.create') }}" class="btn btn-primary">New Service</a>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+          <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+        <a href="{{ route('admin.services.create') }}" class="btn btn-primary">New Service</a>
+      </div>
     </div>
     <div class="card-body">
       <table class="table">
-        <thead><tr><th>#</th><th>Product</th><th>Domain</th><th>Client</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th width="40"><input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()"></th>
+            <th>#</th><th>Product</th><th>Domain</th><th>Client</th><th>Due Date</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
         <tbody>
           @foreach($services as $s)
           <tr>
+            <td><input type="checkbox" class="form-check-input row-checkbox" value="{{ $s->id }}" onchange="updateSelectedCount()"></td>
             <td>{{ $s->id }}</td>
             <td>{{ $s->product }}</td>
             <td>{{ $s->domain ?? '-' }}</td>
@@ -43,6 +54,46 @@
 </div>
 
 <script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checked.length} service(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.services.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Delete service function
 function deleteService(serviceId) {
     if (confirm('Are you sure you want to delete this service? This action cannot be undone.')) {

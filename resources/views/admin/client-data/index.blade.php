@@ -69,6 +69,9 @@
                             <p class="text-muted mb-0">Kelola data client dan informasi layanan</p>
                         </div>
                         <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                                <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                            </button>
                             <a href="{{ route('admin.client-data.service-status') }}" class="btn btn-info">
                                 <i class="bx bx-bar-chart me-1"></i>Service Status
                             </a>
@@ -190,6 +193,9 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th width="40">
+                                    <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                </th>
                                 <th>Nama Client</th>
                                 <th>Alamat</th>
                                 <th>WhatsApp</th>
@@ -201,6 +207,9 @@
                         <tbody>
                             @foreach($clients as $client)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $client->id }}" onchange="updateSelectedCount()">
+                                    </td>
                                     <td>
                                         <div>
                                             <strong>{{ $client->name }}</strong>
@@ -308,6 +317,46 @@
 </div>
 
 <script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Apakah Anda yakin ingin menghapus ${checked.length} data client? Tindakan ini tidak dapat dibatalkan.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.client-data.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Copy to clipboard function
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {

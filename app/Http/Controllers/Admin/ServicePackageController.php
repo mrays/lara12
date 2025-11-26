@@ -199,6 +199,35 @@ class ServicePackageController extends Controller
     }
 
     /**
+     * Bulk delete service packages
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:service_packages,id'
+        ]);
+
+        // Check if any packages are being used
+        $usedPackages = \DB::table('services')
+            ->whereIn('package_id', $request->ids)
+            ->distinct()
+            ->pluck('package_id')
+            ->toArray();
+
+        if (!empty($usedPackages)) {
+            return redirect()->route('admin.service-packages.index')
+                ->with('error', 'Cannot delete packages that are being used by services');
+        }
+
+        $count = count($request->ids);
+        ServicePackage::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.service-packages.index')
+            ->with('success', "{$count} package(s) deleted successfully");
+    }
+
+    /**
      * Get active packages for API/AJAX
      */
     public function getActivePackages()

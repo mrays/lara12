@@ -166,6 +166,23 @@ class ServiceController extends Controller
     }
 
     /**
+     * Bulk delete services
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:services,id'
+        ]);
+
+        $count = count($request->ids);
+        Service::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.services.index')
+            ->with('success', "{$count} service(s) deleted successfully");
+    }
+
+    /**
      * Ensure service table has all required columns
      */
     private function ensureServiceColumnsExist()

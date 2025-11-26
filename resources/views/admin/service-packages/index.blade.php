@@ -15,9 +15,14 @@
                         </h5>
                         <small class="text-muted">Manage service packages that can be assigned to clients</small>
                     </div>
-                    <a href="{{ route('admin.service-packages.create') }}" class="btn btn-primary">
-                        <i class="tf-icons bx bx-plus me-1"></i>New Package
-                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
+                        <a href="{{ route('admin.service-packages.create') }}" class="btn btn-primary">
+                            <i class="tf-icons bx bx-plus me-1"></i>New Package
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,6 +60,9 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    </th>
                                     <th>#</th>
                                     <th>Package Name</th>
                                     <th>Description</th>
@@ -67,6 +75,9 @@
                             <tbody>
                                 @forelse($packages as $package)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input row-checkbox" value="{{ $package->id }}" onchange="updateSelectedCount()">
+                                        </td>
                                         <td>{{ $package->id }}</td>
                                         <td>
                                             <strong>{{ $package->name }}</strong>
@@ -123,7 +134,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
+                                        <td colspan="8" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="tf-icons bx bx-package fs-1 mb-2"></i>
                                                 <p>No service packages found.</p>
@@ -144,6 +155,46 @@
 </div>
 
 <script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checked.length} package(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.service-packages.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Toggle package status
 function togglePackageStatus(packageId, currentStatus) {
     const action = currentStatus ? 'deactivate' : 'activate';

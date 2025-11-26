@@ -15,7 +15,10 @@
                         </h5>
                         <small class="text-muted">Manage all clients and their accounts</small>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-danger" id="deleteSelectedBtn" style="display: none;" onclick="deleteSelected()">
+                            <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newClientModal">
                             <i class="bx bx-plus me-1"></i>New Client
                         </button>
@@ -126,6 +129,9 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleSelectAll()">
+                                    </th>
                                     <th>#</th>
                                     <th>Client Info</th>
                                     <th>Contact</th>
@@ -138,6 +144,9 @@
                             <tbody>
                                 @forelse($clients as $client)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $client->id }}" onchange="updateSelectedCount()">
+                                    </td>
                                     <td>
                                         <span class="fw-bold text-primary">#{{ $client->id }}</span>
                                     </td>
@@ -236,7 +245,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="8" class="text-center py-4">
                                         <img src="{{ asset('vendor/sneat/assets/img/illustrations/page-misc-error-light.png') }}" alt="No clients" width="150">
                                         <p class="mt-3 text-muted">No clients found</p>
                                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newClientModal">
@@ -502,6 +511,46 @@
 </div>
 
 <script>
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
+}
+
+// Update selected count and show/hide delete button
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+// Delete selected items
+function deleteSelected() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${checked.length} client(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.clients.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Toggle password visibility
 function togglePasswordVisibility(inputId) {
     const input = document.getElementById(inputId);

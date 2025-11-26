@@ -126,6 +126,23 @@ class ClientDataController extends Controller
     }
 
     /**
+     * Bulk delete client data
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:client_data,id'
+        ]);
+
+        $count = count($request->ids);
+        ClientData::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.client-data.index')
+            ->with('success', "{$count} data client berhasil dihapus");
+    }
+
+    /**
      * Get service status overview
      */
     public function serviceStatus()

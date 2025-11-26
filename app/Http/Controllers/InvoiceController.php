@@ -462,6 +462,23 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Bulk delete invoices
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:invoices,id'
+        ]);
+
+        $count = count($request->ids);
+        \DB::table('invoices')->whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.invoices.index')
+            ->with('success', "{$count} invoice(s) deleted successfully");
+    }
+
+    /**
      * Download invoice as PDF
      */
     public function downloadPDF($invoice)

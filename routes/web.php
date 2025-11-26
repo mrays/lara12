@@ -228,6 +228,24 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.services.manage-details');
         Route::put('services/{service}/update-details', [App\Http\Controllers\Admin\ServiceController::class, 'updateDetails'])
             ->name('admin.services.update-details');
+            
+        // Bulk Delete Routes
+        Route::post('invoices/bulk-delete', [App\Http\Controllers\InvoiceController::class, 'bulkDelete'])
+            ->name('admin.invoices.bulk-delete');
+        Route::post('domain-extensions/bulk-delete', [App\Http\Controllers\Admin\DomainExtensionController::class, 'bulkDelete'])
+            ->name('admin.domain-extensions.bulk-delete');
+        Route::post('service-packages/bulk-delete', [App\Http\Controllers\Admin\ServicePackageController::class, 'bulkDelete'])
+            ->name('admin.service-packages.bulk-delete');
+        Route::post('services/bulk-delete', [App\Http\Controllers\Admin\ServiceController::class, 'bulkDelete'])
+            ->name('admin.services.bulk-delete');
+        Route::post('clients/bulk-delete', [App\Http\Controllers\Admin\ClientController::class, 'bulkDelete'])
+            ->name('admin.clients.bulk-delete');
+        Route::post('upgrade-requests/bulk-delete', [App\Http\Controllers\Admin\ServiceUpgradeController::class, 'bulkDelete'])
+            ->name('admin.upgrade-requests.bulk-delete');
+        Route::post('client-data/bulk-delete', [App\Http\Controllers\Admin\ClientDataController::class, 'bulkDelete'])
+            ->name('admin.client-data.bulk-delete');
+        Route::post('domains/bulk-delete', [App\Http\Controllers\Admin\DomainController::class, 'bulkDelete'])
+            ->name('admin.domains.bulk-delete');
     ///akhir darigrp admin
     });
     // Payment routes

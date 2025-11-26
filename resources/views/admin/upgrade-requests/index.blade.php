@@ -164,6 +164,9 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Upgrade Requests</h5>
             <div class="d-flex gap-2">
+                <button class="btn btn-danger btn-sm" onclick="deleteSelected()" id="bulkDeleteBtn" style="display: none;">
+                    <i class="bx bx-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                </button>
                 <button class="btn btn-success btn-sm" onclick="bulkAction('approve')" id="bulkApproveBtn" style="display: none;">
                     <i class="bx bx-check me-1"></i>Approve Selected
                 </button>
@@ -396,16 +399,47 @@ document.addEventListener('change', function(e) {
 
 function toggleBulkButtons() {
     const checkedBoxes = document.querySelectorAll('.request-checkbox:checked');
-    const bulkButtons = ['bulkApproveBtn', 'bulkRejectBtn', 'bulkProcessingBtn'];
+    const bulkButtons = ['bulkDeleteBtn', 'bulkApproveBtn', 'bulkRejectBtn', 'bulkProcessingBtn'];
+    const count = checkedBoxes.length;
+    
+    document.getElementById('selectedCount').textContent = count;
     
     bulkButtons.forEach(btnId => {
         const btn = document.getElementById(btnId);
-        if (checkedBoxes.length > 0) {
+        if (count > 0) {
             btn.style.display = 'inline-block';
         } else {
             btn.style.display = 'none';
         }
     });
+}
+
+function deleteSelected() {
+    const checkedBoxes = document.querySelectorAll('.request-checkbox:checked');
+    const requestIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (requestIds.length === 0) {
+        showToast('Please select at least one request', 'warning');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ${requestIds.length} request(s)? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.upgrade-requests.bulk-delete") }}';
+        form.innerHTML = `@csrf`;
+        
+        requestIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 function quickAction(action, requestId) {
