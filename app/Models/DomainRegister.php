@@ -41,11 +41,26 @@ class DomainRegister extends Model
     }
 
     /**
-     * Get clients associated with this domain register
+     * Get domains registered with this domain register
+     */
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
+
+    /**
+     * Get clients associated with this domain register (through domains)
      */
     public function clients()
     {
-        return $this->hasMany(ClientData::class);
+        return $this->hasManyThrough(
+            ClientData::class,
+            Domain::class,
+            'domain_register_id',  // Foreign key on domains table
+            'id',                  // Foreign key on client_data table
+            'id',                  // Local key on domain_registers table
+            'client_id'            // Local key on domains table
+        );
     }
 
     /**

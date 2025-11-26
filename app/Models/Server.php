@@ -42,11 +42,26 @@ class Server extends Model
     }
 
     /**
-     * Get clients associated with this server
+     * Get domains hosted on this server
+     */
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
+
+    /**
+     * Get clients associated with this server (through domains)
      */
     public function clients()
     {
-        return $this->hasMany(ClientData::class);
+        return $this->hasManyThrough(
+            ClientData::class,
+            Domain::class,
+            'server_id',    // Foreign key on domains table
+            'id',           // Foreign key on client_data table
+            'id',           // Local key on servers table
+            'client_id'     // Local key on domains table
+        );
     }
 
     /**
